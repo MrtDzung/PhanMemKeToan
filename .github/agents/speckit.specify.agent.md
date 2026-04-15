@@ -1,5 +1,6 @@
 ---
 description: Create or update the feature specification from a natural language feature description.
+model: Claude Opus 4.6 (copilot)
 handoffs: 
   - label: Build Technical Plan
     agent: speckit.plan

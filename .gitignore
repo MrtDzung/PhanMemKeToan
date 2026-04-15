@@ -1,0 +1,32 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.vs/
+*.DotSettings.user
+logs/
+
+# Node/Angular
+node_modules/
+dist/
+.angular/
+.nx/
+*.tgz
+.npmrc
+
+# IDE
+.vscode/.ropeproject/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Docker
+docker-data/
+
+# Environment
+.env
+*.local
+appsettings.Development.json

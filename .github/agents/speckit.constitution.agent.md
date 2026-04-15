@@ -1,5 +1,6 @@
 ---
 description: Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync.
+model: Claude Opus 4.6 (copilot)
 handoffs: 
   - label: Build Specification
     agent: speckit.specify

@@ -1,5 +1,6 @@
 ---
 description: Generate a custom checklist for the current feature based on user requirements.
+model: Claude Sonnet 4.6 (copilot)
 ---
 
 ## Checklist Purpose: "Unit Tests for English"
