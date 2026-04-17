@@ -24,6 +24,8 @@ The accounting webapp exposes REST APIs that an external e-commerce storefront c
 
 ## Design Principles
 
+> **Dual-DB note**: E-commerce integration connects to a specific **Tenant DB** (not Master DB). API calls must include `X-Tenant-Code` header or use JWT with `tid` claim to resolve the correct accounting database. Stock hold/reserve/release APIs operate against the Tenant DB for the specific company's inventory.
+
 1. **Accounting = Source of Truth**: Stock, pricing, master data live in accounting DB
 2. **Separate Databases**: E-com DB owns cart, sessions, media, SEO; never touches accounting tables directly
 3. **Event-Driven Sync**: Accounting publishes domain events; e-com subscribes

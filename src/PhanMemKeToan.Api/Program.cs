@@ -48,6 +48,8 @@ try
     })
     .AddJwtBearer(options =>
     {
+        options.MapInboundClaims = false; // Keep JWT claim names as-is (prevent "tid" → MS claim type mapping)
+
         var jwtSettings = builder.Configuration.GetSection("JwtSettings");
         var publicKeyPem = jwtSettings["PublicKeyPemBase64"] ?? throw new InvalidOperationException("JwtSettings:PublicKeyPemBase64 required");
         var publicKeyBytes = Convert.FromBase64String(publicKeyPem);
@@ -65,7 +67,8 @@ try
             IssuerSigningKey = publicKey,
             ValidateLifetime = true,
             ClockSkew = TimeSpan.Zero,
-            ValidAlgorithms = new[] { Microsoft.IdentityModel.Tokens.SecurityAlgorithms.RsaSha256 }
+            ValidAlgorithms = new[] { Microsoft.IdentityModel.Tokens.SecurityAlgorithms.RsaSha256 },
+            RoleClaimType = System.Security.Claims.ClaimTypes.Role
         };
 
         options.Events = new JwtBearerEvents
@@ -91,7 +94,9 @@ try
         {
             "SYS.Users.View", "SYS.Users.Manage",
             "SYS.Roles.View", "SYS.Roles.Manage",
-            "SYS.Permissions.View", "SYS.Permissions.Manage"
+            "SYS.Permissions.View", "SYS.Permissions.Manage",
+            // DI module — Account Tree
+            "DI.Accounts.View", "DI.Accounts.Manage", "DI.Accounts.Import"
         };
         foreach (var perm in permissions)
         {
@@ -125,7 +130,7 @@ try
             if (corsOrigins.Length > 0)
                 policy.WithOrigins(corsOrigins).AllowAnyHeader().AllowAnyMethod().AllowCredentials();
             else
-                policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod(); // Development only — never in production
+                policy.SetIsOriginAllowed(_ => true).AllowAnyHeader().AllowAnyMethod().AllowCredentials(); // Development only — never in production
         });
     });
 

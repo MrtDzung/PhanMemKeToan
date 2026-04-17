@@ -15,7 +15,7 @@ public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICur
     {
         get
         {
-            var tenantClaim = httpContextAccessor.HttpContext?.User?.FindFirstValue("tenant_id");
+            var tenantClaim = httpContextAccessor.HttpContext?.User?.FindFirstValue("tid");
             return Guid.TryParse(tenantClaim, out var tenantId) ? tenantId : null;
         }
     }

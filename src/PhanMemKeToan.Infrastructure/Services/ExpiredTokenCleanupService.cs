@@ -34,7 +34,7 @@ public sealed class ExpiredTokenCleanupService(
         try
         {
             using var scope = scopeFactory.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<PhanMemKeToan.Infrastructure.Persistence.ApplicationDbContext>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<PhanMemKeToan.Infrastructure.Persistence.MasterDbContext>();
 
             var cutoff = DateTimeOffset.UtcNow;
 

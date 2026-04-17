@@ -9,11 +9,11 @@ public class GetRolesQueryHandler(IApplicationDbContext dbContext) : IRequestHan
     public async Task<IReadOnlyList<RoleListDto>> Handle(GetRolesQuery request, CancellationToken cancellationToken)
     {
         return await dbContext.Roles
+            .OrderBy(r => r.Name)
             .Select(r => new RoleListDto(
                 r.Id, r.Name, r.Description,
                 r.UserRoles.Count(ur => ur.User.IsActive),
                 r.RolePermissions.Count))
-            .OrderBy(r => r.Name)
             .ToListAsync(cancellationToken);
     }
 }

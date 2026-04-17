@@ -1,5 +1,7 @@
 # E-Commerce Readiness Checklist — Thiết kế NGAY trong Accounting Webapp
 
+> **Dual-DB scope**: All readiness items below apply to the **Tenant DB** (per-company database), not the Master DB.
+
 > **Mục đích:** Danh sách chi tiết, step-by-step, TỪNG chức năng cần thiết kế sẵn trong webapp kế toán
 > từ ngày 1, để khi tích hợp e-commerce sau này KHÔNG phải breaking change.
 >

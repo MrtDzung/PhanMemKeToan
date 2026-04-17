@@ -113,6 +113,9 @@ Content-Type: application/json
 | 403 | `FORBIDDEN` | Missing `SYS.Users.Manage` permission |
 | 409 | `DUPLICATE_EMAIL` | Email already used in this tenant |
 | 422 | `INVALID_ROLE` | One or more roleIds not found or belong to another tenant |
+| 503 | `MASTER_DB_UNAVAILABLE` | Master DB unreachable during MasterUser creation/linking |
+
+**Dual-DB side effects**: Also creates `MasterUser` in Master DB (if email is new) or links existing `MasterUser` via `MasterUserTenant` (if email already exists in another company). Password is set in `MasterUser.PasswordHash` (Master DB), NOT in `User.PasswordHash` (Tenant DB).
 
 ---
 
@@ -184,6 +187,8 @@ Content-Type: application/json
 | fullName | string | Yes | Non-empty, max 200 chars |
 | roleIds | UUID[] | Yes | Full replacement of role assignments (not additive) |
 
+**Dual-DB note**: Email change also updates `MasterUser.Email` in Master DB if this is the user's only company. If multi-company, email change is flagged for manual review (to avoid breaking other tenants).
+
 ### Success Response — 200 OK
 
 Returns the updated user object (same shape as GET /api/users/{id}).
@@ -216,7 +221,7 @@ Body: empty.
 
 No response body.
 
-**Side effects**: `User.IsActive = false`; all `RefreshToken.IsRevoked = true` for this user.
+**Side effects**: `User.IsActive = false` in Tenant DB; `RefreshToken.IsRevoked = true` for this user + this tenant only in **Master DB** (tokens with matching `user_id` + `tenant_id`). The user can still access other companies where they are active.
 
 ### Error Responses
 
@@ -258,7 +263,7 @@ Body: empty.
 
 ## POST /api/users/{id}/unlock
 
-Clears the failed login counter and removes the account lock (resets `FailedLoginCount = 0` and `LockedUntil = null`).
+Clears the failed login counter and removes the account lock (resets `MasterUser.FailedLoginCount = 0` and `MasterUser.LockedUntil = null` in **Master DB**).
 
 ### Request
 

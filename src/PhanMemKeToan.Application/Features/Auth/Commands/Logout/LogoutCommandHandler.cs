@@ -6,7 +6,7 @@ using PhanMemKeToan.Application.Common.Interfaces;
 namespace PhanMemKeToan.Application.Features.Auth.Commands.Logout;
 
 public class LogoutCommandHandler(
-    IApplicationDbContext dbContext,
+    IMasterDbContext masterDbContext,
     ITokenBlacklistService blacklistService,
     ILogger<LogoutCommandHandler> logger
 ) : IRequestHandler<LogoutCommand>
@@ -17,15 +17,14 @@ public class LogoutCommandHandler(
         if (request.TokenRemainingTtl > TimeSpan.Zero)
             await blacklistService.BlacklistAsync(request.Jti, request.TokenRemainingTtl, cancellationToken);
 
-        // 2. Revoke refresh token
-        var refreshToken = await dbContext.RefreshTokens
-            .IgnoreQueryFilters()
+        // 2. Revoke refresh token in Master DB
+        var refreshToken = await masterDbContext.RefreshTokens
             .FirstOrDefaultAsync(rt => rt.TokenHash == request.RefreshTokenHash, cancellationToken);
 
         if (refreshToken is not null)
         {
             refreshToken.IsRevoked = true;
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await masterDbContext.SaveChangesAsync(cancellationToken);
         }
 
         // 3. FR-033 auth log

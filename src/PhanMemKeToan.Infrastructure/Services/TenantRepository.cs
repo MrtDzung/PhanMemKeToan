@@ -2,11 +2,10 @@
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
 using PhanMemKeToan.Application.Common.Interfaces;
-using PhanMemKeToan.Infrastructure.Persistence;
 
 namespace PhanMemKeToan.Infrastructure.Services;
 
-public class TenantRepository(ApplicationDbContext dbContext, IDistributedCache cache) : ITenantRepository
+public class TenantRepository(Persistence.MasterDbContext masterDbContext, IDistributedCache cache) : ITenantRepository
 {
     private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
 
@@ -14,8 +13,7 @@ public class TenantRepository(ApplicationDbContext dbContext, IDistributedCache 
     {
         var cacheKey = $"tenant:code:{code}";
         return await GetCachedOrFetchAsync(cacheKey,
-            () => dbContext.Tenants
-                .IgnoreQueryFilters()
+            () => masterDbContext.Tenants
                 .Where(t => t.Code == code)
                 .Select(t => new TenantDto(t.Id, t.Code, t.Name, t.IsActive))
                 .FirstOrDefaultAsync(cancellationToken),
@@ -26,8 +24,7 @@ public class TenantRepository(ApplicationDbContext dbContext, IDistributedCache 
     {
         var cacheKey = $"tenant:id:{id}";
         return await GetCachedOrFetchAsync(cacheKey,
-            () => dbContext.Tenants
-                .IgnoreQueryFilters()
+            () => masterDbContext.Tenants
                 .Where(t => t.Id == id)
                 .Select(t => new TenantDto(t.Id, t.Code, t.Name, t.IsActive))
                 .FirstOrDefaultAsync(cancellationToken),

@@ -1,0 +1,95 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e29]:
+    - navigation [ref=e30]:
+      - generic [ref=e31]: Kế Toán
+      - list [ref=e32]:
+        - listitem [ref=e33]:
+          - link " Trang chủ" [ref=e34] [cursor=pointer]:
+            - /url: /dashboard
+            - generic [ref=e35]: 
+            - generic [ref=e36]: Trang chủ
+        - listitem [ref=e37]: Hệ thống
+        - listitem [ref=e38]:
+          - link " Người dùng" [ref=e39] [cursor=pointer]:
+            - /url: /system/users
+            - generic [ref=e40]: 
+            - generic [ref=e41]: Người dùng
+        - listitem [ref=e42]:
+          - link " Vai trò" [ref=e43] [cursor=pointer]:
+            - /url: /system/roles
+            - generic [ref=e44]: 
+            - generic [ref=e45]: Vai trò
+        - listitem [ref=e46]:
+          - link " Công ty" [ref=e47] [cursor=pointer]:
+            - /url: /system/tenants
+            - generic [ref=e48]: 
+            - generic [ref=e49]: Công ty
+    - generic [ref=e50]:
+      - banner [ref=e51]:
+        - generic [ref=e53]: System Administration
+        - generic [ref=e54]:
+          - generic [ref=e55]: Super Administrator
+          - button "" [ref=e57] [cursor=pointer]:
+            - generic [ref=e58]: 
+      - main [ref=e59]:
+        - generic [ref=e73]:
+          - generic [ref=e74]:
+            - generic [ref=e75]:
+              - generic [ref=e76]:
+                - link " Quản lý công ty" [ref=e77] [cursor=pointer]:
+                  - /url: /system/tenants
+                  - generic [ref=e78]: 
+                  - text: Quản lý công ty
+                - heading "System Administration" [level=1] [ref=e79]
+                - code [ref=e80]: SYSTEM
+              - generic [ref=e81]:
+                - generic [ref=e83]: Hoạt động
+                - button " Vô hiệu hóa" [ref=e85] [cursor=pointer]:
+                  - generic [ref=e86]: 
+                  - generic [ref=e87]: Vô hiệu hóa
+            - generic [ref=e88]:
+              - tablist [ref=e91]:
+                - tab " Thông tin" [selected] [ref=e92] [cursor=pointer]:
+                  - generic [ref=e93]: 
+                  - text: Thông tin
+                - tab " Người dùng truy cập (2)" [ref=e94] [cursor=pointer]:
+                  - generic [ref=e95]: 
+                  - text: Người dùng truy cập (2)
+              - tabpanel " Thông tin" [ref=e96]:
+                - generic [ref=e97]:
+                  - generic [ref=e98]:
+                    - heading "Thông tin cơ bản" [level=3] [ref=e99]
+                    - generic [ref=e100]:
+                      - generic [ref=e101]:
+                        - generic [ref=e102]: Mã công ty
+                        - code [ref=e103]: SYSTEM
+                      - generic [ref=e104]:
+                        - generic [ref=e105]: Tên công ty
+                        - generic [ref=e106]: System Administration
+                      - generic [ref=e107]:
+                        - generic [ref=e108]: Trạng thái
+                        - generic [ref=e110]: Hoạt động
+                      - generic [ref=e111]:
+                        - generic [ref=e112]: Ngày tạo
+                        - generic [ref=e113]: 01/01/2026 07:00
+                  - generic [ref=e114]:
+                    - heading "Cấu hình Database" [level=3] [ref=e115]
+                    - generic [ref=e116]:
+                      - generic [ref=e117]:
+                        - generic [ref=e118]: Chế độ DB
+                        - generic [ref=e120]: Cloud Managed
+                      - generic [ref=e121]:
+                        - generic [ref=e122]: Trạng thái DB
+                        - generic [ref=e124]: Online
+                      - generic [ref=e125]:
+                        - generic [ref=e126]: Connection String
+                        - generic [ref=e127]: — Chưa cấu hình
+                - button " Chỉnh sửa thông tin" [ref=e130] [cursor=pointer]:
+                  - generic [ref=e131]: 
+                  - generic [ref=e132]: Chỉnh sửa thông tin
+              - text:     
+          - generic:
+            - alertdialog
+  - link "You are using an LTS version of PrimeNG with an invalid license, you may either switch back to a non-LTS version or purchase a license at PrimeStore." [ref=e26] [cursor=pointer]:
+    - /url: https://primeng.org/lts
+    - generic [ref=e27]: You are using an LTS version of PrimeNG with an invalid license, you may either switch back to a non-LTS version or purchase a license at PrimeStore.

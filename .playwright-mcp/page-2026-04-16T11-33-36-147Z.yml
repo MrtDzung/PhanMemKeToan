@@ -1,0 +1,21 @@
+- generic [ref=e1]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - heading "Phần Mềm Kế Toán" [level=1] [ref=e7]
+      - paragraph [ref=e8]: Đăng nhập để tiếp tục
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e11]: Email *
+        - textbox "Email *" [active] [ref=e12]:
+          - /placeholder: email@example.com
+      - generic [ref=e13]:
+        - generic [ref=e14]: Mật khẩu *
+        - generic [ref=e15]:
+          - textbox "Mật khẩu *" [ref=e16]
+          - img [ref=e17]
+      - checkbox [ref=e21] [cursor=pointer]
+      - button "Đăng nhập" [disabled] [ref=e24]:
+        - generic [ref=e25]: Đăng nhập
+  - link "You are using an LTS version of PrimeNG with an invalid license, you may either switch back to a non-LTS version or purchase a license at PrimeStore." [ref=e26] [cursor=pointer]:
+    - /url: https://primeng.org/lts
+    - generic [ref=e27]: You are using an LTS version of PrimeNG with an invalid license, you may either switch back to a non-LTS version or purchase a license at PrimeStore.

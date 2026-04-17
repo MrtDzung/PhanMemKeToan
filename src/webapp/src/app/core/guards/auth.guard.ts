@@ -18,8 +18,19 @@ export const authGuard: CanActivateFn = async (_route, state) => {
       return true;
     }
   } catch {
-    // Refresh failed — redirect to login
+    // Refresh failed ï¿½ redirect to login
   }
 
   return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
+};
+
+export const tempTokenGuard: CanActivateFn = (_route, _state) => {
+  const authStore = inject(AuthStore);
+  const router = inject(Router);
+
+  if (authStore.hasTempToken()) {
+    return true;
+  }
+
+  return router.createUrlTree(['/login']);
 };

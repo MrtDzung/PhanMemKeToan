@@ -85,8 +85,14 @@ The accounting app and any e-commerce storefront **must** use separate databases
 - Daily reconciliation (stock, orders, revenue) between the two systems
 - **Full specification**: See `ecom-integration-architecture.md` in this memory folder
 
-### Multi-Tenant Strategy: Shared DB + TenantID
-All tenants share a single database with `TenantId` column on every table. EF Core Global Query Filters auto-apply tenant isolation. Start simple, migrate to schema-per-tenant only if data isolation requirements demand it.
+### Multi-Tenant Strategy: Dual-DB Dedicated Per-Tenant (Phương án B Kết hợp)
+Master DB (always cloud) stores auth, tenant registry, refresh tokens. Tenant DB (one per company — cloud or on-premise via Cloudflare Tunnel) stores all accounting data. Each company = 1 separate database. EF Core global query filters (`ITenantEntity`) still applied within Tenant DB for `User` and `Role` entities as defense-in-depth.
+
+### Connection Management
+Tenant DB connections resolved per-request via `ITenantConnectionResolver`. Connection strings for on-premise tenants encrypted with ASP.NET DataProtection API (Phase 1) → KMS (Phase 2). On-premise connections via Cloudflare Tunnel (outbound-only, port 443). Connection cached in-memory with 5-minute TTL.
+
+### Cross-DB Identity
+`MasterUser.Id = User.Id` (same GUID in both databases, no FK constraint). Password stored in Master DB only (`MasterUser.PasswordHash`). Creating a user in Tenant DB must create/link corresponding `MasterUser` + `MasterUserTenant` in Master DB.
 
 ### Workflow Engine: Config-Driven (NON-NEGOTIABLE)
 Workflow definitions stored as JSON config (not hardcode). Each business process = 1 JSON template defining stages, roles, SLA, auto-checks, outcomes, and fork/join logic. Adding a new workflow type requires NO code changes — only a new JSON template + domain event wiring.
@@ -166,7 +172,7 @@ Contrast ≥ 4.5:1 text, ≥ 3:1 UI. ARIA labels on icon-only buttons. Data grid
 ### Database: PostgreSQL 16 (Primary)
 - **Why**: Free (no 10GB limit), native `jsonb` for VoucherTemplate/WorkflowTemplate config, native materialized views, built-in full-text search (tsvector)
 - **SQL Server Express**: Kept as reference-only for MISA survey data comparison
-- **Multi-tenant**: Shared DB + TenantId column + EF Core Global Query Filters
+- **Multi-tenant**: Dual-DB: Master DB (central auth) + Tenant DB (per-company, cloud or on-premise). Dual DbContext: `MasterDbContext` + `ApplicationDbContext` (per-request via `TenantDbContextFactory`)
 
 ### Infrastructure
 - **Dev**: Docker Compose (PostgreSQL + Redis)

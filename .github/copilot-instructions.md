@@ -7,6 +7,7 @@
 Vietnamese enterprise accounting webapp. Angular 18+ / PrimeNG 17+ / TailwindCSS 3.4+.
 15 accounting modules: DI, GL, CA, BA, PU, SA, IN, FA, SU, JC, PA, TA, CT, IP/EI, SYS.
 Design-before-code: no implementation without approved spec.
+Backend uses dual DbContext: MasterDbContext (central auth, tenant registry) + ApplicationDbContext (per-tenant accounting data via TenantDbContextFactory).
 
 ## Code Language
 - **Code, API, variables, comments**: English only

@@ -1,0 +1,112 @@
+- generic [ref=e1]:
+  - generic [ref=e29]:
+    - navigation [ref=e30]:
+      - generic [ref=e31]: Kế Toán
+      - list [ref=e32]:
+        - listitem [ref=e33]:
+          - link " Trang chủ" [ref=e34] [cursor=pointer]:
+            - /url: /dashboard
+            - generic [ref=e35]: 
+            - generic [ref=e36]: Trang chủ
+        - listitem [ref=e37]: Hệ thống
+        - listitem [ref=e38]:
+          - link " Người dùng" [ref=e39] [cursor=pointer]:
+            - /url: /system/users
+            - generic [ref=e40]: 
+            - generic [ref=e41]: Người dùng
+        - listitem [ref=e42]:
+          - link " Vai trò" [ref=e43] [cursor=pointer]:
+            - /url: /system/roles
+            - generic [ref=e44]: 
+            - generic [ref=e45]: Vai trò
+        - listitem [ref=e46]:
+          - link " Công ty" [ref=e47] [cursor=pointer]:
+            - /url: /system/tenants
+            - generic [ref=e48]: 
+            - generic [ref=e49]: Công ty
+    - generic [ref=e50]:
+      - banner [ref=e51]:
+        - generic [ref=e53]: System Administration
+        - generic [ref=e54]:
+          - generic [ref=e55]: Super Administrator
+          - button "" [ref=e57] [cursor=pointer]:
+            - generic [ref=e58]: 
+      - main [ref=e59]:
+        - generic [ref=e73]:
+          - generic [ref=e74]:
+            - generic [ref=e75]:
+              - generic [ref=e76]:
+                - link " Quản lý công ty" [ref=e77] [cursor=pointer]:
+                  - /url: /system/tenants
+                  - generic [ref=e78]: 
+                  - text: Quản lý công ty
+                - heading "System Administration" [level=1] [ref=e254]
+                - code [ref=e80]: SYSTEM
+              - generic [ref=e81]:
+                - generic [ref=e83]: Hoạt động
+                - button " Vô hiệu hóa" [ref=e85] [cursor=pointer]:
+                  - generic [ref=e86]: 
+                  - generic [ref=e87]: Vô hiệu hóa
+            - generic [ref=e255]:
+              - tablist [ref=e258]:
+                - tab " Thông tin" [ref=e259] [cursor=pointer]:
+                  - generic [ref=e260]: 
+                  - text: Thông tin
+                - tab " Người dùng truy cập (2)" [selected] [ref=e261] [cursor=pointer]:
+                  - generic [ref=e262]: 
+                  - text: Người dùng truy cập (2)
+              - text: 
+              - tabpanel " Người dùng truy cập (2)" [ref=e263]:
+                - generic [ref=e264]:
+                  - generic [ref=e265]: 2 người dùng có quyền truy cập
+                  - button " Cấp quyền truy cập" [ref=e267] [cursor=pointer]:
+                    - generic [ref=e268]: 
+                    - generic [ref=e269]: Cấp quyền truy cập
+                - table [ref=e272]:
+                  - rowgroup [ref=e273]:
+                    - row "Họ tên Email Vai trò hiển thị Mặc định Ngày tham gia Thao tác" [ref=e274]:
+                      - columnheader "Họ tên" [ref=e275]
+                      - columnheader "Email" [ref=e276]
+                      - columnheader "Vai trò hiển thị" [ref=e277]
+                      - columnheader "Mặc định" [ref=e278]
+                      - columnheader "Ngày tham gia" [ref=e279]
+                      - columnheader "Thao tác" [ref=e280]
+                  - rowgroup [ref=e281]:
+                    - row "Super Administrator superadmin@system.local —  16/04/2026 " [ref=e282]:
+                      - cell "Super Administrator" [ref=e283]
+                      - cell "superadmin@system.local" [ref=e284]
+                      - cell "—" [ref=e285]
+                      - cell "" [ref=e286]:
+                        - generic [ref=e287]: 
+                      - cell "16/04/2026" [ref=e288]
+                      - cell "" [ref=e289]:
+                        - button "" [ref=e291] [cursor=pointer]:
+                          - generic [ref=e292]: 
+                    - row "Test User testuser@demo.vn —  16/04/2026 " [ref=e293]:
+                      - cell "Test User" [ref=e294]
+                      - cell "testuser@demo.vn" [ref=e295]
+                      - cell "—" [ref=e296]
+                      - cell "" [ref=e297]:
+                        - generic [ref=e298]: 
+                      - cell "16/04/2026" [ref=e299]
+                      - cell "" [ref=e300]:
+                        - button "" [ref=e302] [cursor=pointer]:
+                          - generic [ref=e303]: 
+          - generic:
+            - alertdialog
+  - link "You are using an LTS version of PrimeNG with an invalid license, you may either switch back to a non-LTS version or purchase a license at PrimeStore." [ref=e26] [cursor=pointer]:
+    - /url: https://primeng.org/lts
+    - generic [ref=e27]: You are using an LTS version of PrimeNG with an invalid license, you may either switch back to a non-LTS version or purchase a license at PrimeStore.
+  - alertdialog "Xác nhận" [ref=e338]:
+    - generic [ref=e341]:
+      - generic [ref=e342]: Xác nhận
+      - button [ref=e345] [cursor=pointer]:
+        - img [ref=e346]
+    - generic [ref=e348]:
+      - generic [ref=e349]: 
+      - generic [ref=e350]: Vô hiệu hóa công ty "System Administration"? Tất cả phiên đăng nhập sẽ bị thu hồi.
+    - generic [ref=e351]:
+      - button "No" [active] [ref=e353] [cursor=pointer]:
+        - generic [ref=e354]: "No"
+      - button "Yes" [ref=e356] [cursor=pointer]:
+        - generic [ref=e357]: "Yes"

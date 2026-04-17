@@ -1,0 +1,89 @@
+{
+  "account": {
+    "title": "Hệ thống Tài khoản Kế toán",
+    "search": {
+      "placeholder": "Tìm kiếm tài khoản... (F3)"
+    },
+    "filter": {
+      "all": "Tất cả",
+      "active": "Đang dùng",
+      "inactive": "Ngừng dùng"
+    },
+    "form": {
+      "account_number": "Mã tài khoản",
+      "account_name": "Tên tài khoản",
+      "account_name_english": "Tên tiếng Anh",
+      "parent": "Tài khoản cha",
+      "category_kind": "Loại tài khoản",
+      "inactive": "Ngừng sử dụng",
+      "foreign_currency": "Theo dõi ngoại tệ",
+      "detail_by": {
+        "title": "Hạch toán chi tiết theo",
+        "account_object": "Đối tượng",
+        "bank_account": "Tài khoản ngân hàng",
+        "job": "Công trình",
+        "project_work": "Công việc",
+        "order": "Đơn hàng",
+        "contract": "Hợp đồng",
+        "expense_item": "Khoản mục chi phí",
+        "department": "Bộ phận",
+        "list_item": "Danh sách",
+        "pu_contract": "Hợp đồng mua"
+      }
+    },
+    "category": {
+      "debit": "Tài khoản Nợ",
+      "credit": "Tài khoản Có"
+    },
+    "object_type": {
+      "none": "Không xác định",
+      "supplier": "Nhà cung cấp",
+      "customer": "Khách hàng",
+      "employee": "Nhân viên"
+    },
+    "action": {
+      "add": "Thêm mới",
+      "edit": "Chỉnh sửa",
+      "delete": "Xóa",
+      "deactivate": "Vô hiệu hóa",
+      "import": "Nhập danh mục",
+      "save": "Lưu",
+      "cancel": "Hủy",
+      "export": "Xuất Excel"
+    },
+    "import": {
+      "title": "Nhập danh mục tài khoản chuẩn",
+      "step_select_standard": "Bước 1: Chọn hệ thống tài khoản",
+      "step_conflict": "Bước 2: Xử lý xung đột",
+      "step_preview": "Bước 3: Xem trước kết quả",
+      "step_confirm": "Bước 4: Xác nhận nhập",
+      "standard": {
+        "tt99": "TT99/2016 — Doanh nghiệp lớn (330+ tài khoản)",
+        "tt133": "TT133/2016 — Doanh nghiệp vừa và nhỏ (200+ tài khoản)"
+      },
+      "conflict": {
+        "skip": "Bỏ qua (Skip) — Giữ nguyên tài khoản hiện tại",
+        "overwrite": "Ghi đè (Overwrite) — Cập nhật theo danh mục chuẩn"
+      },
+      "result": {
+        "imported": "Đã tạo mới",
+        "skipped": "Đã bỏ qua",
+        "overwritten": "Đã ghi đè"
+      }
+    },
+    "error": {
+      "duplicate_code": "Mã tài khoản đã tồn tại",
+      "code_must_start_with_parent": "Mã tài khoản phải bắt đầu bằng mã tài khoản cha",
+      "has_transactions": "Tài khoản đã có phát sinh, không thể xóa",
+      "has_children": "Tài khoản có tài khoản con, không thể xóa",
+      "not_found": "Không tìm thấy tài khoản",
+      "row_version_conflict": "Dữ liệu đã bị thay đổi bởi người dùng khác, vui lòng tải lại",
+      "locked_has_transactions": "Không thể thay đổi mã hoặc tài khoản cha khi đã có phát sinh"
+    },
+    "badge": {
+      "has_transactions": "Có phát sinh",
+      "inactive": "Ngừng dùng",
+      "is_parent": "Tài khoản tổng hợp"
+    }
+  }
+}

@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using PhanMemKeToan.Application.Common.Models;
 
 namespace PhanMemKeToan.Application.Features.Auth.Commands.Login;
 
@@ -10,8 +11,7 @@ public record LoginCommand(
 ) : IRequest<LoginResult>;
 
 public record LoginResult(
-    string AccessToken,
-    string RefreshToken,
-    bool RememberMe,
-    DateTimeOffset ExpiresAt
+    string TempToken,
+    IReadOnlyList<CompanyInfo> Companies,
+    bool RememberMe
 );

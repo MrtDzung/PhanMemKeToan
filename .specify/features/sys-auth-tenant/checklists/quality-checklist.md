@@ -128,6 +128,25 @@
 
 ---
 
+## 9. Dual-DB Architecture (CHK082–CHK095)
+
+- [ ] CHK082 — MasterDbContext registered with fixed "MasterConnection" connection string — no per-tenant variation
+- [ ] CHK083 — ApplicationDbContext registered via TenantDbContextFactory with per-request connection resolved from ITenantConnectionResolver
+- [ ] CHK084 — Master DB migration folder separate: `Migrations/Master/`
+- [ ] CHK085 — Tenant DB migration folder separate: `Migrations/Tenant/`
+- [ ] CHK086 — Connection string encryption via IConnectionStringEncryptor (DataProtection API) — never stored in plaintext
+- [ ] CHK087 — TempToken: minimal claims (sub, rmb only), TTL 60s, separate HMAC-SHA256 signing key
+- [ ] CHK088 — Cloudflare Tunnel health: `db_status` updated, offline tenants show disabled in company list
+- [ ] CHK089 — Cross-DB identity: MasterUser.Id = User.Id (same GUID), enforced in CreateUserCommandHandler
+- [ ] CHK090 — ChangePasswordCommandHandler updates MasterUser.PasswordHash, NOT tenant User entity
+- [ ] CHK091 — CreateUserCommandHandler: dual-context operation — MasterUser in Master DB + User in Tenant DB
+- [ ] CHK092 — RefreshToken.TenantId populated on creation, used during refresh to resolve correct Tenant DB
+- [ ] CHK093 — 2-step login: no JWT issued at Step 1, only tempToken. JWT issued at Step 2 (select-company)
+- [ ] CHK094 — Company switch: verify MasterUserTenant access before issuing new JWT
+- [ ] CHK095 — Auto-select: if companies.length === 1, frontend auto-calls select-company (no manual step)
+
+---
+
 ## Summary
 
 | Domain | Items | [Gap] Items |
@@ -140,4 +159,5 @@
 | Testing | 10 | 2 (CHK065, CHK067) |
 | Business Rules | 8 | 0 |
 | Performance | 6 | 2 (CHK079, CHK080) |
-| **Total** | **81** | **11** |
+| Dual-DB Architecture | 14 | 0 |
+| **Total** | **95** | **11** |

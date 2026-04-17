@@ -14,8 +14,9 @@ namespace PhanMemKeToan.Infrastructure.Persistence.Migrations
             var userId   = new Guid("00000000-0000-0000-0000-000000000002");
             var roleId   = new Guid("00000000-0000-0000-0000-000000000003");
             var now      = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
-            // Pre-computed BCrypt hash of "Admin@123456" cost=12 to avoid runtime BCrypt dependency in migration
-            var passwordHash = "$2a$12$LQHpuXWfGbZwFPDrMjGnJ.YC2kkmTlfF5V4GcmfF7m1YTB6VJ5Xmm";
+            // Pre-computed BCrypt hash of "Admin@123!" cost=12
+            // Verified with BCrypt.Verify("Admin@123!", hash) == true
+            var passwordHash = "$2a$12$7lTvOH1/cD5afESlS2zOce9igaMwNFedimR7.TZumRa21Ap677GkS";
 
             migrationBuilder.InsertData(
                 table: "sys_tenants",
