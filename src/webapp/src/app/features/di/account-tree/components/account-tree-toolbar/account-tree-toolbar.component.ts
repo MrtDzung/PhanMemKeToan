@@ -44,6 +44,23 @@ interface StatusOption {
           styleClass="status-filter"
           aria-label="Lọc theo trạng thái"
         />
+
+        <div class="tt-mode-toggle" aria-label="Chế độ hệ thống tài khoản">
+          <button
+            type="button"
+            class="tt-btn"
+            [class.active]="!isTT133Mode"
+            (click)="isTT133Mode = false"
+            title="Thông tư 99/2025 (mặc định)"
+          >TT99</button>
+          <button
+            type="button"
+            class="tt-btn"
+            [class.active]="isTT133Mode"
+            (click)="isTT133Mode = true"
+            title="Thông tư 133 (doanh nghiệp vừa và nhỏ)"
+          >TT133</button>
+        </div>
       </div>
 
       <div class="toolbar-right">
@@ -112,10 +129,34 @@ interface StatusOption {
       min-width: 130px;
       font-size: 13px;
     }
+
+    .tt-mode-toggle {
+      display: flex;
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .tt-btn {
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.15s;
+      font-family: inherit;
+    }
+
+    .tt-btn:hover { background: var(--surface-ground); }
+    .tt-btn.active { background: var(--primary); color: white; }
+    .tt-btn + .tt-btn { border-left: 1px solid var(--surface-border); }
   `],
 })
 export class AccountTreeToolbarComponent {
   readonly store = inject(AccountTreeStore);
+  isTT133Mode = false;
 
   addNew = output<void>();
   importCoa = output<void>();

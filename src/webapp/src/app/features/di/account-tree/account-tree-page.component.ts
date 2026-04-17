@@ -1,5 +1,6 @@
-import { Component, inject, OnInit, ChangeDetectionStrategy, viewChild } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy, viewChild, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { SplitterModule } from 'primeng/splitter';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
@@ -17,6 +18,7 @@ import { AccountTreeNodeDto } from '../models/account.models';
   providers: [AccountTreeStore, MessageService],
   imports: [
     CommonModule,
+    RouterLink,
     SplitterModule,
     ToastModule,
     AccountTreeComponent,
@@ -36,6 +38,14 @@ import { AccountTreeNodeDto } from '../models/account.models';
           </div>
         }
       </div>
+
+      <nav class="breadcrumb-bar">
+        <a routerLink="/dashboard" class="breadcrumb-link"><i class="pi pi-home"></i></a>
+        <i class="pi pi-angle-right breadcrumb-sep"></i>
+        <span class="breadcrumb-item">Danh mục</span>
+        <i class="pi pi-angle-right breadcrumb-sep"></i>
+        <span class="breadcrumb-item active">Hệ thống tài khoản</span>
+      </nav>
 
       <div class="page-body">
         <p-splitter
@@ -68,6 +78,14 @@ import { AccountTreeNodeDto } from '../models/account.models';
           </ng-template>
         </p-splitter>
       </div>
+
+      <footer class="status-bar">
+        <span>Tổng: <strong>{{ totalCount() }}</strong> tài khoản</span>
+        <span class="status-sep">|</span>
+        <span>Đang dùng: <strong class="active-count">{{ activeCount() }}</strong></span>
+        <span class="status-sep">|</span>
+        <span>Ngừng dùng: <strong class="inactive-count">{{ inactiveCount() }}</strong></span>
+      </footer>
     </div>
 
     <app-import-coa-dialog #importDialog />
@@ -102,6 +120,41 @@ import { AccountTreeNodeDto } from '../models/account.models';
       font-size: 12px;
       padding: 4px 0;
     }
+
+    .breadcrumb-bar {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 0 16px;
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--surface-border);
+      font-size: 12px;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .breadcrumb-link { color: var(--primary); text-decoration: none; }
+    .breadcrumb-sep { font-size: 10px; color: var(--text-disabled); margin: 0 2px; }
+    .breadcrumb-item { color: var(--text-secondary); }
+    .breadcrumb-item.active { color: var(--text-primary); font-weight: 500; }
+
+    .status-bar {
+      height: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 16px;
+      background: var(--surface-card);
+      border-top: 1px solid var(--surface-border);
+      font-size: 12px;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .status-sep { color: var(--surface-border); }
+    .active-count { color: var(--success); font-weight: 600; }
+    .inactive-count { color: var(--text-disabled); font-weight: 600; }
 
     .page-body {
       flex: 1;
@@ -144,6 +197,9 @@ import { AccountTreeNodeDto } from '../models/account.models';
 export class AccountTreePageComponent implements OnInit {
   readonly store = inject(AccountTreeStore);
   readonly importDialog = viewChild.required(ImportCoaDialogComponent);
+  readonly totalCount = computed(() => this.store.accounts().length);
+  readonly activeCount = computed(() => this.store.accounts().filter(a => !a.inactive).length);
+  readonly inactiveCount = computed(() => this.store.accounts().filter(a => a.inactive).length);
 
   ngOnInit(): void {
     this.store.loadTree();

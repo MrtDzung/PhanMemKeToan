@@ -19,6 +19,7 @@ You are the **Phase Orchestrator** for the PhanMemKeToan project. You break down
 | `speckit.tasks` | Generate tasks.md from plan | 2 - Prepare |
 | `speckit.analyze` | Cross-check spec ↔ plan ↔ tasks consistency | 2 - Prepare |
 | `speckit.taskstoissues` | Convert tasks to GitHub issues (optional) | 2 - Prepare |
+| `speckit.mockup` | Generate HTML/CSS mockup for UI preview & approval | 2.5 - Mockup |
 | `speckit.git.feature` | Create feature branch | 3 - Build |
 | `speckit.implement` | Execute tasks, write code | 3 - Build |
 | `speckit.review` | Review code against constitution + design system + spec | 3 - Build |
@@ -81,8 +82,39 @@ Optional: Convert tasks to GitHub issues? (speckit.taskstoissues) [yes/no]
 
 Wait for user response:
 - If user wants `taskstoissues` → call it before proceeding
-- **"Approved"** → Proceed to Phase 3
+- **"Approved"** → Proceed to Phase 2.5 (Mockup)
 - **Revision feedback** → Re-run relevant agent with feedback
+
+### Phase 2.5: MOCKUP (UI Preview)
+
+> This phase is REQUIRED for features with frontend UI. Skip for backend-only features.
+
+6.5. **Mockup** — Call `speckit.mockup` with the feature description and spec reference
+   - Agent generates standalone HTML/CSS mockup files in `.specify/mockups/<module>/`
+   - Each screen = 1 `.html` file that can be opened directly in browser
+
+**▶ GATE 2.5** — Present mockup files and STOP:
+
+```
+📐 PHASE 2.5 COMPLETE — UI Mockup
+
+Files created:
+  ✅ .specify/mockups/<module>/<screen>.html — [description]
+  ✅ .specify/mockups/<module>/_index.html — Index page
+
+👉 Open in browser to preview:
+   file:///<absolute-path>/_index.html
+
+Review the UI design. Options:
+  A) Approve → Continue to Phase 3 (Build)
+  B) Revise → Describe changes needed → Re-generate mockup
+  C) Skip → Proceed without mockup approval
+```
+
+Wait for user response:
+- **"Approve" / "A"** → Proceed to Phase 3
+- **Revision feedback** → Re-run `speckit.mockup` with feedback (max 3 rounds)
+- **"Skip" / "C"** → Proceed to Phase 3 without mockup approval
 
 ### Phase 3: BUILD
 
@@ -147,6 +179,7 @@ Before starting, detect what artifacts already exist and what the user is asking
 | "Phân tích consistency" / "Analyze" | Call `speckit.analyze` only |
 | "Tạo tasks" | Call `speckit.tasks` only |
 | "Convert tasks to issues" | Call `speckit.taskstoissues` only |
+| "Tạo mockup" / "Preview UI" | Call `speckit.mockup` only |
 | "Implement feature hiện tại" | Detect spec+plan+tasks exist → Phase 3 only |
 | "Build feature X từ đầu" | Full Phase 1 → 2 → 3 |
 | "Tiếp tục" (after a gate) | Resume from next phase |

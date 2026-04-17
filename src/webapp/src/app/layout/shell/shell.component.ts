@@ -13,11 +13,44 @@ import { AuthStore } from '../../core/stores/auth.store';
   imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, ButtonModule, AvatarModule, SelectModule, FormsModule],
   template: `
     <div class="shell-layout">
-      <nav class="sidebar">
-        <div class="sidebar-logo">
-          <span class="logo-text">Kế Toán</span>
-        </div>
-        <ul class="nav-menu">
+      <header class="top-bar">
+          <div class="top-bar-left">
+            <div class="app-logo">
+              <i class="pi pi-chart-bar"></i>
+              <span>Kế Toán</span>
+            </div>
+            @if (authStore.companies().length > 1) {
+              <span class="topbar-sep">|</span>
+              <p-select
+                [options]="authStore.companies()"
+                [ngModel]="authStore.selectedCompany()?.tenantId"
+                (ngModelChange)="onCompanyChange($event)"
+                optionLabel="name"
+                optionValue="tenantId"
+                placeholder="Chọn công ty"
+                styleClass="company-select"
+                [style]="{ minWidth: '200px' }"
+              />
+            } @else if (authStore.selectedCompany()) {
+              <span class="topbar-sep">|</span>
+              <span class="company-name-label">{{ authStore.selectedCompany()?.name }}</span>
+            }
+          </div>
+          <div class="top-bar-right">
+            <span class="user-name">{{ authStore.currentUser()?.fullName }}</span>
+            <p-button
+              icon="pi pi-sign-out"
+              variant="text"
+              size="small"
+              pTooltip="Đăng xuất"
+              (onClick)="logout()"
+            />
+          </div>
+      </header>
+
+      <div class="shell-body">
+        <nav class="sidebar">
+          <ul class="nav-menu">
           <li>
             <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
               <i class="pi pi-home"></i>
@@ -51,37 +84,7 @@ import { AuthStore } from '../../core/stores/auth.store';
             </a>
           </li>
         </ul>
-      </nav>
-
-      <div class="main-area">
-        <header class="top-bar">
-          <div class="top-bar-left">
-            @if (authStore.companies().length > 1) {
-              <p-select
-                [options]="authStore.companies()"
-                [ngModel]="authStore.selectedCompany()?.tenantId"
-                (ngModelChange)="onCompanyChange($event)"
-                optionLabel="name"
-                optionValue="tenantId"
-                placeholder="Chọn công ty"
-                styleClass="company-select"
-                [style]="{ minWidth: '200px' }"
-              />
-            } @else if (authStore.selectedCompany()) {
-              <span class="company-name-label">{{ authStore.selectedCompany()?.name }}</span>
-            }
-          </div>
-          <div class="top-bar-right">
-            <span class="user-name">{{ authStore.currentUser()?.fullName }}</span>
-            <p-button
-              icon="pi pi-sign-out"
-              variant="text"
-              size="small"
-              pTooltip="Đăng xuất"
-              (onClick)="logout()"
-            />
-          </div>
-        </header>
+        </nav>
         <main class="content-area">
           <router-outlet />
         </main>
@@ -89,22 +92,26 @@ import { AuthStore } from '../../core/stores/auth.store';
     </div>
   `,
   styles: [`
-    .shell-layout { display: flex; min-height: 100vh; background: var(--surface-ground); }
-    .sidebar { width: 220px; background: var(--primary-dark); color: white; flex-shrink: 0; padding: 0; }
-    .sidebar-logo { padding: 20px 16px; border-bottom: 1px solid var(--sidebar-hover, rgba(255,255,255,0.1)); }
-    .logo-text { font-size: 16px; font-weight: 700; color: white; }
+    .shell-layout { display: flex; flex-direction: column; min-height: 100vh; background: var(--surface-ground); }
+    .shell-body { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+    .sidebar { width: 220px; background: var(--surface-card); border-right: 1px solid var(--surface-border); flex-shrink: 0; padding: 0; overflow-y: auto; }
     .nav-menu { list-style: none; margin: 0; padding: 8px 0; }
-    .nav-group-label { font-size: 11px; color: var(--sidebar-text-muted, rgba(255,255,255,0.5)); padding: 16px 16px 4px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; color: var(--sidebar-text, rgba(255,255,255,0.8)); text-decoration: none; font-size: 13px; border-radius: 0; transition: background 0.15s; }
-    .nav-item:hover { background: var(--sidebar-hover, rgba(255,255,255,0.1)); color: white; }
-    .nav-item.active { background: var(--primary); color: white; }
-    .main-area { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-    .top-bar { height: 48px; background: var(--surface-card); border-bottom: 1px solid var(--surface-border); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; gap: 12px; }
+    .nav-group-label { font-size: 11px; color: var(--text-disabled); padding: 16px 16px 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 16px; color: var(--text-secondary); text-decoration: none; font-size: 13px; transition: background 0.15s; }
+    .nav-item:hover { background: var(--surface-ground); color: var(--text-primary); }
+    .nav-item.active { background: var(--primary-light); color: var(--primary-dark); font-weight: 600; border-right: 3px solid var(--primary); }
+    .top-bar { height: 48px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; gap: 12px; flex-shrink: 0; }
+    .app-logo { display: flex; align-items: center; gap: 8px; color: white; font-size: 16px; font-weight: 700; flex-shrink: 0; }
+    .topbar-sep { color: rgba(255,255,255,0.4); margin: 0 10px; font-size: 18px; line-height: 1; }
     .top-bar-left { display: flex; align-items: center; }
     .top-bar-right { display: flex; align-items: center; gap: 12px; }
-    .user-name { font-size: 13px; color: var(--text-secondary); }
-    .company-name-label { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+    .user-name { font-size: 13px; color: rgba(255,255,255,0.9); }
+    .company-name-label { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.9); }
     .content-area { flex: 1; overflow: auto; }
+    :host ::ng-deep .top-bar .p-button { color: white !important; }
+    :host ::ng-deep .top-bar .p-button:hover { background: rgba(255,255,255,0.15) !important; }
+    :host ::ng-deep .company-select { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); }
+    :host ::ng-deep .company-select .p-select-label { color: rgba(255,255,255,0.9); font-size: 13px; }
   `]
 })
 export class ShellComponent {
