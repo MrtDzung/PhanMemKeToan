@@ -76,7 +76,7 @@ namespace PhanMemKeToan.Infrastructure.Persistence.Migrations
                 table: "Accounts",
                 columns: new[] { "tenant_id", "account_number" },
                 unique: true,
-                filter: "\"IsDeleted\" = false");
+                filter: "is_deleted = false");
         }
 
         /// <inheritdoc />
