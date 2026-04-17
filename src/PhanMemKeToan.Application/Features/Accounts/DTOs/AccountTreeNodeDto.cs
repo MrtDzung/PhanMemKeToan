@@ -8,6 +8,7 @@ public class AccountTreeNodeDto
     public string AccountNumber { get; set; } = string.Empty;
     public string AccountName { get; set; } = string.Empty;
     public string? AccountNameEnglish { get; set; }
+    public Guid? ParentId { get; set; }
     public int Grade { get; set; }
     public bool IsParent { get; set; }
     public AccountCategoryKind AccountCategoryKind { get; set; }

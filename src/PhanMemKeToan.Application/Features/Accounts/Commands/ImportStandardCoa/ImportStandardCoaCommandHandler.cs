@@ -86,8 +86,7 @@ public class ImportStandardCoaCommandHandler(
         }
 
         // Build numberâ†’guid mapping for parent resolution within import batch
-        var importedMap = new Dictionary<string, Guid>(existing.ToDictionary(kv => kv.Key, kv => kv.Value.Id));
-        var parentUpdates = new HashSet<string>();
+        var importedMap = new Dictionary<string, Guid>(existing.ToDictionary(kv => kv.Key, kv => kv.Value.Id));        var newAccountsByNumber = new Dictionary<string, Account>();        var parentUpdates = new HashSet<string>();
 
         foreach (var entry in entries)
         {
@@ -121,6 +120,9 @@ public class ImportStandardCoaCommandHandler(
                     existingAcc.ModifiedAt = DateTimeOffset.UtcNow;
                     existingAcc.ModifiedBy = "import";
                     result.Overwritten++;
+
+                    if (!string.IsNullOrEmpty(entry.ParentNumber))
+                        parentUpdates.Add(entry.ParentNumber);
                 }
                 else
                 {
@@ -158,6 +160,7 @@ public class ImportStandardCoaCommandHandler(
 
                     dbContext.Accounts.Add(newAccount);
                     importedMap[entry.AccountNumber] = newAccount.Id;
+                    newAccountsByNumber[entry.AccountNumber] = newAccount;
                     result.Imported++;
 
                     if (!string.IsNullOrEmpty(entry.ParentNumber))
@@ -170,11 +173,13 @@ public class ImportStandardCoaCommandHandler(
             }
         }
 
-        // Update IsParent flags for parent accounts
+        // Update IsParent flags for parent accounts (existing + newly imported)
         foreach (var parentNumber in parentUpdates)
         {
             if (existing.TryGetValue(parentNumber, out var parentAcc))
                 parentAcc.IsParent = true;
+            else if (newAccountsByNumber.TryGetValue(parentNumber, out var newParent))
+                newParent.IsParent = true;
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);

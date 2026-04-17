@@ -42,6 +42,7 @@ public class GetAccountTreeQueryHandler(
                 AccountNumber = a.AccountNumber,
                 AccountName = a.AccountName,
                 AccountNameEnglish = a.AccountNameEnglish,
+                ParentId = a.ParentID,
                 Grade = a.Grade,
                 IsParent = a.IsParent,
                 AccountCategoryKind = a.AccountCategoryKind,
@@ -80,9 +81,12 @@ public class GetAccountTreeQueryHandler(
                     AccountId = n.AccountId,
                     AccountNumber = n.AccountNumber,
                     AccountName = n.AccountName,
+                    ParentId = n.ParentId,
+                    Grade = n.Grade,
                     AccountCategoryKind = n.AccountCategoryKind,
                     Inactive = n.Inactive,
-                    IsParent = n.IsParent
+                    IsParent = n.IsParent,
+                    IsPostableInForeignCurrency = n.IsPostableInForeignCurrency
                 });
                 Traverse(n.Children);
             }

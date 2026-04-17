@@ -4,7 +4,6 @@ namespace PhanMemKeToan.Application.Features.Accounts.DTOs;
 
 public class AccountDetailDto : AccountTreeNodeDto
 {
-    public Guid? ParentId { get; set; }
     public string? ParentNumber { get; set; }
     public string? ParentName { get; set; }
 
