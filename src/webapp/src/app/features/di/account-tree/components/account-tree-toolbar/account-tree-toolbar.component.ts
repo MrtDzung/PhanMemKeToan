@@ -137,16 +137,35 @@ interface StatusOption {
     .search-wrap {
       width: 200px;
       flex-shrink: 0;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
     }
 
     .search-input {
       width: 100%;
       font-size: 13px;
+      height: 32px;
+      padding-top: 0;
+      padding-bottom: 0;
+      box-sizing: border-box;
     }
 
     :host ::ng-deep .status-filter {
       width: 120px;
       flex-shrink: 0;
+      font-size: 13px;
+    }
+
+    :host ::ng-deep .status-filter .p-select {
+      height: 32px;
+      align-items: center;
+    }
+
+    :host ::ng-deep .status-filter .p-select-label {
+      padding-top: 0;
+      padding-bottom: 0;
+      line-height: 32px;
       font-size: 13px;
     }
 

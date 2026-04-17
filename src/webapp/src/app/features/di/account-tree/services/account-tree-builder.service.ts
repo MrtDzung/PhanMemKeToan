@@ -19,7 +19,7 @@ export class AccountTreeBuilderService {
         data: acc,
         children: [],
         leaf: !acc.isParent,
-        selectable: !acc.isParent,
+        selectable: true,
         expanded: expandedNodeIds ? expandedNodeIds.has(acc.accountId) : false,
       };
       map.set(acc.accountId, node);

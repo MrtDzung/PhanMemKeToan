@@ -22,8 +22,10 @@ import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account
         scrollHeight="flex"
         styleClass="account-tree-table"
         [tableStyle]="{ 'min-width': '520px' }"
+        selectionMode="single"
         (onNodeExpand)="onNodeExpand($event)"
         (onNodeCollapse)="onNodeCollapse($event)"
+        (onNodeSelect)="onNodeSelect($event)"
       >
         <ng-template pTemplate="header">
           <tr>
@@ -35,8 +37,7 @@ import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account
         </ng-template>
         <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
           <tr
-            [ttRow]="rowNode"
-            (click)="onRowClick(rowData)"
+            [ttSelectableRow]="rowNode"
             [class.row-selected]="rowData.accountId === selectedAccountId()"
             [class.row-inactive]="rowData.inactive"
           >
@@ -216,8 +217,9 @@ export class AccountTreeComponent {
   nodeExpanded = output<string>();
   nodeCollapsed = output<string>();
 
-  onRowClick(data: AccountTreeNodeDto): void {
-    this.accountSelected.emit(data);
+  onNodeSelect(event: { node: TreeNode }): void {
+    const data = event.node.data as AccountTreeNodeDto;
+    if (data) this.accountSelected.emit(data);
   }
 
   onNodeExpand(event: { node: TreeNode }): void {
