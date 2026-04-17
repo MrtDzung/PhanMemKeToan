@@ -51,9 +51,13 @@ export interface AccountListItemDto {
   accountId: string;
   accountNumber: string;
   accountName: string;
+  accountNameEnglish: string | null;
+  parentId: string | null;
+  grade: number;
   accountCategoryKind: AccountCategoryKind;
   inactive: boolean;
   isParent: boolean;
+  isPostableInForeignCurrency: boolean;
 }
 
 export interface ImportCoaResultDto {

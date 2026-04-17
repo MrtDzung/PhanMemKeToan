@@ -93,7 +93,7 @@ export const AccountTreeStore = signalStore(
         accounts = builderService.filterTree(accounts, query);
       }
 
-      return builderService.buildTree(accounts);
+      return builderService.buildTree(accounts, state.expandedNodeIds());
     }),
     selectedAccount: computed(() => {
       const id = state.selectedAccountId();
@@ -217,6 +217,22 @@ export const AccountTreeStore = signalStore(
         const tenantId = authStore.currentUser()?.tenantId ?? 'default';
         saveExpandedToStorage(tenantId, current);
         patchState(store, { expandedNodeIds: current });
+      },
+
+      expandAll(): void {
+        const allParentIds = new Set(
+          store.accounts().filter((a) => a.isParent).map((a) => a.accountId)
+        );
+        const tenantId = authStore.currentUser()?.tenantId ?? 'default';
+        saveExpandedToStorage(tenantId, allParentIds);
+        patchState(store, { expandedNodeIds: allParentIds });
+      },
+
+      collapseAll(): void {
+        const empty = new Set<string>();
+        const tenantId = authStore.currentUser()?.tenantId ?? 'default';
+        saveExpandedToStorage(tenantId, empty);
+        patchState(store, { expandedNodeIds: empty });
       },
     })
   )

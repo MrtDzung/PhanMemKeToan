@@ -49,8 +49,8 @@ import { AccountTreeNodeDto } from '../models/account.models';
 
       <div class="page-body">
         <p-splitter
-          [panelSizes]="[40, 60]"
-          [minSizes]="[20, 30]"
+          [panelSizes]="[72, 28]"
+          [minSizes]="[30, 20]"
           styleClass="full-height-splitter"
         >
           <ng-template pTemplate>
@@ -58,6 +58,8 @@ import { AccountTreeNodeDto } from '../models/account.models';
               <app-account-tree-toolbar
                 (addNew)="onAddNew()"
                 (importCoa)="onOpenImportDialog()"
+                (expandAll)="store.expandAll()"
+                (collapseAll)="store.collapseAll()"
               />
               <app-account-tree
                 [treeNodes]="store.treeNodes()"

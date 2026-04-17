@@ -102,6 +102,11 @@ import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account
       letter-spacing: 0.04em;
     }
 
+    /* Offset header text to align with account numbers (toggler = 16px + gap = 2px + btn padding ~4px) */
+    :host ::ng-deep .account-tree-table .p-treetable-thead > tr > th:first-child {
+      padding-left: 32px;
+    }
+
     .col-num { width: 110px; }
     .col-category { width: 120px; }
     .col-object { width: 90px; }

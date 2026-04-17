@@ -4,7 +4,7 @@ import { AccountTreeNodeDto } from '../../models/account.models';
 
 @Injectable({ providedIn: 'root' })
 export class AccountTreeBuilderService {
-  buildTree(accounts: AccountTreeNodeDto[]): TreeNode[] {
+  buildTree(accounts: AccountTreeNodeDto[], expandedNodeIds?: Set<string>): TreeNode[] {
     const sorted = [...accounts].sort((a, b) =>
       a.accountNumber.localeCompare(b.accountNumber)
     );
@@ -20,7 +20,7 @@ export class AccountTreeBuilderService {
         children: [],
         leaf: !acc.isParent,
         selectable: !acc.isParent,
-        expanded: false,
+        expanded: expandedNodeIds ? expandedNodeIds.has(acc.accountId) : false,
       };
       map.set(acc.accountId, node);
     }

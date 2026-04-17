@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
 import { AccountTreeStore } from '../../store/account-tree.store';
 
 interface StatusOption {
@@ -15,7 +16,7 @@ interface StatusOption {
   selector: 'app-account-tree-toolbar',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, InputTextModule, SelectModule, ButtonModule],
+  imports: [CommonModule, FormsModule, InputTextModule, SelectModule, ButtonModule, TooltipModule],
   template: `
     <div class="toolbar">
       <div class="toolbar-left">
@@ -44,6 +45,25 @@ interface StatusOption {
           styleClass="status-filter"
           aria-label="Lọc theo trạng thái"
         />
+
+        <div class="expand-collapse-btns" role="group" aria-label="Mở rộng / Thu gọn cây tài khoản">
+          <button
+            type="button"
+            class="icon-action-btn"
+            pTooltip="Mở rộng tất cả"
+            tooltipPosition="bottom"
+            (click)="expandAll.emit()"
+            aria-label="Mở rộng tất cả"
+          ><i class="pi pi-angle-double-down"></i></button>
+          <button
+            type="button"
+            class="icon-action-btn"
+            pTooltip="Thu gọn tất cả"
+            tooltipPosition="bottom"
+            (click)="collapseAll.emit()"
+            aria-label="Thu gọn tất cả"
+          ><i class="pi pi-angle-double-up"></i></button>
+        </div>
 
         <div class="tt-mode-toggle" aria-label="Chế độ hệ thống tài khoản">
           <button
@@ -97,7 +117,7 @@ interface StatusOption {
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      padding: 8px 12px;
+      padding: 6px 12px;
       border-bottom: 1px solid var(--surface-border);
       background: var(--surface-card);
     }
@@ -106,7 +126,6 @@ interface StatusOption {
       display: flex;
       align-items: center;
       gap: 8px;
-      flex: 1;
     }
 
     .toolbar-right {
@@ -116,8 +135,8 @@ interface StatusOption {
     }
 
     .search-wrap {
-      flex: 1;
-      max-width: 320px;
+      width: 200px;
+      flex-shrink: 0;
     }
 
     .search-input {
@@ -126,8 +145,39 @@ interface StatusOption {
     }
 
     :host ::ng-deep .status-filter {
-      min-width: 130px;
+      width: 120px;
+      flex-shrink: 0;
       font-size: 13px;
+    }
+
+    .expand-collapse-btns {
+      display: flex;
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .icon-action-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      font-size: 13px;
+    }
+
+    .icon-action-btn:hover {
+      background: var(--surface-ground);
+      color: var(--primary);
+    }
+
+    .icon-action-btn + .icon-action-btn {
+      border-left: 1px solid var(--surface-border);
     }
 
     .tt-mode-toggle {
@@ -160,6 +210,8 @@ export class AccountTreeToolbarComponent {
 
   addNew = output<void>();
   importCoa = output<void>();
+  expandAll = output<void>();
+  collapseAll = output<void>();
 
   readonly statusOptions: StatusOption[] = [
     { label: 'Tất cả', value: 'all' },
