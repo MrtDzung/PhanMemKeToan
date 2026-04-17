@@ -5,6 +5,7 @@ namespace PhanMemKeToan.Application.Common.Interfaces;
 
 public interface IApplicationDbContext
 {
+    DbSet<Account> Accounts { get; }
     DbSet<Tenant> Tenants { get; }
     DbSet<User> Users { get; }
     DbSet<Role> Roles { get; }

@@ -2,29 +2,70 @@
 
 **Feature Branch**: `sys-auth-tenant`  
 **Created**: 2026-04-15  
-**Status**: Draft  
+**Updated**: 2026-04-16 — Dual-DB architecture (Phương án B Kết hợp)  
+**Status**: Draft v2  
 **Module**: SYS — System Administration  
 **Priority**: CRITICAL — Foundation for all other modules
+
+> **Architecture**: Master DB (cloud, central auth) + Tenant DB (dedicated per-company, cloud or on-premise)  
+> **Login Flow**: 2-step — email/password → company selection → JWT
 
 ---
 
 ## User Scenarios & Testing
 
-### User Story 1 — Tenant Administrator Login (Priority: P1)
+### User Story 1 — Login: Verify Credentials (Priority: P1)
 
-A tenant administrator opens the accounting app, enters their email and password, and gains access to the system. The system identifies which tenant they belong to and loads only that tenant's data. On logout, the session is fully invalidated server-side.
+A user opens the accounting app, enters their email and password. The system verifies credentials against the Master DB and returns a temporary token with a list of companies the user has access to. No JWT is issued yet — the user must select a company first.
 
 **Why this priority**: This is the entry gate to the entire application. No other feature can be used without it. All other modules depend on a valid, tenant-scoped session.
 
-**Independent Test**: Can be fully tested by navigating to `/login`, submitting valid credentials, verifying the dashboard loads with correct tenant data, then logging out and verifying that the old access token is rejected with 401.
+**Independent Test**: Can be fully tested by navigating to `/login`, submitting valid credentials, verifying the company selection screen appears with the correct list of companies.
 
 **Acceptance Scenarios**:
 
-1. **Given** a valid user account exists for tenant "ACME", **When** the user submits correct email + password, **Then** the system returns an access token, a refresh token, and the user is redirected to the dashboard showing only ACME's data.
-2. **Given** a user submits incorrect password 5 times within 5 minutes, **When** the 6th attempt is made from the same IP, **Then** the system rejects the request without processing credentials and returns a rate-limit error.
-3. **Given** a logged-in user clicks Logout, **When** the logout request is processed, **Then** the access token JTI is blacklisted, the refresh token is revoked, and any subsequent request with the old access token is rejected with 401.
-4. **Given** a user submits an email that does not exist, **When** the login endpoint is called, **Then** the response is a generic "invalid credentials" message — not revealing whether the email exists in the system.
-5. **Given** a deactivated user account, **When** valid credentials are submitted, **Then** login is rejected with an "account deactivated" message that does not reveal password correctness.
+1. **Given** a valid MasterUser account with access to tenant "ACME", **When** the user submits correct email + password, **Then** the system returns a tempToken (TTL 60s) and a list of accessible companies (name, code, databaseMode, dbStatus, displayRole, isDefault).
+2. **Given** a user with access to only 1 company, **When** login succeeds, **Then** the frontend auto-selects that company and calls `/api/auth/select-company` immediately (no manual company selection step).
+3. **Given** a user submits incorrect password 5 times within 5 minutes, **When** the 6th attempt is made from the same IP, **Then** the system rejects the request without processing credentials and returns a rate-limit error.
+4. **Given** a logged-in user clicks Logout, **When** the logout request is processed, **Then** the access token JTI is blacklisted, the refresh token is revoked in Master DB, and any subsequent request with the old access token is rejected with 401.
+5. **Given** a user submits an email that does not exist, **When** the login endpoint is called, **Then** the response is a generic "invalid credentials" message — not revealing whether the email exists in the system.
+6. **Given** a deactivated MasterUser account, **When** valid credentials are submitted, **Then** login is rejected with an "account deactivated" message that does not reveal password correctness.
+7. **Given** a MasterUser with no active company mappings (all tenants inactive), **When** login succeeds, **Then** a 401 NO_COMPANIES error is returned.
+
+---
+
+### User Story 1b — Company Selection (Priority: P1)
+
+After successful credential verification, the user sees a list of companies they have access to and selects one to enter. The system issues a JWT scoped to the selected company and loads that company's roles and permissions.
+
+**Why this priority**: Part of the core login flow — without company selection, no JWT is issued and no work can be done.
+
+**Independent Test**: Can be tested by logging in as a multi-company user, verifying the company list displays correctly, selecting a company, and verifying the dashboard loads with correct tenant data.
+
+**Acceptance Scenarios**:
+
+1. **Given** a valid tempToken and a tenantId the user has access to, **When** the user selects the company, **Then** the system issues a JWT with the correct `tid` claim, sets a refresh_token cookie, and redirects to the dashboard.
+2. **Given** the default company is marked (`isDefault = true`), **When** the company selection screen loads, **Then** the default company is visually highlighted.
+3. **Given** a company with `dbStatus = 'Offline'`, **When** the company list is displayed, **Then** that company appears disabled with an "Offline" badge and cannot be selected.
+4. **Given** the tempToken has expired (> 60s), **When** the user attempts to select a company, **Then** a 401 TEMP_TOKEN_EXPIRED error is returned and the user is redirected back to the login screen.
+5. **Given** a user attempts to select a company they don't have access to, **When** the select-company API is called, **Then** a 403 COMPANY_NOT_ACCESSIBLE error is returned.
+
+---
+
+### User Story 1c — Company Switching (Priority: P2)
+
+While working in a company, the user wants to switch to a different company without re-entering credentials. A company switcher in the header allows quick switching.
+
+**Why this priority**: Important for multi-company users but not blocking core workflows. Users can always log out and log back in.
+
+**Independent Test**: Can be tested by logging in as a multi-company user, selecting company A, verifying dashboard shows A's data, then switching to company B via the header dropdown, and verifying dashboard reloads with B's data.
+
+**Acceptance Scenarios**:
+
+1. **Given** a logged-in user with access to multiple companies, **When** they click the company name in the header, **Then** a dropdown shows all accessible companies with their names and status.
+2. **Given** the user selects a different company from the dropdown, **When** the switch is confirmed, **Then** a new JWT is issued for the new company, the dashboard reloads with the new company's data, and the old refresh token is revoked.
+3. **Given** the user has unsaved changes (dirty form), **When** they attempt to switch company, **Then** a confirmation dialog warns about unsaved changes before proceeding.
+4. **Given** the target company has `dbStatus = 'Offline'`, **When** the user attempts to switch, **Then** a 503 error is shown and the switch is blocked.
 
 ---
 
@@ -45,21 +86,22 @@ A user actively working in the application has their access token expire. The ap
 
 ---
 
-### User Story 3 — Multi-Tenant Data Isolation (Priority: P1)
+### User Story 3 — Multi-Tenant Data Isolation via Dual-DB (Priority: P1)
 
-A user from tenant "ACME" can only see and operate on "ACME"'s data. A superadmin provisioning a new tenant creates a new tenant record and activates it, after which users of that tenant can log in and access a fully isolated data scope.
+Each company has its own dedicated PostgreSQL database (Tenant DB) for accounting data. A Master DB (always cloud-hosted) stores central auth data: user credentials, tenant registry, company-user mappings, and refresh tokens. A user from tenant "ACME" can only see and operate on data from the ACME Tenant DB.
 
-**Why this priority**: Tenant isolation is a fundamental data integrity and compliance requirement. A breach would expose confidential financial data across customers — a critical security failure.
+**Why this priority**: Tenant isolation is a fundamental data integrity and compliance requirement. Dual-DB provides stronger isolation than shared-schema — each company's data is physically separated.
 
-**Independent Test**: Can be tested by creating two tenants (A and B), each with one user, logging in as user-A and creating a journal entry, then logging in as user-B and verifying the journal entry is not visible or accessible.
+**Independent Test**: Can be tested by creating two tenants (A and B) with separate databases, logging in as user-A and creating a journal entry, then logging in as user-B and verifying the journal entry is not visible — not even in the same database.
 
 **Acceptance Scenarios**:
 
-1. **Given** a JWT token containing TenantId = "acme-uuid", **When** any data-fetching API is called, **Then** only records where TenantId = "acme-uuid" are returned; records from other tenants are completely absent from all responses.
-2. **Given** a request arrives without a JWT but with header `X-Tenant-Code: acme`, **When** the request reaches the TenantMiddleware, **Then** tenant is resolved from the header and TenantId is attached to the request context.
-3. **Given** a request with both a JWT TenantId claim and an `X-Tenant-Code` header pointing to different tenants, **When** the request is processed, **Then** the JWT claim takes priority and the header value is ignored.
-4. **Given** a request with an unrecognized tenant code or deactivated TenantId, **When** any protected endpoint is called, **Then** the system returns HTTP 403 Forbidden.
-5. **Given** a new tenant is created by superadmin with IsActive = true, **When** a user assigned to that tenant attempts to log in, **Then** login succeeds and the session is correctly scoped to the new tenant.
+1. **Given** a JWT token containing `tid` = "acme-uuid", **When** any data-fetching API is called, **Then** the system connects to ACME's Tenant DB via `ITenantConnectionResolver` and returns only data from that database.
+2. **Given** a tenant with `database_mode = 'CloudManaged'`, **When** a request arrives, **Then** `TenantConnectionResolver` builds the connection string from `CloudDatabaseHost` (appsettings) + `cloud_database_name` (tenant record).
+3. **Given** a tenant with `database_mode = 'OnPremise'`, **When** a request arrives, **Then** `TenantConnectionResolver` decrypts `encrypted_connection_string` and connects via Cloudflare Tunnel.
+4. **Given** a tenant with `db_status = 'Offline'`, **When** an authenticated request for that tenant arrives, **Then** the system returns HTTP 503 with error code `TENANT_DB_OFFLINE`.
+5. **Given** a new tenant is provisioned by superadmin (Master DB record + Tenant DB created), **When** a user assigned to that tenant logs in, **Then** login succeeds and the session connects to the new Tenant DB.
+6. **Given** EF Core global query filters on User and Role entities, **When** queries execute within a Tenant DB, **Then** only records matching the current TenantId are returned (defense-in-depth within the per-tenant database).
 
 ---
 
@@ -73,11 +115,12 @@ A tenant administrator manages users within their tenant: creating new accounts,
 
 **Acceptance Scenarios**:
 
-1. **Given** a tenant admin on the user management screen, **When** they create a new user with email + initial password + assigned roles, **Then** the user record is created within the admin's TenantId scope and the new user can log in immediately.
-2. **Given** an admin attempts to create a user with an email already registered in the same tenant, **When** the form is submitted, **Then** a validation error is shown without creating a duplicate.
-3. **Given** an admin deactivates a user, **When** the deactivated user attempts to log in, **Then** access is denied and existing sessions for that user are invalidated within the current token TTL window.
-4. **Given** an admin assigns or removes a role from a user, **When** the change is saved, **Then** the change is reflected in the user's permissions on their next token refresh.
-5. **Given** a non-admin user, **When** they attempt to access the user management API, **Then** the response is HTTP 403 Forbidden.
+1. **Given** a tenant admin on the user management screen, **When** they create a new user with email + initial password + assigned roles, **Then** the User record is created in the current Tenant DB AND a corresponding MasterUser is created (or linked if the email already exists in Master DB) with MasterUserTenant mapping. The new user can log in immediately.
+2. **Given** an admin creates a user with an email that already exists as a MasterUser (from another company), **When** the form is submitted, **Then** the existing MasterUser is linked to this tenant via a new MasterUserTenant record — the user gets access to both companies with the same password.
+3. **Given** an admin attempts to create a user with an email already registered in the same tenant, **When** the form is submitted, **Then** a validation error is shown without creating a duplicate.
+4. **Given** an admin deactivates a user, **When** the deactivated user attempts to log in, **Then** access is denied for this company; existing refresh tokens for this tenant are revoked in Master DB.
+5. **Given** an admin assigns or removes a role from a user, **When** the change is saved, **Then** the change is reflected in the user's permissions on their next token refresh.
+6. **Given** a non-admin user, **When** they attempt to access the user management API, **Then** the response is HTTP 403 Forbidden.
 
 ---
 
@@ -101,7 +144,7 @@ A tenant administrator defines roles (e.g., "Accountant", "Reviewer", "Viewer") 
 
 ### User Story 6 — Current User Profile (Priority: P3)
 
-A logged-in user can view their own profile information and update their display name and account password.
+A logged-in user can view their own profile information, see all companies they have access to, update their display name, and change their account password.
 
 **Why this priority**: Important for user experience and self-service password management, but does not block any transactional workflows.
 
@@ -109,23 +152,29 @@ A logged-in user can view their own profile information and update their display
 
 **Acceptance Scenarios**:
 
-1. **Given** a valid access token, **When** `GET /api/me` is called, **Then** the response contains UserId, Email, FullName, TenantId, list of role names, and flat list of permission codes.
+1. **Given** a valid access token, **When** `GET /api/me` is called, **Then** the response contains UserId, Email, FullName, TenantId, TenantName, list of role names, flat list of permission codes, and a `companies` array listing all accessible companies.
 2. **Given** a user submits a password change with incorrect current password, **When** the request is processed, **Then** the change is rejected with a validation error.
-3. **Given** a user successfully changes their password, **When** they attempt to log in with the old password, **Then** login is rejected; the new password succeeds.
-4. **Given** a user updates their FullName, **When** `GET /api/me` is called afterward, **Then** the updated name is returned.
+3. **Given** a user successfully changes their password, **When** they attempt to log in with the old password, **Then** login is rejected; the new password succeeds. The password change applies to ALL companies (password stored in Master DB).
+4. **Given** a user successfully changes their password, **When** the change is processed, **Then** all refresh tokens across ALL tenants for this user are revoked in Master DB — forcing re-login on all sessions.
+5. **Given** a user updates their FullName, **When** `GET /api/me` is called afterward, **Then** the updated name is returned. Note: FullName is updated in the current Tenant DB only.
 
 ---
 
 ### Edge Cases
 
-- What happens when `X-Tenant-Code` header is present but the tenant is deactivated? → 403 Forbidden with clear message.
+- What happens when a user has access to only 1 company? → Frontend auto-calls `/api/auth/select-company` immediately after login — no company selection screen shown.
+- What happens when the tempToken expires before company selection? → 401 TEMP_TOKEN_EXPIRED → user redirected to login page to re-authenticate.
+- What happens when a company's Tenant DB goes offline (e.g., on-premise tunnel down)? → Company appears in login list with `dbStatus: 'Offline'` and disabled badge. Selection attempts return 503 TENANT_DB_OFFLINE.
+- What happens during company switching with unsaved changes? → Dirty form guard shows confirmation dialog. User can cancel the switch.
 - What happens if Redis is temporarily unavailable for token blacklist checks? → System fails safely — tokens that cannot be validated against the blacklist are rejected (fail-closed security model).
 - What happens when a user's role is changed while they have an active session? → The change propagates at the user's next token refresh (maximum 15-minute lag).
 - What happens when attempting to delete a role still assigned to active users? → Operation is rejected with the list of affected users; admin must remove assignments first.
 - What happens when a blank or whitespace-only password is submitted? → Server-side input validation rejects it before any processing or hashing.
-- What happens if the same email is used across two different tenants? → Allowed. Email uniqueness is enforced per-tenant, not globally.
+- What happens if the same email is used across two different tenants? → Allowed. Both tenants share the same MasterUser (same password). Each tenant has its own User record linked via MasterUser.Id = User.Id.
 - What happens when concurrent logout requests arrive for the same token? → Blacklist write is idempotent; both requests succeed without duplication errors.
 - What happens if an attacker replays a revoked refresh token? → Server detects the token hash has been revoked and returns 401; token family revocation triggers full session invalidation for that user.
+- What happens when creating a user whose email already exists as a MasterUser in another company? → The existing MasterUser is linked to the new tenant via MasterUserTenant. No new MasterUser is created. Password remains the same across all companies.
+- What happens when a user changes their password? → Password is updated in Master DB (MasterUser). All refresh tokens across ALL companies for this user are revoked. The user must re-login on other devices/companies.
 
 ---
 
@@ -135,9 +184,12 @@ A logged-in user can view their own profile information and update their display
 
 #### Authentication
 
-- **FR-001**: The system MUST authenticate users via email and password, returning a short-lived access token (JWT, RS256) and a long-lived refresh token upon successful login.
-- **FR-002**: Access tokens MUST embed the following claims: UserId, TenantId, Email, Roles (list of role names), Permissions (flat list of permission codes).
-- **FR-003**: Access tokens MUST expire after a configurable TTL (default: 15 minutes). Refresh tokens MUST expire after a configurable TTL (default: 7 days).
+- **FR-001**: The system MUST authenticate users via email and password against the **Master DB** (MasterUser entity), returning a short-lived tempToken (JWT, HMAC-SHA256, TTL 60s) and a list of accessible companies upon successful login (Step 1).
+- **FR-002**: After company selection (Step 2), the system MUST issue a short-lived access token (JWT, RS256) with claims: UserId, TenantId, Email, Roles, Permissions — loaded from the selected company's Tenant DB.
+- **FR-002b**: The system MUST provide a `/api/auth/select-company` endpoint that accepts a tempToken + tenantId and returns a JWT access token + sets a refresh_token cookie.
+- **FR-002c**: The system MUST provide a `/api/auth/switch-company` endpoint that accepts a Bearer JWT + tenantId and returns a new JWT access token for the new company.
+- **FR-002d**: When a user has access to only 1 company, the frontend MUST auto-call `/api/auth/select-company` without showing the company selection screen.
+- **FR-003**: Access tokens MUST expire after a configurable TTL (default: 15 minutes). Refresh tokens MUST expire after a configurable TTL (default: 7 days). TempTokens MUST expire after 60 seconds.
 - **FR-004**: Refresh tokens MUST be stored as a SHA-256 hash in the database — the plaintext value is never persisted.
 - **FR-005**: The system MUST implement token rotation on refresh: each successful refresh call issues a new refresh token and invalidates the previous one. Replay detection via token family (lineage) tracking revokes the entire family on reuse detection.
 - **FR-006**: On logout, the system MUST blacklist the access token by its JTI (JWT ID) in a distributed cache with TTL matching the token's remaining validity period.
@@ -151,21 +203,21 @@ A logged-in user can view their own profile information and update their display
 
 #### Multi-Tenant Resolution
 
-- **FR-011**: Every protected API request MUST be resolved to a specific Tenant context before any business logic executes.
-- **FR-012**: Tenant resolution MUST use the TenantId JWT claim as the primary source when a valid token is present.
-- **FR-013**: For requests without a JWT (public endpoints / tenant provisioning flows), the system MUST resolve the tenant from the `X-Tenant-Code` HTTP request header. In localhost/development, a fallback to a configured default tenant code is permitted.
-- **FR-014**: Requests that resolve to an unrecognized or deactivated TenantId MUST be rejected with HTTP 403 Forbidden.
-- **FR-015**: The EF Core global query filter on `ITenantEntity` MUST automatically scope ALL database queries to the resolved TenantId — no individual query may bypass this filter outside of explicitly designated superadmin contexts.
-- **FR-016**: Automated integration tests MUST verify that a user authenticated for Tenant A cannot read, write, or detect the existence of data belonging to Tenant B.
+- **FR-011**: Each company MUST have its own dedicated PostgreSQL database (Tenant DB) for accounting data. The Master DB MUST store central auth data (MasterUser, MasterUserTenant, Tenant registry, RefreshToken).
+- **FR-012**: Tenant resolution for authenticated requests MUST use the `tid` JWT claim to resolve the correct Tenant DB connection via `ITenantConnectionResolver`.
+- **FR-013**: For CloudManaged tenants, the connection string MUST be built from `CloudDatabaseHost` (appsettings) + `cloud_database_name` (tenant record). For OnPremise tenants, the encrypted connection string MUST be decrypted via `IConnectionStringEncryptor`.
+- **FR-014**: Requests that resolve to an unrecognized, deactivated, or offline TenantId MUST be rejected (403 for inactive, 503 for offline).
+- **FR-015**: The EF Core global query filter on `ITenantEntity` MUST automatically scope database queries to the resolved TenantId within the Tenant DB — applied to User and Role entities as defense-in-depth.
+- **FR-016**: Automated integration tests MUST verify that a user authenticated for Tenant A cannot read, write, or detect the existence of data belonging to Tenant B (separate databases).
 
 #### User Management
 
 - **FR-017**: Tenant administrators MUST be able to create, read, update, and deactivate (soft-delete) users within their own tenant only.
-- **FR-018**: Email addresses MUST be unique within a tenant. The same email may exist across different tenants.
-- **FR-019**: User creation MUST support specifying an initial password and one or more role assignments in a single operation.
+- **FR-018**: Email addresses MUST be unique within a tenant. The same email across different tenants MUST share the same MasterUser record in Master DB.
+- **FR-019**: User creation MUST: (a) create a User record in the current Tenant DB, (b) create or link a MasterUser record in Master DB (create if email is new; link if email already exists), (c) create a MasterUserTenant mapping, (d) support specifying an initial password and role assignments in a single operation.
 - **FR-020**: User records MUST NEVER be hard-deleted. Deactivation (IsActive = false) is the only removal mechanism, preserving full audit trail integrity.
-- **FR-021**: Any authenticated user MUST be able to retrieve their own profile via `GET /api/me`.
-- **FR-022**: Any authenticated user MUST be able to update their own FullName and change their own password (requiring current password verification).
+- **FR-021**: Any authenticated user MUST be able to retrieve their own profile via `GET /api/me`, including a `companies` array listing all accessible companies.
+- **FR-022**: Any authenticated user MUST be able to update their own FullName (Tenant DB) and change their own password (Master DB, requiring current password verification). Password change applies to ALL companies.
 - **FR-023**: User management APIs (list, create, edit, deactivate) MUST require the `SYS.Users.Manage` permission.
 
 #### Role & Permission Management
@@ -190,11 +242,15 @@ A logged-in user can view their own profile information and update their display
 #### Angular Frontend
 
 - **FR-037**: The login page at `/login` MUST include email and password fields, a submit button, and display server-side validation errors inline beneath the relevant fields.
-- **FR-038**: The Angular auth state MUST be managed in an NgRx Signals store exposing: `token` (string | null), `user` (profile object | null), `isAuthenticated` (computed boolean), `permissions` (string[] — list of permission codes).
-- **FR-039**: An `AuthGuard` (CanActivate) MUST protect all routes except `/login`. Unauthenticated requests trigger a redirect to `/login` with the original URL preserved for post-login redirect.
+- **FR-037b**: A company selection page at `/select-company` MUST display the list of companies from the login response, with each company showing name, code, databaseMode, dbStatus badge, displayRole, and isDefault highlight.
+- **FR-037c**: If only 1 company is returned from login, the frontend MUST auto-select it and redirect to dashboard (skip `/select-company` page).
+- **FR-038**: The Angular auth state MUST be managed in an NgRx Signals store exposing: `token` (string | null), `user` (profile object | null), `isAuthenticated` (computed boolean), `permissions` (string[] — list of permission codes), `tempToken` (string | null), `companies` (CompanyInfo[] | null), `selectedCompany` (CompanyInfo | null).
+- **FR-039**: An `AuthGuard` (CanActivate) MUST protect all routes except `/login` and `/select-company`. Unauthenticated requests trigger a redirect to `/login` with the original URL preserved for post-login redirect.
+- **FR-039b**: A `TempTokenGuard` MUST protect `/select-company` — only accessible when a valid tempToken exists in the auth store.
 - **FR-040**: A `TenantGuard` MUST verify the resolved tenant context before activating any accounting module route.
 - **FR-041**: An HTTP interceptor MUST: (a) inject the Authorization Bearer token into all outbound API calls, and (b) handle 401 responses by calling the refresh endpoint once, updating the auth store with the new token, and retrying the original request.
 - **FR-042**: The interceptor MUST guard against token refresh storms — if multiple requests simultaneously receive 401, only one refresh call is made and all queued requests are retried after the single refresh completes.
+- **FR-042b**: The shell/header component MUST include a company switcher dropdown showing all accessible companies. Clicking a different company calls `/api/auth/switch-company` and reloads the dashboard.
 - **FR-043**: The user management screen at `/sys/users` MUST display a paginated, searchable list of users with columns: Full Name, Email, Active Roles, Account Status, Last Login At; with actions to create, edit, and toggle activation.
 - **FR-044**: The role management screen at `/sys/roles` MUST allow creating, editing, and deleting roles, with an inline or modal interface for assigning/removing permissions to the role.
 - **FR-045**: The permission matrix screen at `/sys/permissions` MUST display a grid with module sections as row groups and individual permissions as rows; role columns show checkbox toggles; changes are saved via a single "Save" action.
@@ -204,13 +260,18 @@ A logged-in user can view their own profile information and update their display
 
 ### Key Entities
 
-- **Tenant**: Id (UUID), Code (unique), Name, DatabaseSchemaName, IsActive, CreatedAt
-- **User**: Id (UUID), TenantId (FK), Email (unique per tenant), PasswordHash (BCrypt), FullName, IsActive, LastLoginAt, FailedLoginCount, LockedUntil, IsDeleted (soft-delete per Constitution). Inherits AuditableEntity.
+**Master DB entities:**
+- **MasterUser**: Id (UUID), Email (unique globally), PasswordHash (BCrypt), FullName, IsActive, LastLoginAt, FailedLoginCount, LockedUntil, CreatedAt. Central auth identity — one per email, shared across all companies.
+- **MasterUserTenant**: UserId (FK → MasterUser), TenantId (FK → Tenant), DisplayRoleName, IsDefault, GrantedAt, GrantedBy. Maps users to companies they can access.
+- **Tenant**: Id (UUID), Code (unique), Name, DatabaseMode (`CloudManaged`/`OnPremise`), EncryptedConnectionString, TunnelHostname, CloudDatabaseName, DbStatus (`Online`/`Offline`/`Provisioning`/`Migrating`), IsActive, CreatedAt. Registry of all companies.
+- **RefreshToken**: Id (UUID), UserId (FK → MasterUser), TenantId (FK → Tenant), TokenHash (SHA-256), TokenFamily (UUID — for replay detection), ExpiresAt, IssuedAt, IsRevoked. Stored in Master DB to support cross-company token management.
+
+**Tenant DB entities (per-company):**
+- **User**: Id (UUID, = MasterUser.Id), TenantId, Email, FullName, IsActive, IsDeleted. Inherits AuditableEntity. **No PasswordHash** — password stored in MasterUser.
 - **Role**: Id (UUID), TenantId (FK), Name (unique per tenant), Description, IsDeleted (soft-delete per Constitution). Inherits AuditableEntity.
-- **Permission**: Id (UUID), Code (globally unique, pattern: MODULE.Resource.Action), Name, ModuleCode. Not tenant-scoped.
+- **Permission**: Id (UUID), Code (globally unique, pattern: MODULE.Resource.Action), Name, ModuleCode. Not tenant-scoped — seeded identically in all Tenant DBs.
 - **UserRole**: UserId (FK), RoleId (FK). Enforces User.TenantId == Role.TenantId.
 - **RolePermission**: RoleId (FK), PermissionId (FK).
-- **RefreshToken**: Id (UUID), UserId (FK), TokenHash (SHA-256), TokenFamily (UUID — for replay detection), ExpiresAt, IssuedAt, IsRevoked.
 
 ---
 
@@ -250,6 +311,19 @@ A logged-in user can view their own profile information and update their display
   "SYS.AUTH.ERROR.SESSION_EXPIRED": "Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.",
   "SYS.AUTH.ERROR.TENANT_NOT_FOUND": "Không tìm thấy công ty. Vui lòng kiểm tra lại địa chỉ truy cập.",
   "SYS.AUTH.ERROR.TENANT_DEACTIVATED": "Công ty đã ngừng hoạt động. Vui lòng liên hệ nhà cung cấp dịch vụ.",
+  "SYS.AUTH.ERROR.NO_COMPANIES": "Tài khoản chưa được gán công ty nào. Vui lòng liên hệ quản trị viên.",
+  "SYS.AUTH.ERROR.TEMP_TOKEN_EXPIRED": "Phiên chọn công ty đã hết hạn. Vui lòng đăng nhập lại.",
+  "SYS.AUTH.ERROR.COMPANY_NOT_ACCESSIBLE": "Bạn không có quyền truy cập công ty này.",
+  "SYS.AUTH.ERROR.TENANT_DB_OFFLINE": "Cơ sở dữ liệu công ty đang ngoại tuyến. Vui lòng thử lại sau.",
+  "SYS.AUTH.COMPANY_SELECT.TITLE": "Chọn công ty",
+  "SYS.AUTH.COMPANY_SELECT.SUBTITLE": "Chọn công ty bạn muốn làm việc",
+  "SYS.AUTH.COMPANY_SELECT.DEFAULT_BADGE": "Mặc định",
+  "SYS.AUTH.COMPANY_SELECT.OFFLINE_BADGE": "Ngoại tuyến",
+  "SYS.AUTH.COMPANY_SELECT.CLOUD_BADGE": "Cloud",
+  "SYS.AUTH.COMPANY_SELECT.ONPREMISE_BADGE": "On-Premise",
+  "SYS.AUTH.COMPANY_SWITCH.TITLE": "Chuyển công ty",
+  "SYS.AUTH.COMPANY_SWITCH.CONFIRM": "Bạn có muốn chuyển sang công ty {name} không?",
+  "SYS.AUTH.COMPANY_SWITCH.UNSAVED_WARNING": "Bạn có thay đổi chưa lưu. Chuyển công ty sẽ mất các thay đổi này.",
   "SYS.AUTH.PASSWORD.COMPLEXITY_HINT": "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.",
   "SYS.AUTH.FEATURE_COMING_SOON": "Tính năng này sẽ sớm ra mắt",
   "SYS.USERS.PAGE_TITLE": "Quản lý người dùng",
@@ -304,17 +378,20 @@ A logged-in user can view their own profile information and update their display
 
 ## Assumptions
 
-- Shared-database, shared-schema multi-tenant architecture. TenantId isolation via EF Core global query filters (ITenantEntity already scaffolded).
-- JWT signing algorithm: RS256 (asymmetric). JWKS endpoint exposed at `/.well-known/jwks.json` for future service-to-service validation.
+- **Dual-DB architecture (Phương án B Kết hợp)**: Master DB (always cloud-hosted) stores central auth data. Each company gets a dedicated Tenant DB (cloud or on-premise via Cloudflare Tunnel). EF Core global query filters applied within Tenant DB on User and Role entities as defense-in-depth.
+- **2-step login flow**: Step 1 (email/password → tempToken + companies), Step 2 (select-company → JWT). Company switching available via `/api/auth/switch-company`.
+- JWT signing algorithm: RS256 (asymmetric) for access tokens. HMAC-SHA256 for tempTokens. JWKS endpoint exposed at `/.well-known/jwks.json` for future service-to-service validation.
+- **Cross-DB identity**: MasterUser.Id = User.Id (same GUID, no cross-DB FK). CreateUser creates/links both. Password stored in MasterUser only.
 - A platform-level "superadmin" role exists outside any tenant scope. Superadmin provisioning UI is out of scope; a seeded superadmin account via database migration is sufficient.
 - Password reset via email (forgot password flow) is out of scope for MVP. Initial account passwords are set by tenant admins. The Forgot Password button renders disabled in MVP UI with "feature coming soon" tooltip.
 - OAuth2 / SSO (SAML, Google Workspace, Microsoft Entra ID) is out of scope.
 - Two-factor authentication (2FA / MFA) is out of scope.
 - The 15 module permission codes are seeded at migration time. New permissions are added only via migrations.
-- Access token TTL: 15 minutes default. Refresh token TTL: 7 days default. Configurable via appsettings.
+- Access token TTL: 15 minutes default. Refresh token TTL: 7 days default. TempToken TTL: 60 seconds. Configurable via appsettings.
 - Angular stores access token in memory only (NgRx Signals store) — not localStorage/sessionStorage. Refresh token in HttpOnly, Secure, SameSite=Strict cookie.
 - CORS config and rate limiting thresholds are environment-level settings, not per-tenant configurable in v1.
 - AuditableEntity base class applied to all domain entities in this feature.
 - All timestamps stored as UTC. Frontend converts to browser local timezone for display.
 - SSL/TLS terminated at reverse proxy. Application assumes HTTPS in staging and production.
-- In localhost/development, X-Tenant-Code header defaults to a configured default tenant to simplify local development.
+- **Connection string security**: Tenant DB connection strings encrypted with ASP.NET DataProtection API (Phase 1) → KMS (Phase 2). Never stored in plaintext.
+- **On-premise tenants**: Connected via Cloudflare Tunnel (outbound-only, port 443). Health monitored via `db_status` field.

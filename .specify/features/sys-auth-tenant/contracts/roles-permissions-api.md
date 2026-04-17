@@ -1,5 +1,7 @@
 ﻿# API Contracts: Roles & Permissions (`/api/roles`, `/api/permissions`)
 
+> **Scope note**: All endpoints operate on the **Tenant DB** (per-company). Roles and permissions are tenant-scoped — changes do NOT affect other companies. Master DB has no role/permission tables.
+
 **Authentication**: Bearer JWT required for all endpoints  
 **Required Permission**:
 - `SYS.Roles.View` — GET list/single role endpoints

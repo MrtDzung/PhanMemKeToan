@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { CurrentUser, LoginResponse } from '../models/auth.models';
+import { CurrentUser, LoginResponse, SelectCompanyResponse } from '../models/auth.models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -15,9 +15,21 @@ export class AuthService {
     );
   }
 
-  async refreshToken(): Promise<LoginResponse> {
+  async selectCompany(tempToken: string, tenantId: string, rememberMe: boolean): Promise<SelectCompanyResponse> {
     return firstValueFrom(
-      this.http.post<LoginResponse>(`${this.baseUrl}/api/auth/refresh`, {}, { withCredentials: true })
+      this.http.post<SelectCompanyResponse>(`${this.baseUrl}/api/auth/select-company`, { tempToken, tenantId, rememberMe }, { withCredentials: true })
+    );
+  }
+
+  async switchCompany(targetTenantId: string): Promise<SelectCompanyResponse> {
+    return firstValueFrom(
+      this.http.post<SelectCompanyResponse>(`${this.baseUrl}/api/auth/switch-company`, { targetTenantId }, { withCredentials: true })
+    );
+  }
+
+  async refreshToken(): Promise<SelectCompanyResponse> {
+    return firstValueFrom(
+      this.http.post<SelectCompanyResponse>(`${this.baseUrl}/api/auth/refresh`, {}, { withCredentials: true })
     );
   }
 

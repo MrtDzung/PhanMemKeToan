@@ -3,12 +3,14 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { AvatarModule } from 'primeng/avatar';
+import { SelectModule } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
 import { AuthStore } from '../../core/stores/auth.store';
 
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, ButtonModule, AvatarModule],
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, ButtonModule, AvatarModule, SelectModule, FormsModule],
   template: `
     <div class="shell-layout">
       <nav class="sidebar">
@@ -20,6 +22,13 @@ import { AuthStore } from '../../core/stores/auth.store';
             <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
               <i class="pi pi-home"></i>
               <span>Trang chủ</span>
+            </a>
+          </li>
+          <li class="nav-group-label">Danh mục</li>
+          <li>
+            <a routerLink="/di/accounts" routerLinkActive="active" class="nav-item">
+              <i class="pi pi-list"></i>
+              <span>Tài khoản kế toán</span>
             </a>
           </li>
           <li class="nav-group-label">Hệ thống</li>
@@ -35,11 +44,33 @@ import { AuthStore } from '../../core/stores/auth.store';
               <span>Vai trò</span>
             </a>
           </li>
+          <li>
+            <a routerLink="/system/tenants" routerLinkActive="active" class="nav-item">
+              <i class="pi pi-building"></i>
+              <span>Công ty</span>
+            </a>
+          </li>
         </ul>
       </nav>
 
       <div class="main-area">
         <header class="top-bar">
+          <div class="top-bar-left">
+            @if (authStore.companies().length > 1) {
+              <p-select
+                [options]="authStore.companies()"
+                [ngModel]="authStore.selectedCompany()?.tenantId"
+                (ngModelChange)="onCompanyChange($event)"
+                optionLabel="name"
+                optionValue="tenantId"
+                placeholder="Chọn công ty"
+                styleClass="company-select"
+                [style]="{ minWidth: '200px' }"
+              />
+            } @else if (authStore.selectedCompany()) {
+              <span class="company-name-label">{{ authStore.selectedCompany()?.name }}</span>
+            }
+          </div>
           <div class="top-bar-right">
             <span class="user-name">{{ authStore.currentUser()?.fullName }}</span>
             <p-button
@@ -68,13 +99,22 @@ import { AuthStore } from '../../core/stores/auth.store';
     .nav-item:hover { background: var(--sidebar-hover, rgba(255,255,255,0.1)); color: white; }
     .nav-item.active { background: var(--primary); color: white; }
     .main-area { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-    .top-bar { height: 48px; background: var(--surface-card); border-bottom: 1px solid var(--surface-border); display: flex; align-items: center; justify-content: flex-end; padding: 0 16px; gap: 12px; }
+    .top-bar { height: 48px; background: var(--surface-card); border-bottom: 1px solid var(--surface-border); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; gap: 12px; }
+    .top-bar-left { display: flex; align-items: center; }
+    .top-bar-right { display: flex; align-items: center; gap: 12px; }
     .user-name { font-size: 13px; color: var(--text-secondary); }
+    .company-name-label { font-size: 13px; font-weight: 500; color: var(--text-primary); }
     .content-area { flex: 1; overflow: auto; }
   `]
 })
 export class ShellComponent {
   readonly authStore = inject(AuthStore);
+
+  async onCompanyChange(tenantId: string): Promise<void> {
+    if (tenantId && tenantId !== this.authStore.selectedCompany()?.tenantId) {
+      await this.authStore.switchCompany(tenantId);
+    }
+  }
 
   async logout(): Promise<void> {
     await this.authStore.logout();

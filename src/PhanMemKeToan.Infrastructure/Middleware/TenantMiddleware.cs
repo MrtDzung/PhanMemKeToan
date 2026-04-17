@@ -20,6 +20,7 @@ public class TenantMiddleware(RequestDelegate next)
         TenantDto? tenant = null;
 
         // Priority 1: JWT tid claim
+        // NOTE: requires options.MapInboundClaims = false in AddJwtBearer, otherwise "tid" gets renamed by MS claim mapper
         var tidClaim = context.User.FindFirst("tid")?.Value;
         if (!string.IsNullOrEmpty(tidClaim) && Guid.TryParse(tidClaim, out var tenantIdFromJwt))
         {
@@ -36,7 +37,9 @@ public class TenantMiddleware(RequestDelegate next)
         if (tenant is null)
         {
             // Allow unauthenticated requests to reach auth endpoints (login doesn't require tenant yet)
-            if (context.Request.Path.StartsWithSegments("/api/auth/login"))
+            if (context.Request.Path.StartsWithSegments("/api/auth/login") ||
+                context.Request.Path.StartsWithSegments("/api/auth/select-company") ||
+                context.Request.Path.StartsWithSegments("/api/auth/switch-company"))
             {
                 await next(context);
                 return;

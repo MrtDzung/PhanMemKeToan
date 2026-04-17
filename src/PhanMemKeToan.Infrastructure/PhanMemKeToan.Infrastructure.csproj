@@ -1,6 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\coa_tt99.json" />
+    <EmbeddedResource Include="Resources\coa_tt133.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="..\PhanMemKeToan.Application\PhanMemKeToan.Application.csproj" />
   </ItemGroup>

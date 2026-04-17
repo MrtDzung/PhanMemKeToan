@@ -5,52 +5,43 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using PhanMemKeToan.Application.Common.Interfaces;
-using PhanMemKeToan.Application.Features.Auth.Commands.Login;
 using PhanMemKeToan.Domain.Common.Exceptions;
-using PhanMemKeToan.Domain.Entities;
 using RefreshTokenEntity = PhanMemKeToan.Domain.Entities.RefreshToken;
 
 namespace PhanMemKeToan.Application.Features.Auth.Commands.RefreshToken;
 
 public class RefreshTokenCommandHandler(
-    IApplicationDbContext dbContext,
+    IMasterDbContext masterDbContext,
+    IApplicationDbContext tenantDbContext,
     IJwtService jwtService,
     IConfiguration configuration,
     ILogger<RefreshTokenCommandHandler> logger
-) : IRequestHandler<RefreshTokenCommand, LoginResult>
+) : IRequestHandler<RefreshTokenCommand, RefreshTokenResult>
 {
-    public async Task<LoginResult> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
+    public async Task<RefreshTokenResult> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
         var tokenHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(request.RefreshTokenPlaintext))).ToLowerInvariant();
 
-        // 1. Find token by hash (ignore tenant filter)
-        var existingToken = await dbContext.RefreshTokens
-            .IgnoreQueryFilters()
-            .Include(rt => rt.User)
-                .ThenInclude(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
-                        .ThenInclude(r => r.RolePermissions)
-                            .ThenInclude(rp => rp.Permission)
+        // 1. Find token in Master DB
+        var existingToken = await masterDbContext.RefreshTokens
             .FirstOrDefaultAsync(rt => rt.TokenHash == tokenHash, cancellationToken);
 
         if (existingToken is null)
             throw new TokenExpiredException();
 
-        // 2. Replay detection: token already revoked = family attack
+        // 2. Replay detection
         if (existingToken.IsRevoked)
         {
             logger.LogWarning(
-                "AUTH_EVENT {EventType} userId={UserId} tenantId={TenantId} tokenFamily={Family} isReplay=true success=false",
-                "REFRESH", existingToken.UserId, existingToken.User.TenantId, existingToken.TokenFamily);
+                "AUTH_EVENT {EventType} userId={UserId} tenantId={TenantId} tokenFamily={Family} isReplay=true",
+                "REFRESH", existingToken.UserId, existingToken.TenantId, existingToken.TokenFamily);
 
-            // Revoke entire token family
-            var familyTokens = await dbContext.RefreshTokens
-                .IgnoreQueryFilters()
+            var familyTokens = await masterDbContext.RefreshTokens
                 .Where(rt => rt.TokenFamily == existingToken.TokenFamily && !rt.IsRevoked)
                 .ToListAsync(cancellationToken);
             foreach (var t in familyTokens)
                 t.IsRevoked = true;
-            await dbContext.SaveChangesAsync(cancellationToken);
+            await masterDbContext.SaveChangesAsync(cancellationToken);
             throw new TokenRevokedException();
         }
 
@@ -61,7 +52,16 @@ public class RefreshTokenCommandHandler(
         // 4. Revoke old token
         existingToken.IsRevoked = true;
 
-        var user = existingToken.User;
+        // 5. Load user from Tenant DB for roles/permissions
+        var user = await tenantDbContext.Users
+            .IgnoreQueryFilters()
+            .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                    .ThenInclude(r => r.RolePermissions)
+                        .ThenInclude(rp => rp.Permission)
+            .FirstOrDefaultAsync(u => u.Id == existingToken.UserId && u.TenantId == existingToken.TenantId, cancellationToken)
+            ?? throw new TokenExpiredException();
+
         var roles = user.UserRoles
             .Where(ur => !ur.Role.IsDeleted)
             .Select(ur => ur.Role.Name)
@@ -75,34 +75,34 @@ public class RefreshTokenCommandHandler(
             .ToList();
 
         var jti = Guid.NewGuid().ToString();
-        var claimsDto = new UserClaimsDto(user.Id, user.TenantId, user.Email, roles, permissions, jti);
+        var claimsDto = new UserClaimsDto(user.Id, existingToken.TenantId, user.Email, roles, permissions, jti);
 
-        // 5. Generate new pair
+        // 6. Generate new pair
         var accessToken = jwtService.GenerateAccessToken(claimsDto);
         var (refreshPlaintext, refreshHash) = jwtService.GenerateRefreshToken();
 
         var refreshTtlDays = int.TryParse(configuration["JwtSettings:RefreshTokenTtlDays"], out var d) ? d : 7;
         var refreshExpiry = DateTimeOffset.UtcNow.AddDays(refreshTtlDays);
 
-        dbContext.RefreshTokens.Add(new RefreshTokenEntity
+        masterDbContext.RefreshTokens.Add(new RefreshTokenEntity
         {
             Id = Guid.NewGuid(),
             UserId = user.Id,
+            TenantId = existingToken.TenantId,
             TokenHash = refreshHash,
-            TokenFamily = existingToken.TokenFamily, // Keep same family
+            TokenFamily = existingToken.TokenFamily,
             ExpiresAt = refreshExpiry,
             IssuedAt = DateTimeOffset.UtcNow,
             IsRevoked = false
         });
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        await masterDbContext.SaveChangesAsync(cancellationToken);
 
-        // 6. FR-033 auth log
         logger.LogInformation(
             "AUTH_EVENT {EventType} userId={UserId} tenantId={TenantId} isReplay=false success=true",
-            "REFRESH", user.Id, user.TenantId);
+            "REFRESH", user.Id, existingToken.TenantId);
 
         var accessTtlMinutes = int.TryParse(configuration["JwtSettings:AccessTokenTtlMinutes"], out var m) ? m : 15;
-        return new LoginResult(accessToken, refreshPlaintext, false, DateTimeOffset.UtcNow.AddMinutes(accessTtlMinutes));
+        return new RefreshTokenResult(accessToken, refreshPlaintext, DateTimeOffset.UtcNow.AddMinutes(accessTtlMinutes));
     }
 }

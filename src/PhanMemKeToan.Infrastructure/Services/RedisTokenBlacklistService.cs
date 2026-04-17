@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 using PhanMemKeToan.Application.Common.Interfaces;
 
 namespace PhanMemKeToan.Infrastructure.Services;
 
-public class RedisTokenBlacklistService(IDistributedCache cache) : ITokenBlacklistService
+public class RedisTokenBlacklistService(IDistributedCache cache, ILogger<RedisTokenBlacklistService> logger) : ITokenBlacklistService
 {
     private const string KeyPrefix = "blacklist:jti:";
 
@@ -20,10 +21,12 @@ public class RedisTokenBlacklistService(IDistributedCache cache) : ITokenBlackli
             var value = await cache.GetStringAsync($"{KeyPrefix}{jti}", cancellationToken);
             return value is not null;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Fail-closed: if Redis is unavailable, treat token as blacklisted
-            return true;
+            // Fail-open: if Redis is unavailable, allow the token (log warning for ops visibility)
+            // Fail-closed would block ALL authenticated requests when Redis is down, which is worse
+            logger.LogWarning(ex, "Redis unavailable during token blacklist check for jti={Jti}. Treating as NOT blacklisted (fail-open).", jti);
+            return false;
         }
     }
 }

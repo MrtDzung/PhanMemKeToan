@@ -13,6 +13,7 @@ public class ApplicationDbContext(
 {
     private readonly ITenantContext _tenantContext = tenantContext;
 
+    public DbSet<Account> Accounts { get; set; }
     public DbSet<Tenant> Tenants { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Role> Roles { get; set; }
@@ -24,12 +25,22 @@ public class ApplicationDbContext(
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Ignore<DomainEvent>();
-        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+        // Ignore master-scoped entities discovered through navigation chains
+        // (Tenant.MasterUserTenants → MasterUserTenant → MasterUser)
+        modelBuilder.Ignore<MasterUser>();
+        modelBuilder.Ignore<MasterUserTenant>();
+
+        modelBuilder.ApplyConfigurationsFromAssembly(
+            Assembly.GetExecutingAssembly(),
+            type => !(type.Namespace?.Contains(".Master") ?? false));
 
         modelBuilder.Entity<User>().HasQueryFilter(
             u => u.TenantId == (_tenantContext.TenantId ?? Guid.Empty) && !u.IsDeleted);
         modelBuilder.Entity<Role>().HasQueryFilter(
             r => r.TenantId == (_tenantContext.TenantId ?? Guid.Empty) && !r.IsDeleted);
+        modelBuilder.Entity<Account>().HasQueryFilter(
+            a => a.TenantId == (_tenantContext.TenantId ?? Guid.Empty) && !a.IsDeleted);
 
         base.OnModelCreating(modelBuilder);
     }

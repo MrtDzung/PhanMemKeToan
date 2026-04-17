@@ -1,9 +1,9 @@
 # Architecture & Technology Report
 > PhanMemKeToan — Vietnamese Enterprise Accounting Webapp (Lightweight ERP)
 
-**Version**: 1.2.0  
-**Date**: 2026-04-15  
-**Status**: APPROVED (v1.2.0 — all HIGH + MEDIUM review corrections applied)  
+**Version**: 1.3.0  
+**Date**: 2026-04-16  
+**Status**: APPROVED (v1.3.0 — Dual-DB architecture update)  
 **Referenced by**: constitution.md v2.0.0
 
 ---
@@ -74,13 +74,15 @@ Build a Vietnamese enterprise accounting webapp that serves as a **lightweight E
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
 │                        CLIENT LAYER (Browser)                        │
-│    Angular 18+ │ PrimeNG │ AG Grid Community │ CDK Drag-Drop        │
+│    Angular 20+ │ PrimeNG │ AG Grid Community │ CDK Drag-Drop        │
 │    Dynamic Forms (JSON) │ SignalR (Real-time) │ Responsive Web       │
+│    2-Step Login (tempToken → company select → JWT)                   │
 └─────────────────────────────┬────────────────────────────────────────┘
                               │ HTTPS / REST API
 ┌─────────────────────────────▼────────────────────────────────────────┐
-│                        API LAYER (ASP.NET Core 8)                    │
-│    Controllers │ Auth (JWT) │ Rate Limiting │ API Versioning         │
+│                        API LAYER (ASP.NET Core 10)                   │
+│    Controllers │ Auth (JWT RS256) │ Rate Limiting │ API Versioning   │
+│    TenantMiddleware (resolve tid → Tenant DB connection)             │
 │    /api/v1/ (internal) │ /api/v1/integration/ (reserved for e-com)  │
 └─────────────────────────────┬────────────────────────────────────────┘
                               │
@@ -94,23 +96,34 @@ Build a Vietnamese enterprise accounting webapp that serves as a **lightweight E
 │  DOMAIN  │          │INFRASTRUCTURE│           │  BACKGROUND  │
 │  LAYER   │          │    LAYER     │           │    JOBS      │
 │          │          │              │           │              │
-│ Entities │          │ EF Core 8    │           │ Quartz.NET   │
-│ Value    │          │ (CRUD)       │           │              │
-│ Objects  │          │ Dapper       │           │ - Outbox     │
-│ Domain   │          │ (Reports)    │           │   Publisher  │
-│ Events   │          │ Redis        │           │ - SLA        │
-│ Services │          │ MinIO        │           │   Escalation │
-│          │          │ Serilog      │           │ - Hold       │
-│          │          │              │           │   Cleanup    │
-└──────────┘          └──────┬───────┘           │ - Report     │
-                             │                   │   Cache      │
-              ┌──────────────▼───────────────┐   └──────────────┘
-              │      DATA LAYER              │
-              │                              │
-              │  PostgreSQL 16 (Primary)     │
-              │  Redis (Cache/Session)       │
-              │  MinIO (Files/Attachments)   │
-              └──────────────────────────────┘
+│ Entities │          │ Dual DbCtx   │           │ Quartz.NET   │
+│ Value    │          │ ┌──────────┐ │           │              │
+│ Objects  │          │ │MasterDb  │ │           │ - Outbox     │
+│ Domain   │          │ │Context   │ │           │   Publisher  │
+│ Events   │          │ └────┬─────┘ │           │ - SLA        │
+│ Services │          │ ┌────▼─────┐ │           │   Escalation │
+│          │          │ │AppDb     │ │           │ - Hold       │
+│          │          │ │Context   │ │           │   Cleanup    │
+│          │          │ └──────────┘ │           │ - Token      │
+│          │          │ Dapper,Redis │           │   Cleanup    │
+│          │          │ MinIO,Serilog│           │ - Report     │
+└──────────┘          └──────┬───────┘           │   Cache      │
+                             │                   └──────────────┘
+              ┌──────────────▼───────────────────────────────────┐
+              │      DATA LAYER (Dual-DB Architecture)           │
+              │                                                  │
+              │  ┌─────────────────┐  ┌───────────────────────┐  │
+              │  │ Master DB       │  │ Tenant DB (per-company)│  │
+              │  │ (always cloud)  │  │ (cloud or on-premise) │  │
+              │  │                 │  │                       │  │
+              │  │ MasterUser      │  │ User, Role, Permission│  │
+              │  │ MasterUserTenant│  │ Voucher, GL, etc.     │  │
+              │  │ Tenant registry │  │                       │  │
+              │  │ RefreshToken    │  │ EF Core query filters │  │
+              │  └─────────────────┘  └───────────────────────┘  │
+              │                                                  │
+              │  Redis (Cache/Blacklist) │ MinIO (Attachments)   │
+              └─────────────────────────────────────────────────-┘
 ```
 
 ### 2.2 Module Structure (15 Modules)
@@ -366,11 +379,17 @@ src/
 │
 ├── PhanMemKeToan.Infrastructure/      # Data Access, External Services
 │   ├── Persistence/
-│   │   ├── AppDbContext.cs
+│   │   ├── MasterDbContext.cs         # Central auth DB (fixed connection)
+│   │   ├── ApplicationDbContext.cs    # Per-tenant DB (per-request connection)
+│   │   ├── TenantDbContextFactory.cs  # Resolves tenant connection per request
 │   │   ├── Configurations/           # EF Core Fluent API configs
 │   │   ├── Repositories/
-│   │   └── Migrations/
+│   │   ├── Migrations/
+│   │   │   ├── Master/                # Master DB migrations
+│   │   │   └── Tenant/                # Tenant DB migrations
 │   ├── Services/
+│   │   ├── TenantConnectionResolver.cs # Resolve tenant DB connection string
+│   │   ├── DataProtectionEncryptor.cs  # Encrypt/decrypt connection strings
 │   │   ├── PostingEngine.cs
 │   │   ├── InventoryService.cs
 │   │   └── ...
@@ -407,25 +426,59 @@ src/
 
 ### 5.1 Multi-Tenant Strategy
 
-**Pattern**: Shared Database + TenantId Column
+**Pattern**: Dual-DB — Dedicated Per-Tenant (Phương án B Kết hợp)
 
-```sql
--- Every table has TenantId
-CREATE TABLE voucher (
-    id              bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    tenant_id       uuid NOT NULL,
-    ref_type        smallint NOT NULL,
-    ...
-    CONSTRAINT fk_voucher_tenant FOREIGN KEY (tenant_id) REFERENCES tenant(id)
-);
+> Updated v1.3.0: Migrated from "Shared DB + TenantId Column" to "Dual-DB Dedicated Per-Tenant" to support on-premise deployment via Cloudflare Tunnel.
 
--- EF Core Global Query Filter (auto-applied)
--- modelBuilder.Entity<Voucher>().HasQueryFilter(v => v.TenantId == _currentTenant.Id);
+**Architecture**:
+- **Master DB** (always cloud-hosted, single instance): stores central authentication data — `MasterUser`, `MasterUserTenant`, `Tenant` registry, `RefreshToken`. Managed by `MasterDbContext` with a fixed connection string.
+- **Tenant DB** (one per company, cloud OR on-premise): stores all accounting data — `User`, `Role`, `Permission`, `UserRole`, `RolePermission`, `Voucher`, `GeneralLedger`, master data, etc. Managed by `ApplicationDbContext` with per-request connection resolved by `ITenantConnectionResolver`.
+
+**Connection Resolution**:
+```
+JWT tid claim → TenantMiddleware → ITenantConnectionResolver
+  ├── CloudManaged: build from CloudDatabaseHost + cloud_database_name
+  └── OnPremise:    decrypt encrypted_connection_string → connect via Cloudflare Tunnel
 ```
 
-**Isolation**: EF Core Global Query Filters auto-apply `WHERE tenant_id = @tenantId` on every query. All write operations set `TenantId` from the authenticated context.
+**Cloudflare Tunnel (On-Premise)**:
+- Customer runs `cloudflared` agent on their server → outbound-only connection to Cloudflare edge (port 443)
+- API connects to `{tenant}.tunnel.pmketoan.vn` → Cloudflare routes to customer's PostgreSQL
+- Zero inbound firewall rules needed on customer side
+- `db_status` tracks tunnel health: `Online`, `Offline`, `Provisioning`, `Migrating`
 
-**Migration path**: If a large enterprise client requires physical isolation → migrate to schema-per-tenant (PostgreSQL natively supports this).
+**Connection String Security**:
+- On-premise connection strings encrypted at rest via ASP.NET DataProtection API (`IConnectionStringEncryptor`)
+- Phase 2: migrate to Azure Key Vault / AWS KMS
+- Connection strings cached in-memory (5-minute TTL) per tenant
+
+**EF Core Dual DbContext**:
+```csharp
+// Master DB — fixed connection, NO tenant filters
+public class MasterDbContext : DbContext, IMasterDbContext
+{
+    public DbSet<Tenant> Tenants { get; set; }
+    public DbSet<MasterUser> MasterUsers { get; set; }
+    public DbSet<MasterUserTenant> MasterUserTenants { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+}
+
+// Tenant DB — per-request connection, with global query filters
+public class ApplicationDbContext : DbContext, IApplicationDbContext
+{
+    // User, Role filtered by TenantId (defense-in-depth within tenant DB)
+    // Voucher, GeneralLedger, etc. — no filter needed (entire DB is single-tenant)
+}
+```
+
+**Cross-DB Identity Convention**:
+- `MasterUser.Id = User.Id` (same GUID in both databases, no FK constraint)
+- Password stored in `MasterUser` only (Master DB). `User.PasswordHash` deprecated (nullable).
+- Creating a user in Tenant DB **must** create/link corresponding `MasterUser` + `MasterUserTenant` in Master DB.
+
+**Tenant-scoped entities within Tenant DB**: `User` and `Role` still have `TenantId` column + EF Core global query filter as defense-in-depth (future: multiple logical divisions within a single tenant DB). All other entities (`Voucher`, `GeneralLedger`, etc.) do NOT need `TenantId` — the entire database is single-tenant.
+
+**Migration path**: Already at dedicated-DB-per-tenant. Future scaling: read replicas per tenant, or sharding by tenant group.
 
 ### 5.2 ID Strategy
 
@@ -926,10 +979,15 @@ Escalation ignored (24h) → Escalate to next level
 
 **MISA gaps**: No data-level scoping (All/Own/Dept), no field visibility control, no workflow-stage permissions, no API-level auth, no data-diff audit.
 
-### 9.2 New App: 4-Layer Permission Model
+### 9.2 New App: 5-Layer Permission Model
 
 ```
-Layer 1: RBAC (Role-Based Access Control)
+Layer 0: Master-Level Access Control (NEW — Dual-DB)
+  └── WHICH companies can a user access
+  └── MasterUserTenant mapping in Master DB
+  └── Enforced at login (company selection) and company switching
+
+Layer 1: RBAC (Role-Based Access Control) — within Tenant DB
   └── WHO can do WHAT on WHICH resource
   └── Role × Permission × Resource matrix
 
@@ -945,6 +1003,8 @@ Layer 4: Workflow Permission
   └── WHICH workflow actions can they perform
   └── Per-stage action authorization
 ```
+
+> **Layer 0** is evaluated in the Master DB during 2-step login and company switching. Layers 1–4 are evaluated within the Tenant DB scope for all subsequent API requests.
 
 ### 9.3 Layer 1: RBAC
 
@@ -1503,14 +1563,17 @@ Push to main branch
 
 | Aspect | Implementation |
 |--------|---------------|
-| Protocol | JWT (access token + refresh token) |
+| Protocol | JWT RS256 (access token) + HMAC-SHA256 (tempToken) + HttpOnly cookie (refresh token) |
+| **Login flow** | **2-step: Step 1 (email/password → tempToken + companies), Step 2 (select-company → JWT)** |
+| **TempToken** | **HMAC-SHA256, TTL 60s, minimal claims (sub, rmb). Used for company selection only.** |
 | Access token TTL | 15 minutes |
 | Refresh token TTL | 7 days |
-| Storage | Access token in memory, refresh token in httpOnly cookie |
+| Storage | Access token in memory, refresh token in httpOnly cookie, **tempToken in Angular signal store** |
 | Multi-device | Support multiple active sessions per user |
-| Password | bcrypt hash, minimum 8 chars |
+| Password | bcrypt hash (cost 12), minimum 8 chars, **stored in Master DB (MasterUser)** |
 | 2FA | TOTP (Google Authenticator) — optional in MVP |
-| **Session revocation** | **Per-device token tracking + revocation endpoint** |
+| **Session revocation** | **Token family lineage tracking in Master DB. Replay detection → full family revocation.** |
+| **Company switching** | **POST /api/auth/switch-company — new JWT issued, old RefreshToken revoked** |
 
 **Session Management:**
 ```
@@ -1542,7 +1605,8 @@ API endpoint: DELETE /api/auth/sessions/{id} → revoke specific session
 
 | Concern | Solution |
 |---------|----------|
-| Multi-tenant isolation | EF Core Global Query Filters (TenantId on every query) |
+| **Multi-tenant isolation** | **Dual-DB: Master DB for auth, Tenant DB per company. EF Core query filters on User/Role within Tenant DB as defense-in-depth.** |
+| **Connection string encryption** | **On-premise tenant connection strings encrypted via ASP.NET DataProtection API (IConnectionStringEncryptor)** |
 | Sensitive fields | Encrypt at rest (AES-256): bank account numbers, tax IDs |
 | Audit trail | All create/update/delete logged with before/after values |
 | Soft delete | `is_deleted = true` (never hard delete financial data) |
@@ -1558,6 +1622,8 @@ API endpoint: DELETE /api/auth/sessions/{id} → revoke specific session
 | Webhook verification | HMAC-SHA256 signature |
 | Rate limiting | Separate limits for integration endpoints |
 | Price tampering | Server-side validation: order price within ±5% of current |
+| **Cloudflare Tunnel** | **On-premise tenant DBs connect via Cloudflare Tunnel (outbound-only, port 443). Zero inbound firewall rules. db_status monitors tunnel health.** |
+| **Tenant DB resolution** | **E-commerce APIs require JWT `tid` claim or `X-Tenant-Code` header to resolve the correct Tenant DB** |
 
 ---
 
@@ -2268,6 +2334,7 @@ Vietnamese accounting forms require amount written in words:
 - **Team**: 1 full-stack developer (+ AI-assisted code generation)
 - **Timeline**: Scope will be determined per feature spec — no fixed deadline. Quality over speed.
 - **MVP criteria**: A single tenant can complete a full accounting cycle: opening balance → daily vouchers → posting → period close → 6 standard financial reports
+- **Architecture**: Dual-DB (Master DB + Tenant DB per company), 2-step login with company selection. Phase 1a = single-tenant implementation; Phase 1b = dual-DB migration + multi-company support.
 - **NOT in Phase 1**: E-commerce integration, multi-branch, advanced analytics, mobile app, e-invoice, payroll
 
 ### 23.2 Phase 2
@@ -2375,7 +2442,18 @@ Vietnamese accounting forms require amount written in words:
 
 ## Changelog
 
-### v1.2.0 (Current)
+### v1.3.0 (Current)
+**Dual-DB Architecture (Phương án B Kết hợp):**
+- §2.1: Updated High-Level Architecture diagram — dual DbContext (MasterDbContext → Master DB, ApplicationDbContext → Tenant DB), connection resolution flow
+- §4.4: Added new files: `MasterDbContext.cs`, `TenantDbContextFactory.cs`, `TenantConnectionResolver.cs`, `DataProtectionEncryptor.cs`, separate migration folders
+- §5.1: **REWRITE** — "Shared DB + TenantId" → "Dual-DB Dedicated Per-Tenant". Master DB schema, Tenant DB schema, Cloudflare Tunnel architecture, connection string encryption, cross-DB identity convention
+- §9.2: Renamed "4-Layer" → "5-Layer Permission Model". Added Layer 0: Master-level access control (MasterUserTenant)
+- §15.1: Added 2-step login flow (tempToken → company select → JWT), HMAC-SHA256 tempToken, token family lineage, company switching
+- §15.3: Updated multi-tenant isolation to Dual-DB, added connection string encryption
+- §15.4: Added Cloudflare Tunnel for on-premise, tenant DB resolution for e-commerce
+- §23.1: Added Phase 1a/1b split (single-tenant → dual-DB migration)
+
+### v1.2.0
 **Deep Review Corrections — 25+ fixes applied:**
 - §4.3: Added Domain Event capture pattern (BaseEntity._domainEvents) + Outbox retry policy (exponential backoff, dead-letter)
 - §5.4: Added Soft Delete Policy table (financial = soft only, transient = hard delete via job)

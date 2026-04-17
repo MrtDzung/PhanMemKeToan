@@ -37,7 +37,33 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
     "SYS.Users.View"
   ],
   "lastLoginAt": "2026-04-15T07:30:00Z",
-  "createdAt": "2026-01-10T00:00:00Z"
+  "createdAt": "2026-01-10T00:00:00Z",
+  "companies": [
+    {
+      "tenantId": "a1b2c3d4-0000-0000-0000-000000000001",
+      "name": "Công ty ACME",
+      "code": "ACME",
+      "databaseMode": "CloudManaged",
+      "dbStatus": "Online",
+      "displayRole": "Kế toán trưởng",
+      "isDefault": true
+    },
+    {
+      "tenantId": "b2c3d4e5-0000-0000-0000-000000000002",
+      "name": "Chi nhánh HCM",
+      "code": "ACME-HCM",
+      "databaseMode": "OnPremise",
+      "dbStatus": "Online",
+      "displayRole": "Kế toán viên",
+      "isDefault": false
+    }
+  ],
+  "currentCompany": {
+    "tenantId": "a1b2c3d4-0000-0000-0000-000000000001",
+    "name": "Công ty ACME",
+    "code": "ACME",
+    "databaseMode": "CloudManaged"
+  }
 }
 ```
 
@@ -47,12 +73,14 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...
 | email | string | Login email |
 | fullName | string | Display name |
 | isActive | boolean | Account active status |
-| tenantId | UUID | Tenant the user belongs to |
-| tenantName | string | Tenant display name |
-| roles | string[] | Names of all assigned roles |
-| permissions | string[] | Flat union of all permission codes from all roles |
+| tenantId | UUID | Current tenant the user is working in |
+| tenantName | string | Current tenant display name |
+| roles | string[] | Names of all assigned roles (in current tenant) |
+| permissions | string[] | Flat union of all permission codes from all roles (in current tenant) |
 | lastLoginAt | ISO 8601 | Timestamp of most recent successful login; null if never logged in |
 | createdAt | ISO 8601 | Account creation timestamp |
+| companies | CompanyInfo[] | **All accessible companies** from MasterUserTenants (same as login Step 1 response) |
+| currentCompany | object | **Currently active company** (tenantId, name, code, databaseMode) |
 
 **Note**: The `permissions` array is the union of all permissions from all assigned roles — duplicates are removed. This is the same set embedded in the access token (useful for re-hydrating Angular auth store after page reload if needed).
 
@@ -99,7 +127,7 @@ Content-Type: application/json
 }
 ```
 
-**Note**: The updated `fullName` will be reflected in future access tokens after the user''s next token refresh (within the 15-minute TTL window). This is acceptable per the spec (§ User Story 6).
+**Note**: The updated `fullName` will be reflected in future access tokens after the user''s next token refresh (within the 15-minute TTL window). This is acceptable per the spec (§ User Story 6). **Dual-DB note**: `fullName` is updated in the current Tenant DB only. Other companies may show the original name until a cross-tenant sync is implemented (future enhancement).
 
 ### Error Responses
 
@@ -154,9 +182,10 @@ Content-Type: application/json
 No response body.
 
 **Side effects**:
-- `User.PasswordHash` updated with new BCrypt hash (cost 12).
-- All `RefreshToken` rows for this user set `IsRevoked = true`.
+- `MasterUser.PasswordHash` updated with new BCrypt hash (cost 12) in **Master DB** (NOT `User.PasswordHash` in Tenant DB).
+- All `RefreshToken` rows for this user **across ALL tenants** set `IsRevoked = true` in **Master DB**.
 - The current access token continues to work until its natural expiry (TTL 15 min); the next refresh attempt will fail, prompting re-login.
+- **Password change applies to all companies** — the user uses the same password across all tenants.
 
 ### Error Responses
 

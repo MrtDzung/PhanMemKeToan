@@ -8,8 +8,7 @@ using PhanMemKeToan.Domain.Entities;
 namespace PhanMemKeToan.Application.Features.Users.Commands.UpdateUser;
 
 public class UpdateUserCommandHandler(
-    IApplicationDbContext dbContext,
-    ITenantContext tenantContext
+    IApplicationDbContext dbContext
 ) : IRequestHandler<UpdateUserCommand>
 {
     public async Task Handle(UpdateUserCommand request, CancellationToken cancellationToken)

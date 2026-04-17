@@ -22,6 +22,151 @@ namespace PhanMemKeToan.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("PhanMemKeToan.Domain.Entities.Account", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("AccountCategoryKind")
+                        .HasColumnType("integer")
+                        .HasColumnName("account_category_kind");
+
+                    b.Property<string>("AccountName")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("account_name");
+
+                    b.Property<string>("AccountNameEnglish")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("account_name_english");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("account_number");
+
+                    b.Property<int>("AccountObjectType")
+                        .HasColumnType("integer")
+                        .HasColumnName("account_object_type");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("created_by");
+
+                    b.Property<bool>("DetailByAccountObject")
+                        .HasColumnType("boolean")
+                        .HasColumnName("detail_by_account_object");
+
+                    b.Property<bool>("DetailByBankAccount")
+                        .HasColumnType("boolean")
+                        .HasColumnName("detail_by_bank_account");
+
+                    b.Property<bool>("DetailByContract")
+                        .HasColumnType("boolean")
+                        .HasColumnName("detail_by_contract");
+
+                    b.Property<bool>("DetailByDepartment")
+                        .HasColumnType("boolean")
+                        .HasColumnName("detail_by_department");
+
+                    b.Property<bool>("DetailByExpenseItem")
+                        .HasColumnType("boolean")
+                        .HasColumnName("detail_by_expense_item");
+
+                    b.Property<bool>("DetailByJob")
+                        .HasColumnType("boolean")
+                        .HasColumnName("detail_by_job");
+
+                    b.Property<bool>("DetailByListItem")
+                        .HasColumnType("boolean")
+                        .HasColumnName("detail_by_list_item");
+
+                    b.Property<bool>("DetailByOrder")
+                        .HasColumnType("boolean")
+                        .HasColumnName("detail_by_order");
+
+                    b.Property<bool>("DetailByPUContract")
+                        .HasColumnType("boolean")
+                        .HasColumnName("detail_by_pu_contract");
+
+                    b.Property<bool>("DetailByProjectWork")
+                        .HasColumnType("boolean")
+                        .HasColumnName("detail_by_project_work");
+
+                    b.Property<int>("Grade")
+                        .HasColumnType("integer")
+                        .HasColumnName("grade");
+
+                    b.Property<bool>("Inactive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("inactive");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_deleted");
+
+                    b.Property<bool>("IsParent")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_parent");
+
+                    b.Property<bool>("IsPostableInForeignCurrency")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_postable_in_foreign_currency");
+
+                    b.Property<string>("MISACodeID")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("misa_code_id");
+
+                    b.Property<DateTimeOffset?>("ModifiedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("modified_at");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasColumnType("text")
+                        .HasColumnName("modified_by");
+
+                    b.Property<Guid?>("ParentID")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_id");
+
+                    b.Property<int>("RowVersion")
+                        .HasColumnType("integer")
+                        .HasColumnName("row_version");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_accounts");
+
+                    b.HasIndex("AccountNumber")
+                        .HasDatabaseName("IX_Accounts_AccountNumber_Pattern");
+
+                    b.HasIndex("ParentID")
+                        .HasDatabaseName("IX_Accounts_ParentID");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("IX_Accounts_TenantId");
+
+                    b.HasIndex("TenantId", "AccountNumber")
+                        .IsUnique()
+                        .HasDatabaseName("UIX_Accounts_TenantId_AccountNumber")
+                        .HasFilter("is_deleted = false");
+
+                    b.ToTable("Accounts", (string)null);
+                });
+
             modelBuilder.Entity("PhanMemKeToan.Domain.Entities.Permission", b =>
                 {
                     b.Property<Guid>("Id")
@@ -79,6 +224,10 @@ namespace PhanMemKeToan.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("issued_at");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
                     b.Property<Guid>("TokenFamily")
                         .HasColumnType("uuid")
                         .HasColumnName("token_family");
@@ -100,11 +249,11 @@ namespace PhanMemKeToan.Infrastructure.Persistence.Migrations
                         .IsUnique()
                         .HasDatabaseName("ix_sys_refresh_tokens_token_hash");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_sys_refresh_tokens_user_id");
-
                     b.HasIndex("TokenFamily", "IsRevoked")
                         .HasDatabaseName("ix_sys_refresh_tokens_token_family_is_revoked");
+
+                    b.HasIndex("UserId", "TenantId", "IsRevoked")
+                        .HasDatabaseName("ix_sys_refresh_tokens_user_tenant");
 
                     b.ToTable("sys_refresh_tokens", (string)null);
                 });
@@ -190,20 +339,51 @@ namespace PhanMemKeToan.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("CloudflareSubdomain")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("cloudflare_subdomain");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)")
                         .HasColumnName("code");
 
+                    b.Property<string>("ConnectionStringEncrypted")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("connection_string_encrypted");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
+
+                    b.Property<string>("DatabaseMode")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("CloudManaged")
+                        .HasColumnName("database_mode");
 
                     b.Property<string>("DatabaseSchemaName")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)")
                         .HasColumnName("database_schema_name");
+
+                    b.Property<string>("DbHost")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("db_host");
+
+                    b.Property<string>("DbStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("Online")
+                        .HasColumnName("db_status");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
@@ -322,6 +502,17 @@ namespace PhanMemKeToan.Infrastructure.Persistence.Migrations
                     b.ToTable("sys_user_roles", (string)null);
                 });
 
+            modelBuilder.Entity("PhanMemKeToan.Domain.Entities.Account", b =>
+                {
+                    b.HasOne("PhanMemKeToan.Domain.Entities.Account", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_accounts_accounts_parent_id");
+
+                    b.Navigation("Parent");
+                });
+
             modelBuilder.Entity("PhanMemKeToan.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("PhanMemKeToan.Domain.Entities.User", "User")
@@ -374,6 +565,11 @@ namespace PhanMemKeToan.Infrastructure.Persistence.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PhanMemKeToan.Domain.Entities.Account", b =>
+                {
+                    b.Navigation("Children");
                 });
 
             modelBuilder.Entity("PhanMemKeToan.Domain.Entities.Permission", b =>

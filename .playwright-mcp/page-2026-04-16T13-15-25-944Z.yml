@@ -1,0 +1,51 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e29]:
+    - navigation [ref=e30]:
+      - generic [ref=e31]: Kế Toán
+      - list [ref=e32]:
+        - listitem [ref=e33]:
+          - link " Trang chủ" [ref=e34] [cursor=pointer]:
+            - /url: /dashboard
+            - generic [ref=e35]: 
+            - generic [ref=e36]: Trang chủ
+        - listitem [ref=e37]: Hệ thống
+        - listitem [ref=e38]:
+          - link " Người dùng" [ref=e39] [cursor=pointer]:
+            - /url: /system/users
+            - generic [ref=e40]: 
+            - generic [ref=e41]: Người dùng
+        - listitem [ref=e42]:
+          - link " Vai trò" [ref=e43] [cursor=pointer]:
+            - /url: /system/roles
+            - generic [ref=e44]: 
+            - generic [ref=e45]: Vai trò
+        - listitem [ref=e46]:
+          - link " Công ty" [ref=e47] [cursor=pointer]:
+            - /url: /system/tenants
+            - generic [ref=e48]: 
+            - generic [ref=e49]: Công ty
+    - generic [ref=e50]:
+      - banner [ref=e51]:
+        - generic [ref=e53]: System Administration
+        - generic [ref=e54]:
+          - generic [ref=e55]: Super Administrator
+          - button "" [ref=e57] [cursor=pointer]:
+            - generic [ref=e58]: 
+      - main [ref=e59]:
+        - generic [ref=e61]:
+          - heading "Trang chủ" [level=1] [ref=e62]
+          - paragraph [ref=e63]:
+            - text: Xin chào,
+            - strong [ref=e64]: Super Administrator
+            - text: — System Administration
+          - generic [ref=e67]:
+            - generic [ref=e68]: Hệ thống
+            - generic [ref=e69]:
+              - paragraph [ref=e70]: Quản lý người dùng, vai trò và phân quyền
+              - link "Người dùng" [ref=e71] [cursor=pointer]:
+                - /url: /system/users
+              - link "Vai trò" [ref=e72] [cursor=pointer]:
+                - /url: /system/roles
+  - link "You are using an LTS version of PrimeNG with an invalid license, you may either switch back to a non-LTS version or purchase a license at PrimeStore." [ref=e26] [cursor=pointer]:
+    - /url: https://primeng.org/lts
+    - generic [ref=e27]: You are using an LTS version of PrimeNG with an invalid license, you may either switch back to a non-LTS version or purchase a license at PrimeStore.

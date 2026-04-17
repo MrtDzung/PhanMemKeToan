@@ -1,0 +1,4 @@
+[     108ms] [LOG] Angular is running in development mode. @ http://localhost:64428/@fs/F:/DuAn/PhanMemKeToan/src/webapp/.angular/cache/20.3.23/webapp/vite/deps/chunk-4XTOXYJZ.js?v=e57661e9:14751
+[ 5303506ms] [LOG] Angular is running in development mode. @ http://localhost:64428/@fs/F:/DuAn/PhanMemKeToan/src/webapp/.angular/cache/20.3.23/webapp/vite/deps/chunk-4XTOXYJZ.js?v=e57661e9:14751
+[ 5303536ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://localhost:5086/api/auth/refresh:0
+[ 5688237ms] [LOG] Angular is running in development mode. @ http://localhost:64428/@fs/F:/DuAn/PhanMemKeToan/src/webapp/.angular/cache/20.3.23/webapp/vite/deps/chunk-4XTOXYJZ.js?v=e57661e9:14751

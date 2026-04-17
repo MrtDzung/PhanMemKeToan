@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { RouterLink } from '@angular/router';
-import { TableModule } from 'primeng/table';
+import { TableModule, TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { InputTextModule } from 'primeng/inputtext';
@@ -61,16 +61,12 @@ interface PagedResult {
         />
       </div>
 
-      @if (loading()) {
-        <div class="loading-center">
-          <p-progressSpinner strokeWidth="4" style="width:40px;height:40px;" />
-        </div>
-      } @else {
-        <p-table
+      <p-table
           [value]="users()"
           [rows]="pageSize"
           [totalRecords]="totalCount()"
           [lazy]="true"
+          [loading]="loading()"
           (onLazyLoad)="loadUsers($event)"
           [paginator]="true"
           [rowHover]="true"
@@ -115,7 +111,6 @@ interface PagedResult {
             </tr>
           </ng-template>
         </p-table>
-      }
     </div>
 
     <p-toast />
@@ -126,7 +121,7 @@ interface PagedResult {
     .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .page-title { font-size: 16px; font-weight: 600; color: var(--text-primary); margin: 0; }
     .search-bar { margin-bottom: 12px; }
-    .loading-center { display: flex; justify-content: center; padding: 40px; }
+
   `]
 })
 export class UserListComponent implements OnInit {
@@ -145,7 +140,7 @@ export class UserListComponent implements OnInit {
     this.fetchUsers();
   }
 
-  async loadUsers(event: { first?: number; rows?: number }): Promise<void> {
+  async loadUsers(event: TableLazyLoadEvent): Promise<void> {
     this.currentPage = Math.floor((event.first ?? 0) / (event.rows ?? this.pageSize)) + 1;
     await this.fetchUsers();
   }

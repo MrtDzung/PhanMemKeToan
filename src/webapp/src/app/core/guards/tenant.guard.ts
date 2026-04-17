@@ -7,6 +7,7 @@ export const tenantGuard: CanActivateFn = (_route, _state) => {
   const router = inject(Router);
 
   const user = authStore.currentUser();
+  console.log('[tenantGuard] currentUser:', JSON.stringify(user ? { id: user.id, tenantId: user.tenantId, fullName: user.fullName } : null));
   if (user?.tenantId) {
     return true;
   }

@@ -13,14 +13,16 @@ namespace PhanMemKeToan.Application.Tests.Features.Auth;
 
 public class RefreshTokenCommandHandlerTests
 {
-    private readonly Mock<IApplicationDbContext> _dbContextMock = new();
+    private readonly Mock<IMasterDbContext> _masterDbContextMock = new();
+    private readonly Mock<IApplicationDbContext> _tenantDbContextMock = new();
     private readonly Mock<IJwtService> _jwtServiceMock = new();
     private readonly Mock<IConfiguration> _configMock = new();
     private readonly Mock<ILogger<RefreshTokenCommandHandler>> _loggerMock = new();
 
     private RefreshTokenCommandHandler CreateHandler()
         => new(
-            _dbContextMock.Object,
+            _masterDbContextMock.Object,
+            _tenantDbContextMock.Object,
             _jwtServiceMock.Object,
             _configMock.Object,
             _loggerMock.Object);
@@ -71,7 +73,7 @@ public class RefreshTokenCommandHandlerTests
         };
 
         SetupRefreshTokens([token]);
-        _dbContextMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
+        _masterDbContextMock.Setup(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(1);
 
         var handler = CreateHandler();
@@ -94,6 +96,6 @@ public class RefreshTokenCommandHandlerTests
         dbSetMock.As<IAsyncEnumerable<RefreshTokenEntity>>()
             .Setup(m => m.GetAsyncEnumerator(It.IsAny<CancellationToken>()))
             .Returns(new TestAsyncEnumerator<RefreshTokenEntity>(queryable.GetEnumerator()));
-        _dbContextMock.Setup(x => x.RefreshTokens).Returns(dbSetMock.Object);
+        _masterDbContextMock.Setup(x => x.RefreshTokens).Returns(dbSetMock.Object);
     }
 }
