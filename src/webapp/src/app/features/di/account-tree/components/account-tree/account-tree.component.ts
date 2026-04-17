@@ -1,6 +1,6 @@
 import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TreeModule } from 'primeng/tree';
+import { TreeTableModule } from 'primeng/treetable';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TreeNode } from 'primeng/api';
 import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account.models';
@@ -9,44 +9,63 @@ import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account
   selector: 'app-account-tree',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, TreeModule, ProgressSpinnerModule],
+  imports: [CommonModule, TreeTableModule, ProgressSpinnerModule],
   template: `
     @if (loading()) {
       <div class="flex justify-center items-center h-full p-4">
         <p-progressSpinner strokeWidth="4" [style]="{ width: '40px', height: '40px' }" />
       </div>
     } @else {
-      <p-tree
+      <p-treeTable
         [value]="treeNodes()"
-        selectionMode="single"
-        [(selection)]="selectedNode"
-        (onNodeSelect)="onNodeSelect($event)"
+        [scrollable]="true"
+        scrollHeight="flex"
+        styleClass="account-tree-table"
+        [tableStyle]="{ 'min-width': '520px' }"
         (onNodeExpand)="onNodeExpand($event)"
         (onNodeCollapse)="onNodeCollapse($event)"
-        [style]="{ border: 'none', background: 'transparent' }"
-        styleClass="account-tree"
-        role="tree"
       >
-        <ng-template pTemplate="default" let-node>
-          <span class="account-tree-node" [attr.aria-level]="node.data?.grade" [attr.aria-selected]="node.data?.accountId === selectedAccountId()">
-            <span class="account-number">{{ node.data?.accountNumber }}</span>
-            <span class="account-name">{{ node.data?.accountName }}</span>
-            @if (!node.data?.inactive) {
-              <span class="category-badge" [class.debit]="node.data?.accountCategoryKind === AccountCategoryKind.Debit" [class.credit]="node.data?.accountCategoryKind === AccountCategoryKind.Credit">
-                {{ node.data?.accountCategoryKind === AccountCategoryKind.Debit ? 'Nợ' : 'Có' }}
-              </span>
-            }
-            @if (node.data?.inactive) {
-              <span class="inactive-badge">Ngừng dùng</span>
-            }
-            @if (node.data?.hasTransactions) {
-              <span class="has-tx-badge" title="Có phát sinh">
-                <i class="pi pi-database"></i>
-              </span>
-            }
-          </span>
+        <ng-template pTemplate="header">
+          <tr>
+            <th class="col-num">SỐ TK</th>
+            <th>Tên tài khoản</th>
+            <th class="col-category">Tính chất</th>
+            <th class="col-object">Đối tượng</th>
+          </tr>
         </ng-template>
-      </p-tree>
+        <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
+          <tr
+            [ttRow]="rowNode"
+            (click)="onRowClick(rowData)"
+            [class.row-selected]="rowData.accountId === selectedAccountId()"
+            [class.row-inactive]="rowData.inactive"
+          >
+            <td class="cell-num">
+              <p-treeTableToggler [rowNode]="rowNode" />
+              <span class="acct-num" [class.parent]="rowData.isParent">{{ rowData.accountNumber }}</span>
+            </td>
+            <td>
+              <span
+                class="acct-name"
+                [class.grade1]="rowData.grade === 1"
+                [class.grade2]="rowData.grade === 2"
+              >{{ rowData.accountName }}</span>
+            </td>
+            <td>
+              @if (rowData.accountCategoryKind === AccountCategoryKind.Mixed) {
+                <span class="cat-badge mixed">Lưỡng tính</span>
+              } @else if (rowData.accountCategoryKind === AccountCategoryKind.Debit) {
+                <span class="cat-badge debit">Dư Nợ</span>
+              } @else {
+                <span class="cat-badge credit">Dư Có</span>
+              }
+            </td>
+            <td class="cell-center">
+              <span class="dash">—</span>
+            </td>
+          </tr>
+        </ng-template>
+      </p-treeTable>
     }
   `,
   styles: [`
@@ -57,65 +76,127 @@ import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account
       overflow: hidden;
     }
 
-    .account-tree-node {
+    :host ::ng-deep .p-treetable {
+      flex: 1;
       display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
     }
 
-    .account-number {
+    :host ::ng-deep .p-treetable-scrollable-wrapper,
+    :host ::ng-deep .p-treetable-wrapper {
+      flex: 1;
+      overflow: auto;
+    }
+
+    :host ::ng-deep .account-tree-table .p-treetable-thead > tr > th {
+      background: var(--surface-ground);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-bottom: 2px solid var(--surface-border);
+      white-space: nowrap;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .col-num { width: 110px; }
+    .col-category { width: 120px; }
+    .col-object { width: 90px; }
+
+    :host ::ng-deep .account-tree-table .p-treetable-tbody > tr {
+      height: 32px;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+
+    :host ::ng-deep .account-tree-table .p-treetable-tbody > tr:hover {
+      background: var(--primary-light) !important;
+    }
+
+    :host ::ng-deep .account-tree-table .p-treetable-tbody > tr.row-selected {
+      background: #dce8f8 !important;
+    }
+
+    :host ::ng-deep .account-tree-table .p-treetable-tbody > tr.row-inactive {
+      opacity: 0.55;
+    }
+
+    :host ::ng-deep .account-tree-table .p-treetable-tbody > tr > td {
+      padding: 0 10px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--surface-border);
+      vertical-align: middle;
+    }
+
+    .cell-num {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .cell-center {
+      text-align: center;
+    }
+
+    .acct-num {
       font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
       font-size: 12px;
       color: var(--text-secondary);
-      min-width: 60px;
       font-variant-numeric: tabular-nums;
     }
 
-    .account-name {
-      flex: 1;
+    .acct-num.parent {
+      font-weight: 700;
       color: var(--text-primary);
     }
 
-    .category-badge {
-      font-size: 11px;
-      padding: 1px 6px;
-      border-radius: 3px;
+    .acct-name {
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    .acct-name.grade1 {
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+    }
+
+    .acct-name.grade2 {
       font-weight: 600;
     }
-    .category-badge.debit {
+
+    .cat-badge {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .cat-badge.mixed {
+      color: var(--text-secondary);
+      border: 1px solid var(--surface-border);
+      background: var(--surface-ground);
+    }
+
+    .cat-badge.debit {
       color: var(--debit);
       border: 1px solid var(--debit);
-      background: var(--debit-bg);
+      background: rgba(21, 101, 192, 0.06);
     }
-    .category-badge.credit {
+
+    .cat-badge.credit {
       color: var(--credit);
       border: 1px solid var(--credit);
-      background: var(--credit-bg);
+      background: rgba(198, 40, 40, 0.06);
     }
 
-    .inactive-badge {
-      font-size: 11px;
-      padding: 1px 6px;
-      border-radius: 3px;
+    .dash {
       color: var(--text-disabled);
-      border: 1px solid var(--text-disabled);
-    }
-
-    .has-tx-badge {
-      color: var(--info);
-      font-size: 11px;
-    }
-
-    :host ::ng-deep .p-tree {
-      flex: 1;
-      overflow-y: auto;
-      font-size: 13px;
-    }
-
-    :host ::ng-deep .p-tree-node-content {
-      height: 32px;
-      align-items: center;
     }
   `],
 })
@@ -130,13 +211,8 @@ export class AccountTreeComponent {
   nodeExpanded = output<string>();
   nodeCollapsed = output<string>();
 
-  selectedNode: TreeNode | null = null;
-
-  onNodeSelect(event: { node: TreeNode }): void {
-    const data = event.node.data as AccountTreeNodeDto;
-    if (data) {
-      this.accountSelected.emit(data);
-    }
+  onRowClick(data: AccountTreeNodeDto): void {
+    this.accountSelected.emit(data);
   }
 
   onNodeExpand(event: { node: TreeNode }): void {
@@ -149,3 +225,4 @@ export class AccountTreeComponent {
     if (data) this.nodeCollapsed.emit(data.accountId);
   }
 }
+

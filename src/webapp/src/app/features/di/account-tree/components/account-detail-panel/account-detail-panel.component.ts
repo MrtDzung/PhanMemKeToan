@@ -5,7 +5,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
 import { AccountFormComponent } from '../account-form/account-form.component';
 import { AccountTreeStore } from '../../store/account-tree.store';
-import { AccountCategoryKind } from '../../../models/account.models';
+import { AccountCategoryKind, AccountDetailDto } from '../../../models/account.models';
 
 @Component({
   selector: 'app-account-detail-panel',
@@ -24,58 +24,29 @@ import { AccountCategoryKind } from '../../../models/account.models';
             severity="secondary"
             [text]="true"
             size="small"
-            (onClick)="store.setFormMode('view'); store.selectAccount(store.selectedAccountId() ?? '')"
+            (onClick)="store.clearSelection()"
             aria-label="Đóng"
           />
         </div>
         <app-account-form
           [isEditMode]="false"
           (saved)="store.setFormMode('view')"
-          (cancelled)="store.setFormMode('view')"
+          (cancelled)="store.clearSelection()"
         />
       } @else if (store.selectedAccountDetail(); as detail) {
         <div class="panel-header">
           <div class="header-info">
-            <span class="account-number-header">{{ detail.accountNumber }}</span>
-            <span class="account-name-header">{{ detail.accountName }}</span>
+            <span class="acct-num-large">{{ detail.accountNumber }}</span>
+            <span class="acct-name-sub">{{ detail.accountName }}</span>
           </div>
-          <div class="header-actions">
-            @if (store.formMode() === 'view') {
-              <p-button
-                icon="pi pi-pencil"
-                label="Chỉnh sửa"
-                severity="secondary"
-                size="small"
-                (onClick)="store.setFormMode('edit')"
-              />
-              <p-button
-                icon="pi pi-trash"
-                label="Xóa"
-                severity="danger"
-                size="small"
-                [outlined]="true"
-                (onClick)="onDelete(detail.accountId, detail.rowVersion)"
-                [disabled]="detail.hasTransactions || detail.isParent"
-              />
-            }
-          </div>
-        </div>
-
-        <div class="status-badges">
-          @if (detail.inactive) {
-            <span class="badge badge--inactive">Ngừng dùng</span>
-          } @else {
-            <span class="badge badge--active">Đang dùng</span>
-          }
-          <span class="badge badge--category" [class.debit]="detail.accountCategoryKind === AccountCategoryKind.Debit" [class.credit]="detail.accountCategoryKind === AccountCategoryKind.Credit">
-            {{ detail.accountCategoryKind === AccountCategoryKind.Debit ? 'Tài khoản Nợ' : 'Tài khoản Có' }}
-          </span>
-          @if (detail.isParent) {
-            <span class="badge badge--parent">Tài khoản tổng hợp</span>
-          }
-          @if (detail.hasTransactions) {
-            <span class="badge badge--has-tx">Có phát sinh</span>
-          }
+          <p-button
+            icon="pi pi-times"
+            severity="secondary"
+            [text]="true"
+            size="small"
+            (onClick)="store.clearSelection()"
+            aria-label="Đóng panel"
+          />
         </div>
 
         @if (store.formMode() === 'edit') {
@@ -87,37 +58,101 @@ import { AccountCategoryKind } from '../../../models/account.models';
             (cancelled)="store.setFormMode('view')"
           />
         } @else {
-          <div class="detail-view">
-            <div class="detail-row">
-              <span class="detail-label">Mã tài khoản</span>
-              <span class="detail-value monospace">{{ detail.accountNumber }}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Tên tài khoản</span>
-              <span class="detail-value">{{ detail.accountName }}</span>
-            </div>
+          <div class="detail-scroll">
+
             @if (detail.accountNameEnglish) {
-              <div class="detail-row">
-                <span class="detail-label">Tên tiếng Anh</span>
-                <span class="detail-value">{{ detail.accountNameEnglish }}</span>
+              <div class="field-group">
+                <div class="field-label">Tên tiếng Anh</div>
+                <div class="field-value">{{ detail.accountNameEnglish }}</div>
               </div>
             }
+
             @if (detail.parentNumber) {
-              <div class="detail-row">
-                <span class="detail-label">Tài khoản cha</span>
-                <span class="detail-value monospace">{{ detail.parentNumber }} — {{ detail.parentName }}</span>
+              <div class="field-group">
+                <div class="field-label">Tài khoản tổng hợp</div>
+                <div class="field-value monospace">{{ detail.parentNumber }} - {{ detail.parentName }}</div>
               </div>
             }
-            @if (detail.isPostableInForeignCurrency) {
-              <div class="detail-row">
-                <span class="detail-label">Ngoại tệ</span>
-                <span class="detail-value">Có theo dõi</span>
+
+            <div class="field-group">
+              <div class="field-label">Tính chất</div>
+              <div class="field-value">
+                @if (detail.accountCategoryKind === AccountCategoryKind.Mixed) {
+                  <span class="cat-badge mixed">Lưỡng tính</span>
+                } @else if (detail.accountCategoryKind === AccountCategoryKind.Debit) {
+                  <span class="cat-badge debit">Dư Nợ</span>
+                } @else {
+                  <span class="cat-badge credit">Dư Có</span>
+                }
               </div>
-            }
-            <div class="detail-row">
-              <span class="detail-label">Cập nhật</span>
-              <span class="detail-value text-secondary">{{ detail.modifiedAt ?? detail.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
             </div>
+
+            @if (hasAnyDetailFlag(detail)) {
+              <div class="field-group">
+                <div class="field-label">Chi tiết theo</div>
+                <div class="detail-flags">
+                  @if (detail.isPostableInForeignCurrency) {
+                    <div class="flag-item"><i class="pi pi-check"></i> Có hạch toán ngoại tệ</div>
+                  }
+                  @if (detail.detailByAccountObject) {
+                    <div class="flag-item"><i class="pi pi-check"></i> Chi tiết theo đối tượng</div>
+                  }
+                  @if (detail.detailByBankAccount) {
+                    <div class="flag-item"><i class="pi pi-check"></i> Chi tiết theo TK ngân hàng</div>
+                  }
+                  @if (detail.detailByJob) {
+                    <div class="flag-item"><i class="pi pi-check"></i> Chi tiết theo công việc</div>
+                  }
+                  @if (detail.detailByProjectWork) {
+                    <div class="flag-item"><i class="pi pi-check"></i> Chi tiết theo công trình</div>
+                  }
+                  @if (detail.detailByOrder) {
+                    <div class="flag-item"><i class="pi pi-check"></i> Chi tiết theo đơn đặt hàng</div>
+                  }
+                  @if (detail.detailByContract) {
+                    <div class="flag-item"><i class="pi pi-check"></i> Chi tiết theo hợp đồng</div>
+                  }
+                  @if (detail.detailByExpenseItem) {
+                    <div class="flag-item"><i class="pi pi-check"></i> Chi tiết theo khoản mục CP</div>
+                  }
+                  @if (detail.detailByDepartment) {
+                    <div class="flag-item"><i class="pi pi-check"></i> Chi tiết theo phòng ban</div>
+                  }
+                </div>
+              </div>
+            }
+
+            <div class="field-group">
+              <div class="field-label">Trạng thái</div>
+              <div class="field-value">
+                @if (detail.inactive) {
+                  <span class="status-badge inactive">Ngừng dùng</span>
+                } @else {
+                  <span class="status-badge active">Đang dùng</span>
+                }
+              </div>
+            </div>
+
+          </div>
+
+          <div class="panel-footer">
+            <p-button
+              icon="pi pi-pencil"
+              label="Sửa"
+              severity="secondary"
+              size="small"
+              [outlined]="true"
+              (onClick)="store.setFormMode('edit')"
+            />
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              size="small"
+              [text]="true"
+              (onClick)="onDelete(detail.accountId, detail.rowVersion)"
+              [disabled]="detail.hasTransactions || detail.isParent"
+              aria-label="Xóa tài khoản"
+            />
           </div>
         }
       } @else {
@@ -141,9 +176,10 @@ import { AccountCategoryKind } from '../../../models/account.models';
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      padding: 12px 16px;
+      padding: 12px 16px 10px;
       border-bottom: 1px solid var(--surface-border);
       gap: 8px;
+      flex-shrink: 0;
     }
 
     .panel-title {
@@ -158,96 +194,48 @@ import { AccountCategoryKind } from '../../../models/account.models';
       gap: 2px;
     }
 
-    .account-number-header {
+    .acct-num-large {
       font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-      font-size: 14px;
+      font-size: 18px;
       font-weight: 700;
-      color: var(--primary);
-    }
-
-    .account-name-header {
-      font-size: 13px;
       color: var(--text-primary);
+      line-height: 1.2;
     }
 
-    .header-actions {
-      display: flex;
-      gap: 6px;
+    .acct-name-sub {
+      font-size: 13px;
+      color: var(--text-secondary);
     }
 
-    .status-badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      padding: 8px 16px;
-      border-bottom: 1px solid var(--surface-border);
-    }
-
-    .badge {
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 3px;
-      font-weight: 500;
-    }
-
-    .badge--active {
-      background: var(--success-bg);
-      color: var(--success);
-    }
-
-    .badge--inactive {
-      color: var(--text-disabled);
-      border: 1px solid var(--text-disabled);
-    }
-
-    .badge--category.debit {
-      color: var(--debit);
-      border: 1px solid var(--debit);
-      background: var(--debit-bg);
-    }
-
-    .badge--category.credit {
-      color: var(--credit);
-      border: 1px solid var(--credit);
-      background: var(--credit-bg);
-    }
-
-    .badge--parent {
-      color: var(--info);
-      border: 1px solid var(--info);
-      background: var(--info-bg);
-    }
-
-    .badge--has-tx {
-      color: var(--warning);
-      border: 1px solid var(--warning);
-      background: var(--warning-bg);
-    }
-
-    .detail-view {
+    .detail-scroll {
       flex: 1;
       overflow-y: auto;
       padding: 12px 16px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 0;
     }
 
-    .detail-row {
-      display: grid;
-      grid-template-columns: 140px 1fr;
-      gap: 8px;
-      font-size: 13px;
-      padding: 4px 0;
+    .field-group {
+      padding: 8px 0;
       border-bottom: 1px solid var(--surface-border);
     }
 
-    .detail-label {
-      color: var(--text-secondary);
-      font-size: 12px;
+    .field-group:last-child {
+      border-bottom: none;
     }
 
-    .detail-value {
+    .field-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+
+    .field-value {
+      font-size: 13px;
       color: var(--text-primary);
     }
 
@@ -256,8 +244,77 @@ import { AccountCategoryKind } from '../../../models/account.models';
       font-size: 12px;
     }
 
-    .text-secondary {
+    .cat-badge {
+      font-size: 11px;
+      padding: 2px 10px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    .cat-badge.mixed {
       color: var(--text-secondary);
+      border: 1px solid var(--surface-border);
+      background: var(--surface-ground);
+    }
+
+    .cat-badge.debit {
+      color: var(--debit);
+      border: 1px solid var(--debit);
+      background: rgba(21, 101, 192, 0.06);
+    }
+
+    .cat-badge.credit {
+      color: var(--credit);
+      border: 1px solid var(--credit);
+      background: rgba(198, 40, 40, 0.06);
+    }
+
+    .detail-flags {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .flag-item {
+      font-size: 12px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .flag-item .pi-check {
+      color: var(--success);
+      font-size: 11px;
+    }
+
+    .status-badge {
+      font-size: 12px;
+      padding: 2px 10px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+
+    .status-badge.active {
+      background: rgba(46, 125, 50, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(46, 125, 50, 0.3);
+    }
+
+    .status-badge.inactive {
+      color: var(--text-disabled);
+      border: 1px solid var(--text-disabled);
+    }
+
+    .panel-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-top: 1px solid var(--surface-border);
+      flex-shrink: 0;
+      background: var(--surface-card);
     }
 
     .empty-state {
@@ -277,6 +334,20 @@ export class AccountDetailPanelComponent {
   readonly AccountCategoryKind = AccountCategoryKind;
   private readonly confirmationService = inject(ConfirmationService);
 
+  hasAnyDetailFlag(detail: AccountDetailDto): boolean {
+    return (
+      detail.isPostableInForeignCurrency ||
+      detail.detailByAccountObject ||
+      detail.detailByBankAccount ||
+      detail.detailByJob ||
+      detail.detailByProjectWork ||
+      detail.detailByOrder ||
+      detail.detailByContract ||
+      detail.detailByExpenseItem ||
+      detail.detailByDepartment
+    );
+  }
+
   onDelete(accountId: string, rowVersion: number): void {
     this.confirmationService.confirm({
       message: 'Bạn có chắc chắn muốn xóa tài khoản này?',
@@ -291,3 +362,4 @@ export class AccountDetailPanelComponent {
     });
   }
 }
+

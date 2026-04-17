@@ -51,14 +51,14 @@ interface StatusOption {
             class="tt-btn"
             [class.active]="!isTT133Mode"
             (click)="isTT133Mode = false"
-            title="Thông tư 99/2025 (mặc định)"
-          >TT99</button>
+            title="Thông tư 200/2014 (doanh nghiệp lớn)"
+          >TT200</button>
           <button
             type="button"
             class="tt-btn"
             [class.active]="isTT133Mode"
             (click)="isTT133Mode = true"
-            title="Thông tư 133 (doanh nghiệp vừa và nhỏ)"
+            title="Thông tư 133/2016 (doanh nghiệp vừa và nhỏ)"
           >TT133</button>
         </div>
       </div>
@@ -66,7 +66,7 @@ interface StatusOption {
       <div class="toolbar-right">
         <p-button
           icon="pi pi-plus"
-          label="Thêm mới"
+          label="Thêm tài khoản"
           severity="primary"
           size="small"
           (onClick)="addNew.emit()"
@@ -74,7 +74,7 @@ interface StatusOption {
         />
         <p-button
           icon="pi pi-upload"
-          label="Nhập danh mục"
+          label="Nhập từ Excel"
           severity="secondary"
           size="small"
           (onClick)="importCoa.emit()"

@@ -1,6 +1,7 @@
 export enum AccountCategoryKind {
   Debit = 0,
   Credit = 1,
+  Mixed = 2,
 }
 
 export enum AccountObjectType {

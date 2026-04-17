@@ -199,6 +199,10 @@ export const AccountTreeStore = signalStore(
         patchState(store, { searchQuery: q });
       },
 
+      clearSelection(): void {
+        patchState(store, { selectedAccountId: null, selectedAccountDetail: null, formMode: 'view' });
+      },
+
       setStatusFilter(f: StatusFilter): void {
         patchState(store, { statusFilter: f });
       },
