@@ -30,6 +30,8 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IE
             RoleInUseException riue => (409, "ROLE_IN_USE", (object?)new { affectedUsers = riue.AffectedUserNames }),
             NotFoundException nfe => (404, "NOT_FOUND", (object?)new { entity = nfe.EntityName }),
             ValidationException ve => (400, "VALIDATION_ERROR", (object?)new { errors = ve.Errors }),
+            BusinessRuleException bre => (400, bre.Code.ToUpperInvariant(), (object?)null),
+            ConflictException => (409, "CONFLICT", (object?)null),
             ForbiddenAccessException => (403, "FORBIDDEN", (object?)null),
             _ => (500, "INTERNAL_ERROR", (object?)null)
         };

@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { RouterLink } from '@angular/router';
 import { TableModule, TableLazyLoadEvent } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
@@ -34,7 +33,7 @@ interface PagedResult {
   selector: 'app-user-list',
   standalone: true,
   imports: [
-    CommonModule, FormsModule, RouterLink, TableModule, ButtonModule, TagModule,
+    CommonModule, FormsModule, TableModule, ButtonModule, TagModule,
     InputTextModule, ProgressSpinnerModule, ToastModule, ConfirmDialogModule
   ],
   providers: [MessageService, ConfirmationService],

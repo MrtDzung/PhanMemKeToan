@@ -14,7 +14,7 @@ import { AccountCategoryKind, AccountDetailDto } from '../../../models/account.m
   providers: [ConfirmationService],
   imports: [CommonModule, ButtonModule, ConfirmDialogModule, AccountFormComponent],
   template: `
-    <p-confirmDialog />
+    <p-confirmDialog [style]="{ width: '450px' }" contentStyleClass="p-4" headerStyleClass="p-4 pb-0" footerStyleClass="p-4 pt-0 gap-2" />
     <div class="detail-panel">
       @if (store.formMode() === 'create') {
         <div class="panel-header">
@@ -30,6 +30,7 @@ import { AccountCategoryKind, AccountDetailDto } from '../../../models/account.m
         </div>
         <app-account-form
           [isEditMode]="false"
+          [parentId]="store.parentIdForCreate()"
           (saved)="store.setFormMode('view')"
           (cancelled)="store.clearSelection()"
         />

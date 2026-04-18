@@ -28,5 +28,12 @@ docker-data/
 
 # Environment
 .env
+
+# Playwright MCP artifacts
+.playwright-mcp/
+
+# Debug screenshots
+*.png
+*.jpg
 *.local
 appsettings.Development.json

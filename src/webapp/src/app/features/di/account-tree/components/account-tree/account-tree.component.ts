@@ -2,6 +2,7 @@ import { Component, input, output, ChangeDetectionStrategy } from '@angular/core
 import { CommonModule } from '@angular/common';
 import { TreeTableModule } from 'primeng/treetable';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TooltipModule } from 'primeng/tooltip';
 import { TreeNode } from 'primeng/api';
 import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account.models';
 
@@ -9,7 +10,7 @@ import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account
   selector: 'app-account-tree',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, TreeTableModule, ProgressSpinnerModule],
+  imports: [CommonModule, TreeTableModule, ProgressSpinnerModule, TooltipModule],
   template: `
     @if (loading()) {
       <div class="flex justify-center items-center h-full p-4">
@@ -21,18 +22,28 @@ import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account
         [scrollable]="true"
         scrollHeight="flex"
         styleClass="account-tree-table"
-        [tableStyle]="{ 'min-width': '520px' }"
+        [tableStyle]="{ 'min-width': '700px' }"
         selectionMode="single"
         (onNodeExpand)="onNodeExpand($event)"
         (onNodeCollapse)="onNodeCollapse($event)"
         (onNodeSelect)="onNodeSelect($event)"
       >
+        <ng-template pTemplate="colgroup">
+          <colgroup>
+            <col style="width: 140px">
+            <col>
+            <col style="width: 110px">
+            <col style="width: 150px">
+            <col style="width: 110px">
+          </colgroup>
+        </ng-template>
         <ng-template pTemplate="header">
           <tr>
-            <th class="col-num">SỐ TK</th>
+            <th>SỐ TK</th>
             <th>Tên tài khoản</th>
-            <th class="col-category">Tính chất</th>
-            <th class="col-object">Đối tượng</th>
+            <th>Tính chất</th>
+            <th>Đối tượng</th>
+            <th style="text-align: center">Thao tác</th>
           </tr>
         </ng-template>
         <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
@@ -41,9 +52,11 @@ import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account
             [class.row-selected]="rowData.accountId === selectedAccountId()"
             [class.row-inactive]="rowData.inactive"
           >
-            <td class="cell-num">
-              <p-treeTableToggler [rowNode]="rowNode" />
-              <span class="acct-num" [class.parent]="rowData.isParent">{{ rowData.accountNumber }}</span>
+            <td>
+              <div class="cell-num">
+                <p-treeTableToggler [rowNode]="rowNode" />
+                <span class="acct-num" [class.parent]="rowData.isParent">{{ rowData.accountNumber }}</span>
+              </div>
             </td>
             <td>
               <span
@@ -63,6 +76,34 @@ import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account
             </td>
             <td class="cell-center">
               <span class="dash">—</span>
+            </td>
+            <td>
+              <div class="cell-actions">
+                <button
+                  type="button"
+                  class="row-action-btn add"
+                  pTooltip="Thêm tài khoản con"
+                  tooltipPosition="left"
+                  (click)="$event.stopPropagation(); addAccount.emit(rowData)"
+                  aria-label="Thêm tài khoản con"
+                ><i class="pi pi-plus"></i></button>
+                <button
+                  type="button"
+                  class="row-action-btn"
+                  pTooltip="Sửa tài khoản"
+                  tooltipPosition="left"
+                  (click)="$event.stopPropagation(); editAccount.emit(rowData)"
+                  aria-label="Sửa tài khoản"
+                ><i class="pi pi-pencil"></i></button>
+                <button
+                  type="button"
+                  class="row-action-btn delete"
+                  pTooltip="Xóa tài khoản"
+                  tooltipPosition="left"
+                  (click)="$event.stopPropagation(); deleteAccount.emit(rowData)"
+                  aria-label="Xóa tài khoản"
+                ><i class="pi pi-trash"></i></button>
+              </div>
             </td>
           </tr>
         </ng-template>
@@ -91,6 +132,11 @@ import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account
       overflow: auto;
     }
 
+    :host ::ng-deep .account-tree-table table {
+      border-collapse: collapse;
+      border-spacing: 0;
+    }
+
     :host ::ng-deep .account-tree-table .p-treetable-thead > tr > th {
       background: var(--surface-ground);
       color: var(--text-secondary);
@@ -103,14 +149,46 @@ import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account
       letter-spacing: 0.04em;
     }
 
-    /* Offset header text to align with account numbers (toggler = 16px + gap = 2px + btn padding ~4px) */
-    :host ::ng-deep .account-tree-table .p-treetable-thead > tr > th:first-child {
-      padding-left: 32px;
+    .cell-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
     }
 
-    .col-num { width: 110px; }
-    .col-category { width: 120px; }
-    .col-object { width: 90px; }
+    .row-action-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border: none;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      padding: 0;
+    }
+
+    .row-action-btn:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .row-action-btn.add:hover {
+      background: rgba(46, 125, 50, 0.08);
+      color: var(--success);
+    }
+
+    .row-action-btn.delete:hover {
+      background: rgba(211, 47, 47, 0.08);
+      color: var(--error);
+    }
+
+    .row-action-btn i {
+      font-size: 13px;
+    }
 
     :host ::ng-deep .account-tree-table .p-treetable-tbody > tr {
       height: 32px;
@@ -134,6 +212,8 @@ import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account
       padding: 0 10px;
       font-size: 13px;
       border-bottom: 1px solid var(--surface-border);
+      border-left: none;
+      border-right: none;
       vertical-align: middle;
     }
 
@@ -214,21 +294,24 @@ export class AccountTreeComponent {
   selectedAccountId = input<string | null>(null);
 
   accountSelected = output<AccountTreeNodeDto>();
+  addAccount = output<AccountTreeNodeDto>();
+  editAccount = output<AccountTreeNodeDto>();
+  deleteAccount = output<AccountTreeNodeDto>();
   nodeExpanded = output<string>();
   nodeCollapsed = output<string>();
 
-  onNodeSelect(event: { node: TreeNode }): void {
-    const data = event.node.data as AccountTreeNodeDto;
+  onNodeSelect(event: { node?: TreeNode }): void {
+    const data = event.node?.data as AccountTreeNodeDto;
     if (data) this.accountSelected.emit(data);
   }
 
-  onNodeExpand(event: { node: TreeNode }): void {
-    const data = event.node.data as AccountTreeNodeDto;
+  onNodeExpand(event: { node?: TreeNode }): void {
+    const data = event.node?.data as AccountTreeNodeDto;
     if (data) this.nodeExpanded.emit(data.accountId);
   }
 
-  onNodeCollapse(event: { node: TreeNode }): void {
-    const data = event.node.data as AccountTreeNodeDto;
+  onNodeCollapse(event: { node?: TreeNode }): void {
+    const data = event.node?.data as AccountTreeNodeDto;
     if (data) this.nodeCollapsed.emit(data.accountId);
   }
 }

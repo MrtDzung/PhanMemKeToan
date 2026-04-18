@@ -62,6 +62,77 @@
 }
 
 /* ============================================
+   PrimeNG Dialog & ConfirmDialog overrides
+   ============================================ */
+
+.p-dialog .p-dialog-header {
+  padding: 1.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.p-dialog .p-dialog-content {
+  padding: 1.5rem;
+}
+
+.p-dialog .p-dialog-footer {
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.p-confirm-dialog .p-dialog-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.p-confirm-dialog-icon {
+  font-size: 1.75rem !important;
+  color: var(--negative) !important;
+  background-color: var(--error-bg) !important;
+  padding: 0.75rem !important;
+  border-radius: 50% !important;
+}
+
+.p-confirm-dialog-message {
+  margin-left: 0 !important;
+  margin-top: 0.25rem !important;
+  line-height: 1.5 !important;
+}
+
+/* Fix Tailwind resetting button styles inside PrimeNG dialogs */
+.p-dialog .p-dialog-footer button {
+  padding: 0.5rem 1rem !important;
+  border-radius: 4px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+}
+
+.p-dialog .p-dialog-footer button.p-button-danger {
+  background-color: var(--negative) !important;
+  border: 1px solid var(--negative) !important;
+  color: white !important;
+}
+
+.p-dialog .p-dialog-footer button.p-button-danger:hover {
+  background-color: #a41b1b !important;
+}
+
+.p-dialog .p-dialog-footer button.p-button-text {
+  background-color: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--text-secondary) !important;
+}
+
+.p-dialog .p-dialog-footer button.p-button-text:hover {
+  background-color: var(--surface-ground) !important;
+  color: var(--text-primary) !important;
+}
+
+
+/* ============================================
    Global Resets & Defaults
    ============================================ */
 

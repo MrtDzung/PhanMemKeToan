@@ -26,6 +26,7 @@ export interface AccountTreeState {
   statusFilter: StatusFilter;
   expandedNodeIds: Set<string>;
   error: string | null;
+  parentIdForCreate: string | null;
 }
 
 const initialState: AccountTreeState = {
@@ -39,7 +40,29 @@ const initialState: AccountTreeState = {
   statusFilter: 'all',
   expandedNodeIds: new Set(),
   error: null,
+  parentIdForCreate: null,
 };
+
+function filterByStatus(accounts: AccountTreeNodeDto[], filter: StatusFilter): AccountTreeNodeDto[] {
+  if (filter === 'all') return accounts;
+
+  // Get matching leaf accounts first
+  const matchingIds = new Set<string>();
+  for (const acc of accounts) {
+    const matches = filter === 'active' ? !acc.inactive : acc.inactive;
+    if (matches) {
+      matchingIds.add(acc.accountId);
+      // include ancestors so the tree can be built correctly
+      let parentId = acc.parentId;
+      while (parentId) {
+        matchingIds.add(parentId);
+        const parent = accounts.find((a) => a.accountId === parentId);
+        parentId = parent?.parentId ?? null;
+      }
+    }
+  }
+  return accounts.filter((a) => matchingIds.has(a.accountId));
+}
 
 function loadExpandedFromStorage(tenantId: string): Set<string> {
   try {
@@ -66,11 +89,7 @@ export const AccountTreeStore = signalStore(
       const query = state.searchQuery();
       const filter = state.statusFilter();
 
-      if (filter === 'active') {
-        accounts = accounts.filter((a) => !a.inactive);
-      } else if (filter === 'inactive') {
-        accounts = accounts.filter((a) => a.inactive);
-      }
+      accounts = filterByStatus(accounts, filter);
 
       if (query.trim()) {
         accounts = builderService.filterTree(accounts, query);
@@ -83,11 +102,7 @@ export const AccountTreeStore = signalStore(
       const query = state.searchQuery();
       const filter = state.statusFilter();
 
-      if (filter === 'active') {
-        accounts = accounts.filter((a) => !a.inactive);
-      } else if (filter === 'inactive') {
-        accounts = accounts.filter((a) => a.inactive);
-      }
+      accounts = filterByStatus(accounts, filter);
 
       if (query.trim()) {
         accounts = builderService.filterTree(accounts, query);
@@ -106,10 +121,10 @@ export const AccountTreeStore = signalStore(
       apiService = inject(AccountApiService),
       authStore = inject(AuthStore)
     ) => ({
-      async loadTree(includeInactive = false): Promise<void> {
+      async loadTree(): Promise<void> {
         patchState(store, { loading: true, error: null });
         try {
-          const res = await firstValueFrom(apiService.getAccountTree(includeInactive, 'flat'));
+          const res = await firstValueFrom(apiService.getAccountTree(true, 'flat'));
           const tenantId = authStore.currentUser()?.tenantId ?? 'default';
           const expandedNodeIds = loadExpandedFromStorage(tenantId);
           patchState(store, { accounts: res.data, loading: false, expandedNodeIds });
@@ -133,6 +148,10 @@ export const AccountTreeStore = signalStore(
         patchState(store, { formMode: mode });
       },
 
+      setCreateMode(parentId: string | null): void {
+        patchState(store, { formMode: 'create', parentIdForCreate: parentId, selectedAccountId: null, selectedAccountDetail: null });
+      },
+
       async createAccount(cmd: CreateAccountCommand): Promise<void> {
         patchState(store, { saving: true, error: null });
         try {
@@ -140,7 +159,7 @@ export const AccountTreeStore = signalStore(
           patchState(store, { saving: false, formMode: 'view', selectedAccountId: null });
           await this.loadTree();
         } catch (err: unknown) {
-          const msg = (err as { error?: { detail?: string } })?.error?.detail ?? 'Tạo tài khoản thất bại';
+          const msg = (err as any)?.error?.message ?? (err as any)?.error?.detail ?? 'Tạo tài khoản thất bại';
           patchState(store, { saving: false, error: msg });
           throw err;
         }
@@ -154,7 +173,7 @@ export const AccountTreeStore = signalStore(
           await this.loadTree();
           await this.selectAccount(id);
         } catch (err: unknown) {
-          const msg = (err as { error?: { detail?: string } })?.error?.detail ?? 'Cập nhật tài khoản thất bại';
+          const msg = (err as any)?.error?.message ?? (err as any)?.error?.detail ?? 'Cập nhật tài khoản thất bại';
           patchState(store, { saving: false, error: msg });
           throw err;
         }
@@ -172,7 +191,7 @@ export const AccountTreeStore = signalStore(
           });
           await this.loadTree();
         } catch (err: unknown) {
-          const msg = (err as { error?: { detail?: string } })?.error?.detail ?? 'Xóa tài khoản thất bại';
+          const msg = (err as any)?.error?.message ?? (err as any)?.error?.detail ?? 'Xóa tài khoản thất bại';
           patchState(store, { saving: false, error: msg });
           throw err;
         }

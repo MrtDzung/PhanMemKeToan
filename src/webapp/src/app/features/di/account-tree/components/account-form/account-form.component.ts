@@ -8,16 +8,19 @@ import {
   SimpleChanges,
   HostListener,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, Validators } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ButtonModule } from 'primeng/button';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 import { ConfirmationService } from 'primeng/api';
-import { AccountDetailDto, AccountCategoryKind, AccountObjectType, CreateAccountCommand, UpdateAccountCommand } from '../../../models/account.models';
+import { AccountTreeNodeDto, AccountDetailDto, AccountCategoryKind, AccountObjectType, CreateAccountCommand, UpdateAccountCommand } from '../../../models/account.models';
 import { AccountValidationService } from '../../services/account-validation.service';
 import { AccountTreeStore } from '../../store/account-tree.store';
 
@@ -39,14 +42,16 @@ interface ObjectTypeOption {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     InputTextModule,
     SelectModule,
     CheckboxModule,
     ButtonModule,
     ConfirmDialogModule,
+    AutoCompleteModule,
   ],
   template: `
-    <p-confirmDialog />
+    <p-confirmDialog [style]="{ width: '450px' }" contentStyleClass="p-4" headerStyleClass="p-4 pb-0" footerStyleClass="p-4 pt-0 gap-2" />
     <form [formGroup]="form" (ngSubmit)="onSave()" class="account-form" novalidate>
       <div class="form-grid">
 
@@ -71,6 +76,34 @@ interface ObjectTypeOption {
               @else if (form.get('accountNumber')?.errors?.['prefixError']) { Mã phải bắt đầu bằng mã tài khoản cha. }
             </small>
           }
+        </div>
+
+        <!-- Parent Account Lookup -->
+        <div class="form-field">
+          <label for="parentAccount">Tài khoản cha</label>
+          <p-autocomplete
+            inputId="parentAccount"
+            [(ngModel)]="selectedParent"
+            [ngModelOptions]="{ standalone: true }"
+            [suggestions]="parentSuggestions()"
+            (completeMethod)="onSearchParent($event)"
+            (onSelect)="onParentSelected($event.value)"
+            (onClear)="onParentCleared()"
+            optionLabel="displayLabel"
+            [dropdown]="true"
+            [showClear]="true"
+            placeholder="Để trống = Tài khoản cấp 1"
+            [style]="{ width: '100%' }"
+            [inputStyle]="{ width: '100%' }"
+          >
+            <ng-template let-acc pTemplate="item">
+              <div class="parent-option">
+                <span class="parent-option__code">{{ acc.accountNumber }}</span>
+                <span class="parent-option__name">{{ acc.accountName }}</span>
+              </div>
+            </ng-template>
+          </p-autocomplete>
+          <small class="form-hint">Không chọn → tài khoản cấp 1</small>
         </div>
 
         <!-- Account Name -->
@@ -291,6 +324,30 @@ interface ObjectTypeOption {
       font-size: 11px;
     }
 
+    .form-hint {
+      color: var(--text-disabled);
+      font-size: 11px;
+    }
+
+    .parent-option {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+    }
+
+    .parent-option__code {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--primary);
+      font-size: 12px;
+      min-width: 48px;
+    }
+
+    .parent-option__name {
+      color: var(--text-primary);
+      font-size: 12px;
+    }
+
     :host ::ng-deep input.ng-invalid.ng-touched,
     :host ::ng-deep .p-select.ng-invalid.ng-touched {
       border-color: var(--error) !important;
@@ -309,14 +366,25 @@ export class AccountFormComponent implements OnInit, OnChanges {
   private readonly fb = inject(FormBuilder);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly validationService = inject(AccountValidationService);
+  private readonly cd = inject(ChangeDetectorRef);
   readonly store = inject(AccountTreeStore);
 
   account = input<AccountDetailDto | null>(null);
   isEditMode = input<boolean>(false);
   parentAccountNumber = input<string | null>(null);
+  parentId = input<string | null>(null);
 
   saved = output<void>();
   cancelled = output<void>();
+
+  // Parent account lookup state
+  private _selectedParent: (AccountTreeNodeDto & { displayLabel: string }) | null = null;
+  get selectedParent() { return this._selectedParent; }
+  set selectedParent(v: (AccountTreeNodeDto & { displayLabel: string }) | null) {
+    this._selectedParent = v;
+    this.cd.markForCheck();
+  }
+  parentSuggestions = signal<(AccountTreeNodeDto & { displayLabel: string })[]>([]);
 
   readonly categoryOptions: CategoryOption[] = [
     { label: 'Tài khoản Nợ', value: AccountCategoryKind.Debit },
@@ -385,6 +453,22 @@ export class AccountFormComponent implements OnInit, OnChanges {
         rowVersion: acc.rowVersion,
       });
 
+      // Pre-populate parent lookup from account detail
+      if (acc.parentId) {
+        const parentNode = this.store.accounts().find(a => a.accountId === acc.parentId);
+        if (parentNode) {
+          this.selectedParent = { ...parentNode, displayLabel: `${parentNode.accountNumber} — ${parentNode.accountName}` };
+        } else if (acc.parentNumber && acc.parentName) {
+          // fallback if not found in tree yet
+          this.selectedParent = {
+            accountId: acc.parentId, accountNumber: acc.parentNumber, accountName: acc.parentName,
+            displayLabel: `${acc.parentNumber} — ${acc.parentName}`,
+          } as AccountTreeNodeDto & { displayLabel: string };
+        }
+      } else {
+        this.selectedParent = null;
+      }
+
       if (acc.hasTransactions) {
         this.form.get('accountNumber')?.disable();
       } else {
@@ -392,17 +476,70 @@ export class AccountFormComponent implements OnInit, OnChanges {
       }
     } else {
       this.form.reset({
+        accountNumber: '',
+        accountName: '',
+        accountNameEnglish: '',
         accountCategoryKind: AccountCategoryKind.Debit,
+        isPostableInForeignCurrency: false,
+        inactive: false,
         accountObjectType: AccountObjectType.None,
+        detailByAccountObject: false,
+        detailByBankAccount: false,
+        detailByJob: false,
+        detailByProjectWork: false,
+        detailByOrder: false,
+        detailByContract: false,
+        detailByExpenseItem: false,
+        detailByDepartment: false,
+        detailByListItem: false,
+        detailByPuContract: false,
         rowVersion: 0,
       });
       this.form.get('accountNumber')?.enable();
+
+      // Pre-populate parent from parentId input (create mode)
+      const createParentId = this.parentId();
+      if (createParentId) {
+        const parentNode = this.store.accounts().find(a => a.accountId === createParentId);
+        if (parentNode) {
+          this.selectedParent = { ...parentNode, displayLabel: `${parentNode.accountNumber} — ${parentNode.accountName}` };
+        }
+      } else {
+        this.selectedParent = null;
+      }
     }
+  }
+
+  onSearchParent(event: { query: string }): void {
+    const q = event.query.toLowerCase().trim();
+    const currentId = this.account()?.accountId;
+    const results = this.store.accounts()
+      .filter(a => a.accountId !== currentId) // cannot select self as parent
+      .filter(a =>
+        a.accountNumber.toLowerCase().includes(q) ||
+        a.accountName.toLowerCase().includes(q)
+      )
+      .slice(0, 20)
+      .map(a => ({ ...a, displayLabel: `${a.accountNumber} — ${a.accountName}` }));
+    this.parentSuggestions.set(results);
+  }
+
+  onParentSelected(acc: AccountTreeNodeDto & { displayLabel: string }): void {
+    this.selectedParent = acc;
+  }
+
+  onParentCleared(): void {
+    this.selectedParent = null;
   }
 
   isInvalid(field: string): boolean {
     const ctrl = this.form.get(field);
     return !!(ctrl && ctrl.invalid && (ctrl.dirty || ctrl.touched));
+  }
+
+  @HostListener('keydown.escape')
+  onEscape(): void {
+    this.onCancel();
   }
 
   @HostListener('keydown.control.s', ['$event'])
@@ -411,17 +548,16 @@ export class AccountFormComponent implements OnInit, OnChanges {
     if (this.form.valid) this.onSave();
   }
 
-  @HostListener('keydown.escape')
-  onEscape(): void {
-    this.onCancel();
-  }
-
   onSave(): void {
     this.form.markAllAsTouched();
     if (this.form.invalid) return;
 
     const val = this.form.getRawValue();
-    const parentNum = this.parentAccountNumber();
+    const parentFromLookup = this.selectedParent;
+    const parentId = parentFromLookup?.accountId ?? null;
+    const parentNum = parentFromLookup?.accountNumber ?? null;
+
+    // Validate prefix: account number must start with parent's number
     if (parentNum && !this.validationService.validatePrefix(val.accountNumber!, parentNum)) {
       this.form.get('accountNumber')?.setErrors({ prefixError: true });
       return;
@@ -433,6 +569,7 @@ export class AccountFormComponent implements OnInit, OnChanges {
         accountNumber: val.accountNumber!,
         accountName: val.accountName!,
         accountNameEnglish: val.accountNameEnglish || undefined,
+        parentId: parentId ?? undefined,
         accountCategoryKind: val.accountCategoryKind!,
         isPostableInForeignCurrency: val.isPostableInForeignCurrency!,
         inactive: val.inactive!,
@@ -455,19 +592,20 @@ export class AccountFormComponent implements OnInit, OnChanges {
         accountNumber: val.accountNumber!,
         accountName: val.accountName!,
         accountNameEnglish: val.accountNameEnglish || undefined,
+        parentId: parentId ?? undefined,
         accountCategoryKind: val.accountCategoryKind!,
-        isPostableInForeignCurrency: val.isPostableInForeignCurrency!,
+        isPostableInForeignCurrency: val.isPostableInForeignCurrency ?? false,
         accountObjectType: val.accountObjectType!,
-        detailByAccountObject: val.detailByAccountObject!,
-        detailByBankAccount: val.detailByBankAccount!,
-        detailByJob: val.detailByJob!,
-        detailByProjectWork: val.detailByProjectWork!,
-        detailByOrder: val.detailByOrder!,
-        detailByContract: val.detailByContract!,
-        detailByExpenseItem: val.detailByExpenseItem!,
-        detailByDepartment: val.detailByDepartment!,
-        detailByListItem: val.detailByListItem!,
-        detailByPuContract: val.detailByPuContract!,
+        detailByAccountObject: val.detailByAccountObject ?? false,
+        detailByBankAccount: val.detailByBankAccount ?? false,
+        detailByJob: val.detailByJob ?? false,
+        detailByProjectWork: val.detailByProjectWork ?? false,
+        detailByOrder: val.detailByOrder ?? false,
+        detailByContract: val.detailByContract ?? false,
+        detailByExpenseItem: val.detailByExpenseItem ?? false,
+        detailByDepartment: val.detailByDepartment ?? false,
+        detailByListItem: val.detailByListItem ?? false,
+        detailByPuContract: val.detailByPuContract ?? false,
       };
       this.store.createAccount(cmd).then(() => this.saved.emit());
     }
@@ -481,6 +619,8 @@ export class AccountFormComponent implements OnInit, OnChanges {
         icon: 'pi pi-exclamation-triangle',
         acceptLabel: 'Hủy thay đổi',
         rejectLabel: 'Tiếp tục chỉnh sửa',
+        acceptButtonStyleClass: 'p-button-danger p-button-text p-button-sm',
+        rejectButtonStyleClass: 'p-button-outlined p-button-sm',
         accept: () => {
           this.form.reset();
           this.cancelled.emit();

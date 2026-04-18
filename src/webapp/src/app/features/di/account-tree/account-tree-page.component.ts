@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SplitterModule } from 'primeng/splitter';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { AccountTreeStore } from './store/account-tree.store';
 import { AccountTreeComponent } from './components/account-tree/account-tree.component';
 import { AccountTreeToolbarComponent } from './components/account-tree-toolbar/account-tree-toolbar.component';
@@ -15,12 +16,13 @@ import { AccountTreeNodeDto } from '../models/account.models';
   selector: 'app-account-tree-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [AccountTreeStore, MessageService],
+  providers: [AccountTreeStore, MessageService, ConfirmationService],
   imports: [
     CommonModule,
     RouterLink,
     SplitterModule,
     ToastModule,
+    ConfirmDialogModule,
     AccountTreeComponent,
     AccountTreeToolbarComponent,
     AccountDetailPanelComponent,
@@ -28,6 +30,7 @@ import { AccountTreeNodeDto } from '../models/account.models';
   ],
   template: `
     <p-toast />
+    <p-confirmDialog [style]="{ width: '450px' }" contentStyleClass="p-4" headerStyleClass="p-4 pb-0" footerStyleClass="p-4 pt-0 gap-2" />
     <div class="page-layout">
       <div class="page-header">
         <h1 class="page-title">Hệ thống Tài khoản Kế toán</h1>
@@ -56,7 +59,6 @@ import { AccountTreeNodeDto } from '../models/account.models';
           <ng-template pTemplate>
             <div class="tree-panel">
               <app-account-tree-toolbar
-                (addNew)="onAddNew()"
                 (importCoa)="onOpenImportDialog()"
                 (expandAll)="store.expandAll()"
                 (collapseAll)="store.collapseAll()"
@@ -66,6 +68,9 @@ import { AccountTreeNodeDto } from '../models/account.models';
                 [loading]="store.loading()"
                 [selectedAccountId]="store.selectedAccountId()"
                 (accountSelected)="onAccountSelected($event)"
+                (addAccount)="onAddAccount($event)"
+                (editAccount)="onEditAccount($event)"
+                (deleteAccount)="onDeleteAccount($event)"
                 (nodeExpanded)="store.toggleExpanded($event)"
                 (nodeCollapsed)="store.toggleExpanded($event)"
                 class="tree-container"
@@ -198,6 +203,8 @@ import { AccountTreeNodeDto } from '../models/account.models';
 })
 export class AccountTreePageComponent implements OnInit {
   readonly store = inject(AccountTreeStore);
+  readonly confirmationService = inject(ConfirmationService);
+  readonly messageService = inject(MessageService);
   readonly importDialog = viewChild.required(ImportCoaDialogComponent);
   readonly totalCount = computed(() => this.store.accounts().length);
   readonly activeCount = computed(() => this.store.accounts().filter(a => !a.inactive).length);
@@ -211,8 +218,39 @@ export class AccountTreePageComponent implements OnInit {
     this.store.selectAccount(account.accountId);
   }
 
-  onAddNew(): void {
-    this.store.setFormMode('create');
+  onAddAccount(parentAccount: AccountTreeNodeDto): void {
+    this.store.setCreateMode(parentAccount.accountId);
+  }
+
+  onEditAccount(account: AccountTreeNodeDto): void {
+    this.store.selectAccount(account.accountId);
+    this.store.setFormMode('edit');
+  }
+
+  onDeleteAccount(account: AccountTreeNodeDto): void {
+    this.confirmationService.confirm({
+      message: `Xóa tài khoản <strong>${account.accountNumber} — ${account.accountName}</strong>?<br><small style="color:var(--text-secondary)">Hành động này không thể hoàn tác.</small>`,
+      header: 'Xác nhận xóa',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Xóa',
+      rejectLabel: 'Hủy',
+      acceptButtonStyleClass: 'p-button-danger p-button-sm',
+      rejectButtonStyleClass: 'p-button-text p-button-secondary p-button-sm',
+      accept: async () => {
+        await this.store.selectAccount(account.accountId);
+        const detail = this.store.selectedAccountDetail();
+        if (!detail) {
+          this.messageService.add({ severity: 'error', summary: 'Không thể tải thông tin tài khoản' });
+          return;
+        }
+        try {
+          await this.store.deleteAccount(account.accountId, detail.rowVersion);
+          this.messageService.add({ severity: 'success', summary: 'Đã xóa', detail: `Tài khoản ${account.accountNumber} đã được xóa.` });
+        } catch {
+          // error already in store
+        }
+      }
+    });
   }
 
   onOpenImportDialog(): void {

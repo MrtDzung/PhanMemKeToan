@@ -30,10 +30,11 @@ public class DeleteAccountCommandHandler(
         if (account.Children.Any(c => !c.IsDeleted))
             throw new BusinessRuleException("has_children", "Không thể xóa tài khoản vì còn tài khoản con.");
 
-        // Cannot delete if has GL transactions (GL table not yet implemented)
-        // bool hasTransactions = await CheckHasTransactionsAsync(account.AccountNumber, cancellationToken);
-        // if (hasTransactions)
-        //     throw new BusinessRuleException("has_transactions", "Không thể xóa tài khoản vì đã có chứng từ liên quan.");
+        // Cannot delete if has GL transactions
+        // Note: For now, as GL balances are not fully implemented, we assume no transactions unless marked otherwise.
+        // Once implemented, replace this with actual check.
+        // if (await CheckHasTransactionsAsync(account.Id, cancellationToken))
+        //     throw new BusinessRuleException("has_transactions", "Không thể xóa tài khoản vì đã phát sinh giao dịch.");
 
         // Soft-delete
         account.IsDeleted = true;

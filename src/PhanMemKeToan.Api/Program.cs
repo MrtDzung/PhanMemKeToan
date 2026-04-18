@@ -141,8 +141,8 @@ try
 
     var app = builder.Build();
 
-    app.UseExceptionHandler();
     app.UseSerilogRequestLogging();
+    app.UseExceptionHandler();
     app.UseHttpsRedirection();
     app.UseCors("DefaultCors");
     app.UseRateLimiter();

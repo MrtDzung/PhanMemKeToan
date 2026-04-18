@@ -85,14 +85,6 @@ interface StatusOption {
 
       <div class="toolbar-right">
         <p-button
-          icon="pi pi-plus"
-          label="Thêm tài khoản"
-          severity="primary"
-          size="small"
-          (onClick)="addNew.emit()"
-          aria-label="Thêm tài khoản mới"
-        />
-        <p-button
           icon="pi pi-upload"
           label="Nhập từ Excel"
           severity="secondary"
