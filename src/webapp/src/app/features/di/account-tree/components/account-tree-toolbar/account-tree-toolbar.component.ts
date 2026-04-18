@@ -84,6 +84,15 @@ interface StatusOption {
       </div>
 
       <div class="toolbar-right">
+        <!-- TODO: Add *appHasPermission directive when permission directive is implemented in src/app/core/ -->
+        <p-button
+          icon="pi pi-list"
+          label="Nhập COA chuẩn"
+          severity="secondary"
+          size="small"
+          (onClick)="importCoaStandard.emit()"
+          aria-label="Nhập danh mục tài khoản chuẩn"
+        />
         <p-button
           icon="pi pi-upload"
           label="Nhập từ Excel"
@@ -221,6 +230,7 @@ export class AccountTreeToolbarComponent {
 
   addNew = output<void>();
   importCoa = output<void>();
+  importCoaStandard = output<void>();
   expandAll = output<void>();
   collapseAll = output<void>();
 

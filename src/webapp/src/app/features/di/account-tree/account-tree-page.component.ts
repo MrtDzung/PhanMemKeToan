@@ -59,7 +59,7 @@ import { AccountTreeNodeDto } from '../models/account.models';
           <ng-template pTemplate>
             <div class="tree-panel">
               <app-account-tree-toolbar
-                (importCoa)="onOpenImportDialog()"
+                (importCoaStandard)="onOpenImportDialog()"
                 (expandAll)="store.expandAll()"
                 (collapseAll)="store.collapseAll()"
               />

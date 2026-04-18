@@ -10,6 +10,7 @@ import {
   AccountDetailDto,
   CreateAccountCommand,
   UpdateAccountCommand,
+  ImportCoaResultDto,
 } from '../../models/account.models';
 
 export type FormMode = 'view' | 'create' | 'edit';
@@ -200,7 +201,7 @@ export const AccountTreeStore = signalStore(
       async importCoa(
         standard: 'TT99' | 'TT133',
         conflictResolution: 'skip' | 'overwrite'
-      ): Promise<{ imported: number; skipped: number; overwritten: number }> {
+      ): Promise<ImportCoaResultDto> {
         patchState(store, { saving: true, error: null });
         try {
           const res = await firstValueFrom(apiService.importCoa(standard, conflictResolution));
