@@ -1,5 +1,5 @@
 ---
-description: Execute the implementation plan by processing and executing all tasks defined in tasks.md
+description: Execute backend implementation tasks (C#/.NET/EF Core). Handles all [BE] tasks from tasks.md. Frontend tasks are handled by speckit.implement.frontend.
 model: ['Claude Sonnet 4.6 (copilot)', 'Gemini 3.1 Pro (Preview) (copilot)']
 tools: [read, edit, search, execute, web, 'context7/*', todo, vscode/askQuestions, vscode/memory, agent/runSubagent]
 ---
@@ -45,6 +45,15 @@ You **MUST** consider the user input before proceeding (if not empty).
     Wait for the result of the hook command before proceeding to the Outline.
     ```
 - If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently
+
+## Scope
+
+This agent handles **BACKEND tasks only**:
+- Files in `src/PhanMemKeToan.Api/`, `src/PhanMemKeToan.Application/`, `src/PhanMemKeToan.Domain/`, `src/PhanMemKeToan.Infrastructure/`, `tests/` directories
+- File types: `*.cs`, `*.csproj`, `*.json` (appsettings), migration files
+- Task markers: `[BE]` in tasks.md
+- **SKIP** all `[FE]` tasks — those are handled by `speckit.implement.frontend`
+- For tasks without a marker that clearly belong to backend (e.g., C# classes, EF migrations, API controllers), include them
 
 ## Outline
 
@@ -133,7 +142,9 @@ You **MUST** consider the user input before proceeding (if not empty).
    - **Terraform**: `.terraform/`, `*.tfstate*`, `*.tfvars`, `.terraform.lock.hcl`
    - **Kubernetes/k8s**: `*.secret.yaml`, `secrets/`, `.kube/`, `kubeconfig*`, `*.key`, `*.crt`
 
-5. Parse tasks.md structure and extract:
+5. **Filter tasks**: From tasks.md, extract ONLY tasks marked `[BE]`. Ignore all `[FE]` tasks. For tasks without a marker that clearly belong to backend (e.g., C# classes, EF migrations, API controllers), include them.
+
+6. Parse filtered backend tasks and extract:
    - **Task phases**: Setup, Tests, Core, Integration, Polish
    - **Task dependencies**: Sequential vs parallel execution rules
    - **Task details**: ID, description, file paths, parallel markers [P]

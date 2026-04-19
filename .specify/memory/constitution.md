@@ -201,7 +201,8 @@ Contrast ≥ 4.5:1 text, ≥ 3:1 UI. ARIA labels on icon-only buttons. Data grid
 4. **Plan**: Use `/speckit.plan` to create technical implementation plan
 5. **Review Plan**: Owner reviews and approves plan before any code
 6. **Tasks**: Use `/speckit.tasks` to break down into actionable tasks
-7. **Implement**: Use `/speckit.implement` to execute tasks
+7. **Implement (Backend)**: Use `/speckit.implement` to execute `[BE]` tasks (C#/.NET/EF Core)
+7b. **Implement (Frontend)**: Use `/speckit.implement.frontend` to execute `[FE]` tasks (Angular/TypeScript/PrimeNG). Runs AFTER backend to ensure API contracts are available. Skip for backend-only features.
 8. **Review Code**: Use `/speckit.review` to auto-review against constitution + architecture + design system (7-category check: Architecture, Design System, Number/Date, Security, Business Rules, UX/A11y, Spec Coverage). CRITICAL issues must be fixed before commit.
 9. **Commit**: Use `/speckit.git.commit` only after review PASS or owner override
 10. **Verify**: Manual UAT against MISA behavior as reference
