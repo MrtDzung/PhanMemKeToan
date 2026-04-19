@@ -1,7 +1,7 @@
 ---
 description: Generate a custom checklist for the current feature based on user requirements.
-model: Claude Sonnet 4.6 (copilot)
-tools: [vscode/getProjectSetupInfo, vscode/installExtension, vscode/memory, vscode/newWorkspace, vscode/resolveMemoryFileUri, vscode/runCommand, vscode/vscodeAPI, vscode/extensions, vscode/askQuestions, execute/runNotebookCell, execute/testFailure, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/createAndRunTask, execute/runInTerminal, execute/runTests, read/getNotebookSummary, read/problems, read/readFile, read/viewImage, read/terminalSelection, read/terminalLastCommand, agent/runSubagent, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, edit/rename, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/textSearch, search/usages, web/fetch, web/githubRepo, awesome-copilot/load_instruction, awesome-copilot/search_instructions, browser-tools/getConsoleErrors, browser-tools/getConsoleLogs, browser-tools/getNetworkErrors, browser-tools/getNetworkLogs, browser-tools/getSelectedElement, browser-tools/runAccessibilityAudit, browser-tools/runAuditMode, browser-tools/runBestPracticesAudit, browser-tools/runDebuggerMode, browser-tools/runNextJSAudit, browser-tools/runPerformanceAudit, browser-tools/runSEOAudit, browser-tools/takeScreenshot, browser-tools/wipeLogs, context7/query-docs, context7/resolve-library-id, github/add_comment_to_pending_review, github/add_issue_comment, github/assign_copilot_to_issue, github/create_branch, github/create_or_update_file, github/create_pull_request, github/create_repository, github/delete_file, github/fork_repository, github/get_commit, github/get_file_contents, github/get_label, github/get_latest_release, github/get_me, github/get_release_by_tag, github/get_tag, github/get_team_members, github/get_teams, github/issue_read, github/issue_write, github/list_branches, github/list_commits, github/list_issue_types, github/list_issues, github/list_pull_requests, github/list_releases, github/list_tags, github/merge_pull_request, github/pull_request_read, github/pull_request_review_write, github/push_files, github/request_copilot_review, github/search_code, github/search_issues, github/search_pull_requests, github/search_repositories, github/search_users, github/sub_issue_write, github/update_pull_request, github/update_pull_request_branch, playwright/browser_click, playwright/browser_close, playwright/browser_console_messages, playwright/browser_drag, playwright/browser_evaluate, playwright/browser_file_upload, playwright/browser_fill_form, playwright/browser_handle_dialog, playwright/browser_hover, playwright/browser_navigate, playwright/browser_navigate_back, playwright/browser_network_requests, playwright/browser_press_key, playwright/browser_resize, playwright/browser_run_code, playwright/browser_select_option, playwright/browser_snapshot, playwright/browser_tabs, playwright/browser_take_screenshot, playwright/browser_type, playwright/browser_wait_for, screenshot/capture, browser/openBrowserPage, ms-azuretools.vscode-containers/containerToolsConfig, ms-mssql.mssql/mssql_schema_designer, ms-mssql.mssql/mssql_dab, ms-mssql.mssql/mssql_connect, ms-mssql.mssql/mssql_disconnect, ms-mssql.mssql/mssql_list_servers, ms-mssql.mssql/mssql_list_databases, ms-mssql.mssql/mssql_get_connection_details, ms-mssql.mssql/mssql_change_database, ms-mssql.mssql/mssql_list_tables, ms-mssql.mssql/mssql_list_schemas, ms-mssql.mssql/mssql_list_views, ms-mssql.mssql/mssql_list_functions, ms-mssql.mssql/mssql_run_query, todo]
+model: ['Gemini 3.1 Pro (Preview) (copilot)', 'Claude Sonnet 4.6 (copilot)']
+tools: [read, edit, search, execute, todo, vscode/askQuestions, vscode/memory]
 ---
 
 ## Checklist Purpose: "Unit Tests for English"
@@ -10,18 +10,18 @@ tools: [vscode/getProjectSetupInfo, vscode/installExtension, vscode/memory, vsco
 
 **NOT for verification/testing**:
 
-- ❌ NOT "Verify the button clicks correctly"
-- ❌ NOT "Test error handling works"
-- ❌ NOT "Confirm the API returns 200"
-- ❌ NOT checking if code/implementation matches the spec
+- âŒ NOT "Verify the button clicks correctly"
+- âŒ NOT "Test error handling works"
+- âŒ NOT "Confirm the API returns 200"
+- âŒ NOT checking if code/implementation matches the spec
 
 **FOR requirements quality validation**:
 
-- ✅ "Are visual hierarchy requirements defined for all card types?" (completeness)
-- ✅ "Is 'prominent display' quantified with specific sizing/positioning?" (clarity)
-- ✅ "Are hover state requirements consistent across all interactive elements?" (consistency)
-- ✅ "Are accessibility requirements defined for keyboard navigation?" (coverage)
-- ✅ "Does the spec define what happens when logo image fails to load?" (edge cases)
+- âœ… "Are visual hierarchy requirements defined for all card types?" (completeness)
+- âœ… "Is 'prominent display' quantified with specific sizing/positioning?" (clarity)
+- âœ… "Are hover state requirements consistent across all interactive elements?" (consistency)
+- âœ… "Are accessibility requirements defined for keyboard navigation?" (coverage)
+- âœ… "Does the spec define what happens when logo image fails to load?" (edge cases)
 
 **Metaphor**: If your spec is code written in English, the checklist is its unit test suite. You're testing whether the requirements are well-written, complete, unambiguous, and ready for implementation - NOT whether the implementation works.
 
@@ -90,11 +90,11 @@ You **MUST** consider the user input before proceeding (if not empty).
       - Depth calibration (e.g., "Is this a lightweight pre-commit sanity list or a formal release gate?")
       - Audience framing (e.g., "Will this be used by the author only or peers during PR review?")
       - Boundary exclusion (e.g., "Should we explicitly exclude performance tuning items this round?")
-      - Scenario class gap (e.g., "No recovery flows detected—are rollback / partial failure paths in scope?")
+      - Scenario class gap (e.g., "No recovery flows detectedâ€”are rollback / partial failure paths in scope?")
 
    Question formatting rules:
    - If presenting options, generate a compact table with columns: Option | Candidate | Why It Matters
-   - Limit to A–E options maximum; omit table if a free-form answer is clearer
+   - Limit to Aâ€“E options maximum; omit table if a free-form answer is clearer
    - Never ask the user to restate what they already said
    - Avoid speculative categories (no hallucination). If uncertain, ask explicitly: "Confirm whether X belongs in scope."
 
@@ -103,7 +103,7 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Audience: Reviewer (PR) if code-related; Author otherwise
    - Focus: Top 2 relevance clusters
 
-   Output the questions (label Q1/Q2/Q3). After answers: if ≥2 scenario classes (Alternate / Exception / Recovery / Non-Functional domain) remain unclear, you MAY ask up to TWO more targeted follow‑ups (Q4/Q5) with a one-line justification each (e.g., "Unresolved recovery path risk"). Do not exceed five total questions. Skip escalation if user explicitly declines more.
+   Output the questions (label Q1/Q2/Q3). After answers: if â‰¥2 scenario classes (Alternate / Exception / Recovery / Non-Functional domain) remain unclear, you MAY ask up to TWO more targeted followâ€‘ups (Q4/Q5) with a one-line justification each (e.g., "Unresolved recovery path risk"). Do not exceed five total questions. Skip escalation if user explicitly declines more.
 
 3. **Understand user request**: Combine `$ARGUMENTS` + clarifying answers:
    - Derive checklist theme (e.g., security, review, deploy, ux)
@@ -153,12 +153,12 @@ You **MUST** consider the user input before proceeding (if not empty).
 
    **HOW TO WRITE CHECKLIST ITEMS - "Unit Tests for English"**:
 
-   ❌ **WRONG** (Testing implementation):
+   âŒ **WRONG** (Testing implementation):
    - "Verify landing page displays 3 episode cards"
    - "Test hover states work on desktop"
    - "Confirm logo click navigates home"
 
-   ✅ **CORRECT** (Testing requirements quality):
+   âœ… **CORRECT** (Testing requirements quality):
    - "Are the exact number and layout of featured episodes specified?" [Completeness]
    - "Is 'prominent display' quantified with specific sizing/positioning?" [Clarity]
    - "Are hover state requirements consistent across all interactive elements?" [Consistency]
@@ -172,7 +172,7 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Question format asking about requirement quality
    - Focus on what's WRITTEN (or not written) in the spec/plan
    - Include quality dimension in brackets [Completeness/Clarity/Consistency/etc.]
-   - Reference spec section `[Spec §X.Y]` when checking existing requirements
+   - Reference spec section `[Spec Â§X.Y]` when checking existing requirements
    - Use `[Gap]` marker when checking for missing requirements
 
    **EXAMPLES BY QUALITY DIMENSION**:
@@ -183,12 +183,12 @@ You **MUST** consider the user input before proceeding (if not empty).
    - "Are mobile breakpoint requirements defined for responsive layouts? [Gap]"
 
    Clarity:
-   - "Is 'fast loading' quantified with specific timing thresholds? [Clarity, Spec §NFR-2]"
-   - "Are 'related episodes' selection criteria explicitly defined? [Clarity, Spec §FR-5]"
-   - "Is 'prominent' defined with measurable visual properties? [Ambiguity, Spec §FR-4]"
+   - "Is 'fast loading' quantified with specific timing thresholds? [Clarity, Spec Â§NFR-2]"
+   - "Are 'related episodes' selection criteria explicitly defined? [Clarity, Spec Â§FR-5]"
+   - "Is 'prominent' defined with measurable visual properties? [Ambiguity, Spec Â§FR-4]"
 
    Consistency:
-   - "Do navigation requirements align across all pages? [Consistency, Spec §FR-10]"
+   - "Do navigation requirements align across all pages? [Consistency, Spec Â§FR-10]"
    - "Are card component requirements consistent between landing and detail pages? [Consistency]"
 
    Coverage:
@@ -197,8 +197,8 @@ You **MUST** consider the user input before proceeding (if not empty).
    - "Are requirements specified for partial data loading failures? [Coverage, Exception Flow]"
 
    Measurability:
-   - "Are visual hierarchy requirements measurable/testable? [Acceptance Criteria, Spec §FR-1]"
-   - "Can 'balanced visual weight' be objectively verified? [Measurability, Spec §FR-2]"
+   - "Are visual hierarchy requirements measurable/testable? [Acceptance Criteria, Spec Â§FR-1]"
+   - "Can 'balanced visual weight' be objectively verified? [Measurability, Spec Â§FR-2]"
 
    **Scenario Classification & Coverage** (Requirements Quality Focus):
    - Check if requirements exist for: Primary, Alternate, Exception/Error, Recovery, Non-Functional scenarios
@@ -207,14 +207,14 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Include resilience/rollback when state mutation occurs: "Are rollback requirements defined for migration failures? [Gap]"
 
    **Traceability Requirements**:
-   - MINIMUM: ≥80% of items MUST include at least one traceability reference
-   - Each item should reference: spec section `[Spec §X.Y]`, or use markers: `[Gap]`, `[Ambiguity]`, `[Conflict]`, `[Assumption]`
+   - MINIMUM: â‰¥80% of items MUST include at least one traceability reference
+   - Each item should reference: spec section `[Spec Â§X.Y]`, or use markers: `[Gap]`, `[Ambiguity]`, `[Conflict]`, `[Assumption]`
    - If no ID system exists: "Is a requirement & acceptance criteria ID scheme established? [Traceability]"
 
    **Surface & Resolve Issues** (Requirements Quality Problems):
    Ask questions about the requirements themselves:
-   - Ambiguities: "Is the term 'fast' quantified with specific metrics? [Ambiguity, Spec §NFR-1]"
-   - Conflicts: "Do navigation requirements conflict between §FR-10 and §FR-10a? [Conflict]"
+   - Ambiguities: "Is the term 'fast' quantified with specific metrics? [Ambiguity, Spec Â§NFR-1]"
+   - Conflicts: "Do navigation requirements conflict between Â§FR-10 and Â§FR-10a? [Conflict]"
    - Assumptions: "Is the assumption of 'always available podcast API' validated? [Assumption]"
    - Dependencies: "Are external podcast API requirements documented? [Dependency, Gap]"
    - Missing definitions: "Is 'visual hierarchy' defined with measurable criteria? [Gap]"
@@ -224,21 +224,21 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Merge near-duplicates checking the same requirement aspect
    - If >5 low-impact edge cases, create one item: "Are edge cases X, Y, Z addressed in requirements? [Coverage]"
 
-   **🚫 ABSOLUTELY PROHIBITED** - These make it an implementation test, not a requirements test:
-   - ❌ Any item starting with "Verify", "Test", "Confirm", "Check" + implementation behavior
-   - ❌ References to code execution, user actions, system behavior
-   - ❌ "Displays correctly", "works properly", "functions as expected"
-   - ❌ "Click", "navigate", "render", "load", "execute"
-   - ❌ Test cases, test plans, QA procedures
-   - ❌ Implementation details (frameworks, APIs, algorithms)
+   **ðŸš« ABSOLUTELY PROHIBITED** - These make it an implementation test, not a requirements test:
+   - âŒ Any item starting with "Verify", "Test", "Confirm", "Check" + implementation behavior
+   - âŒ References to code execution, user actions, system behavior
+   - âŒ "Displays correctly", "works properly", "functions as expected"
+   - âŒ "Click", "navigate", "render", "load", "execute"
+   - âŒ Test cases, test plans, QA procedures
+   - âŒ Implementation details (frameworks, APIs, algorithms)
 
-   **✅ REQUIRED PATTERNS** - These test requirements quality:
-   - ✅ "Are [requirement type] defined/specified/documented for [scenario]?"
-   - ✅ "Is [vague term] quantified/clarified with specific criteria?"
-   - ✅ "Are requirements consistent between [section A] and [section B]?"
-   - ✅ "Can [requirement] be objectively measured/verified?"
-   - ✅ "Are [edge cases/scenarios] addressed in requirements?"
-   - ✅ "Does the spec define [missing aspect]?"
+   **âœ… REQUIRED PATTERNS** - These test requirements quality:
+   - âœ… "Are [requirement type] defined/specified/documented for [scenario]?"
+   - âœ… "Is [vague term] quantified/clarified with specific criteria?"
+   - âœ… "Are requirements consistent between [section A] and [section B]?"
+   - âœ… "Can [requirement] be objectively measured/verified?"
+   - âœ… "Are [edge cases/scenarios] addressed in requirements?"
+   - âœ… "Does the spec define [missing aspect]?"
 
 6. **Structure Reference**: Generate the checklist following the canonical template in `.specify/templates/checklist-template.md` for title, meta section, category headings, and ID formatting. If template is unavailable, use: H1 title, purpose/created meta lines, `##` category sections containing `- [ ] CHK### <requirement item>` lines with globally incrementing IDs starting at CHK001.
 
@@ -262,12 +262,12 @@ To avoid clutter, use descriptive types and clean up obsolete checklists when do
 
 Sample items (testing the requirements, NOT the implementation):
 
-- "Are visual hierarchy requirements defined with measurable criteria? [Clarity, Spec §FR-1]"
-- "Is the number and positioning of UI elements explicitly specified? [Completeness, Spec §FR-1]"
+- "Are visual hierarchy requirements defined with measurable criteria? [Clarity, Spec Â§FR-1]"
+- "Is the number and positioning of UI elements explicitly specified? [Completeness, Spec Â§FR-1]"
 - "Are interaction state requirements (hover, focus, active) consistently defined? [Consistency]"
 - "Are accessibility requirements specified for all interactive elements? [Coverage, Gap]"
 - "Is fallback behavior defined when images fail to load? [Edge Case, Gap]"
-- "Can 'prominent display' be objectively measured? [Measurability, Spec §FR-4]"
+- "Can 'prominent display' be objectively measured? [Measurability, Spec Â§FR-4]"
 
 **API Requirements Quality:** `api.md`
 
@@ -301,24 +301,24 @@ Sample items:
 
 ## Anti-Examples: What NOT To Do
 
-**❌ WRONG - These test implementation, not requirements:**
+**âŒ WRONG - These test implementation, not requirements:**
 
 ```markdown
-- [ ] CHK001 - Verify landing page displays 3 episode cards [Spec §FR-001]
-- [ ] CHK002 - Test hover states work correctly on desktop [Spec §FR-003]
-- [ ] CHK003 - Confirm logo click navigates to home page [Spec §FR-010]
-- [ ] CHK004 - Check that related episodes section shows 3-5 items [Spec §FR-005]
+- [ ] CHK001 - Verify landing page displays 3 episode cards [Spec Â§FR-001]
+- [ ] CHK002 - Test hover states work correctly on desktop [Spec Â§FR-003]
+- [ ] CHK003 - Confirm logo click navigates to home page [Spec Â§FR-010]
+- [ ] CHK004 - Check that related episodes section shows 3-5 items [Spec Â§FR-005]
 ```
 
-**✅ CORRECT - These test requirements quality:**
+**âœ… CORRECT - These test requirements quality:**
 
 ```markdown
-- [ ] CHK001 - Are the number and layout of featured episodes explicitly specified? [Completeness, Spec §FR-001]
-- [ ] CHK002 - Are hover state requirements consistently defined for all interactive elements? [Consistency, Spec §FR-003]
-- [ ] CHK003 - Are navigation requirements clear for all clickable brand elements? [Clarity, Spec §FR-010]
-- [ ] CHK004 - Is the selection criteria for related episodes documented? [Gap, Spec §FR-005]
+- [ ] CHK001 - Are the number and layout of featured episodes explicitly specified? [Completeness, Spec Â§FR-001]
+- [ ] CHK002 - Are hover state requirements consistently defined for all interactive elements? [Consistency, Spec Â§FR-003]
+- [ ] CHK003 - Are navigation requirements clear for all clickable brand elements? [Clarity, Spec Â§FR-010]
+- [ ] CHK004 - Is the selection criteria for related episodes documented? [Gap, Spec Â§FR-005]
 - [ ] CHK005 - Are loading state requirements defined for asynchronous episode data? [Gap]
-- [ ] CHK006 - Can "visual hierarchy" requirements be objectively measured? [Measurability, Spec §FR-001]
+- [ ] CHK006 - Can "visual hierarchy" requirements be objectively measured? [Measurability, Spec Â§FR-001]
 ```
 
 **Key Differences:**
