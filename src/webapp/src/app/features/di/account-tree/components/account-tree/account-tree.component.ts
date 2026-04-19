@@ -177,12 +177,12 @@ import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account
     }
 
     .row-action-btn.add:hover {
-      background: rgba(46, 125, 50, 0.08);
+      background: var(--success-bg-light);
       color: var(--success);
     }
 
     .row-action-btn.delete:hover {
-      background: rgba(211, 47, 47, 0.08);
+      background: var(--error-bg-light);
       color: var(--error);
     }
 
@@ -201,7 +201,7 @@ import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account
     }
 
     :host ::ng-deep .account-tree-table .p-treetable-tbody > tr.row-selected {
-      background: #dce8f8 !important;
+      background: var(--primary-selected) !important;
     }
 
     :host ::ng-deep .account-tree-table .p-treetable-tbody > tr.row-inactive {
@@ -228,7 +228,7 @@ import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account
     }
 
     .acct-num {
-      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      font-family: var(--font-mono);
       font-size: 12px;
       color: var(--text-secondary);
       font-variant-numeric: tabular-nums;
@@ -272,13 +272,13 @@ import { AccountTreeNodeDto, AccountCategoryKind } from '../../../models/account
     .cat-badge.debit {
       color: var(--debit);
       border: 1px solid var(--debit);
-      background: rgba(21, 101, 192, 0.06);
+      background: var(--debit-bg-light);
     }
 
     .cat-badge.credit {
       color: var(--credit);
       border: 1px solid var(--credit);
-      background: rgba(198, 40, 40, 0.06);
+      background: var(--credit-bg-light);
     }
 
     .dash {

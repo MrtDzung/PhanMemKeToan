@@ -1,0 +1,101 @@
+:host {
+  display: block;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: 4px;
+  min-width: 260px;
+  height: 36px;
+  transition: border-color 0.15s;
+
+  &:focus-within {
+    border-color: var(--primary);
+    outline: none;
+  }
+}
+
+.search-icon {
+  position: absolute;
+  left: 10px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 0 32px 0 32px;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-family: inherit;
+
+  &::placeholder {
+    color: var(--text-disabled);
+  }
+}
+
+.search-clear {
+  position: absolute;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary);
+  border-radius: 50%;
+  padding: 0;
+  font-size: 11px;
+  transition: color 0.15s, background 0.15s;
+
+  &:hover {
+    color: var(--text-primary);
+    background: var(--surface-ground);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 1px;
+  }
+}
+
+::ng-deep .btn-search.p-button {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: var(--color-on-primary) !important;
+
+  &:hover:not(:disabled) {
+    background: var(--primary-dark) !important;
+    border-color: var(--primary-dark) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .search-wrap {
+    min-width: unset;
+    width: 100%;
+  }
+
+  .search-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

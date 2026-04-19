@@ -1,4 +1,4 @@
-import { Component, inject, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -94,20 +94,14 @@ interface StatusOption {
           aria-label="Nhập danh mục tài khoản chuẩn"
         />
         <p-button
-          icon="pi pi-upload"
-          label="Nhập từ Excel"
-          severity="secondary"
-          size="small"
-          (onClick)="importCoa.emit()"
-          aria-label="Nhập danh mục tài khoản"
-        />
-        <p-button
           icon="pi pi-download"
           label="Xuất Excel"
           severity="secondary"
           size="small"
-          [disabled]="true"
-          aria-label="Xuất danh sách tài khoản (chưa hỗ trợ)"
+          [disabled]="isExporting()"
+          [loading]="isExporting()"
+          (onClick)="exportExcel.emit()"
+          aria-label="Xuất danh sách tài khoản ra Excel"
         />
       </div>
     </div>
@@ -228,11 +222,13 @@ export class AccountTreeToolbarComponent {
   readonly store = inject(AccountTreeStore);
   isTT133Mode = false;
 
+  isExporting = input<boolean>(false);
+
   addNew = output<void>();
-  importCoa = output<void>();
   importCoaStandard = output<void>();
   expandAll = output<void>();
   collapseAll = output<void>();
+  exportExcel = output<void>();
 
   readonly statusOptions: StatusOption[] = [
     { label: 'Tất cả', value: 'all' },

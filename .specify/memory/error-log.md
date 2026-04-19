@@ -45,3 +45,22 @@
 **Fix**: Added `ParentId`, `Grade`, `IsPostableInForeignCurrency` to `AccountListItemDto` and mapped them in `FlattenTree`.
 
 **Lesson**: When frontend builds tree from flat API data, the flat DTO MUST include hierarchy fields (`parentId`, `grade`). Always verify the full chain: Domain → DTO → API Response → Angular interface → Tree builder.
+
+---
+
+## 2026-04-19: AccountObjectEmployeeProfile — DateTime Kind=Unspecified → PostgreSQL Error
+
+**Symptom**: `POST /api/account-objects` with `employeeProfile` returned 500. Error: `Cannot write DateTime with Kind=Unspecified to PostgreSQL type 'timestamp with time zone', only UTC is supported`.
+
+**Root Cause**: `DateOfBirth` and `HireDate` sent from client as `'1990-05-15'` (date-only string) — deserialized by ASP.NET Core as `DateTime.Kind=Unspecified`. Npgsql rejects `Unspecified` for `timestamptz` columns.
+
+**Fix**: In `CreateAccountObjectCommandHandler` and `UpdateAccountObjectCommandHandler`, convert before saving:
+```csharp
+DateOfBirth = ep.DateOfBirth.HasValue ? DateTime.SpecifyKind(ep.DateOfBirth.Value, DateTimeKind.Utc) : null,
+HireDate = ep.HireDate.HasValue ? DateTime.SpecifyKind(ep.HireDate.Value, DateTimeKind.Utc) : null,
+```
+Client should send ISO 8601 UTC strings: `'1990-05-15T00:00:00Z'`.
+
+**Lesson**: All `DateTime` fields written to Npgsql `timestamptz` columns MUST have `Kind=Utc`. Enforce at the handler level using `DateTime.SpecifyKind(value, DateTimeKind.Utc)`. Alternatively, configure Npgsql globally with `AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true)` — but explicit UTC is safer.
+
+---

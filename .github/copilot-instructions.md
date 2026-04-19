@@ -1,4 +1,4 @@
-# Copilot Instructions — PhanMemKeToan
+﻿# Copilot Instructions — PhanMemKeToan
 
 > These rules are auto-loaded by GitHub Copilot for every conversation in this workspace.
 > Full reference: `.specify/memory/frontend-design-system.md`

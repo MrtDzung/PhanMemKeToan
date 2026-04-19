@@ -32,9 +32,26 @@
   --debit-bg: color-mix(in srgb, var(--debit) 8%, transparent);
   --credit-bg: color-mix(in srgb, var(--credit) 8%, transparent);
   --success-bg: color-mix(in srgb, var(--success) 12%, transparent);
+  --success-bg-light: color-mix(in srgb, var(--success) 8%, transparent);
+  --success-border-light: color-mix(in srgb, var(--success) 30%, transparent);
   --info-bg: color-mix(in srgb, var(--info) 8%, transparent);
   --warning-bg: color-mix(in srgb, var(--warning) 8%, transparent);
   --error-bg: color-mix(in srgb, var(--error) 8%, transparent);
+  --error-bg-light: color-mix(in srgb, var(--error) 8%, transparent);
+  --debit-bg-light: color-mix(in srgb, var(--debit) 6%, transparent);
+  --credit-bg-light: color-mix(in srgb, var(--credit) 6%, transparent);
+  --primary-selected: color-mix(in srgb, var(--primary) 12%, white);
+
+  /* On-color tokens (text on colored backgrounds) */
+  --color-on-primary: #ffffff;
+  --color-on-primary-muted: rgba(255, 255, 255, 0.9);
+  --color-on-primary-dim: rgba(255, 255, 255, 0.4);
+  --color-on-primary-hover: rgba(255, 255, 255, 0.15);
+  --color-on-primary-border: rgba(255, 255, 255, 0.3);
+
+  /* Darker variants for hover states */
+  --error-dark: #a41b1b;
+  --error-border: #f5c2c2;
 
   /* Surfaces */
   --surface-ground: #f5f5f5;
@@ -117,7 +134,7 @@
 }
 
 .p-dialog .p-dialog-footer button.p-button-danger:hover {
-  background-color: #a41b1b !important;
+  background-color: var(--error-dark) !important;
 }
 
 .p-dialog .p-dialog-footer button.p-button-text {

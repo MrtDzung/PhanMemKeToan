@@ -1,4 +1,4 @@
-﻿import { Component, inject } from '@angular/core';
+﻿import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
@@ -11,6 +11,7 @@ import { AuthStore } from '../../core/stores/auth.store';
   selector: 'app-shell',
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, ButtonModule, AvatarModule, SelectModule, FormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="shell-layout">
       <header class="top-bar">
@@ -102,16 +103,16 @@ import { AuthStore } from '../../core/stores/auth.store';
     .nav-item.active { background: var(--primary-light); color: var(--primary-dark); font-weight: 600; border-right: 3px solid var(--primary); }
     .top-bar { height: 48px; background: var(--primary); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; gap: 12px; flex-shrink: 0; }
     .app-logo { display: flex; align-items: center; gap: 8px; color: white; font-size: 16px; font-weight: 700; flex-shrink: 0; }
-    .topbar-sep { color: rgba(255,255,255,0.4); margin: 0 10px; font-size: 18px; line-height: 1; }
+    .topbar-sep { color: var(--color-on-primary-dim); margin: 0 10px; font-size: 18px; line-height: 1; }
     .top-bar-left { display: flex; align-items: center; }
     .top-bar-right { display: flex; align-items: center; gap: 12px; }
-    .user-name { font-size: 13px; color: rgba(255,255,255,0.9); }
-    .company-name-label { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.9); }
+    .user-name { font-size: 13px; color: var(--color-on-primary-muted); }
+    .company-name-label { font-size: 13px; font-weight: 500; color: var(--color-on-primary-muted); }
     .content-area { flex: 1; overflow: auto; }
     :host ::ng-deep .top-bar .p-button { color: white !important; }
-    :host ::ng-deep .top-bar .p-button:hover { background: rgba(255,255,255,0.15) !important; }
-    :host ::ng-deep .company-select { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); }
-    :host ::ng-deep .company-select .p-select-label { color: rgba(255,255,255,0.9); font-size: 13px; }
+    :host ::ng-deep .top-bar .p-button:hover { background: var(--color-on-primary-hover) !important; }
+    :host ::ng-deep .company-select { background: var(--color-on-primary-hover); border-color: var(--color-on-primary-border); }
+    :host ::ng-deep .company-select .p-select-label { color: var(--color-on-primary-muted); font-size: 13px; }
   `]
 })
 export class ShellComponent {

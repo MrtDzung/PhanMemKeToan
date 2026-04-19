@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard, tempTokenGuard } from './core/guards/auth.guard';
 import { tenantGuard } from './core/guards/tenant.guard';
+import { permissionGuard } from './core/guards/permission.guard';
 
 export const routes: Routes = [
   {
@@ -35,13 +36,13 @@ export const routes: Routes = [
       },
       {
         path: 'di',
-        canActivate: [tenantGuard],
+        canActivate: [tenantGuard, permissionGuard('DI')],
         loadChildren: () =>
           import('./features/di/di.routes').then((m) => m.diRoutes),
       },
       {
         path: 'system',
-        canActivate: [tenantGuard],
+        canActivate: [tenantGuard, permissionGuard('SYS')],
         children: [
           {
             path: 'users',

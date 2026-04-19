@@ -196,7 +196,7 @@ import { AccountCategoryKind, AccountDetailDto } from '../../../models/account.m
     }
 
     .acct-num-large {
-      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      font-family: var(--font-mono);
       font-size: 18px;
       font-weight: 700;
       color: var(--text-primary);
@@ -241,7 +241,7 @@ import { AccountCategoryKind, AccountDetailDto } from '../../../models/account.m
     }
 
     .monospace {
-      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      font-family: var(--font-mono);
       font-size: 12px;
     }
 
@@ -261,13 +261,13 @@ import { AccountCategoryKind, AccountDetailDto } from '../../../models/account.m
     .cat-badge.debit {
       color: var(--debit);
       border: 1px solid var(--debit);
-      background: rgba(21, 101, 192, 0.06);
+      background: var(--debit-bg-light);
     }
 
     .cat-badge.credit {
       color: var(--credit);
       border: 1px solid var(--credit);
-      background: rgba(198, 40, 40, 0.06);
+      background: var(--credit-bg-light);
     }
 
     .detail-flags {
@@ -298,9 +298,9 @@ import { AccountCategoryKind, AccountDetailDto } from '../../../models/account.m
     }
 
     .status-badge.active {
-      background: rgba(46, 125, 50, 0.1);
+      background: var(--success-bg);
       color: var(--success);
-      border: 1px solid rgba(46, 125, 50, 0.3);
+      border: 1px solid var(--success-border-light);
     }
 
     .status-badge.inactive {

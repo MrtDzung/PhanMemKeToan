@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ChangeDetectionStrategy, viewChild, computed } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy, viewChild, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SplitterModule } from 'primeng/splitter';
@@ -11,6 +11,7 @@ import { AccountTreeToolbarComponent } from './components/account-tree-toolbar/a
 import { AccountDetailPanelComponent } from './components/account-detail-panel/account-detail-panel.component';
 import { ImportCoaDialogComponent } from './components/import-coa-dialog/import-coa-dialog.component';
 import { AccountTreeNodeDto } from '../models/account.models';
+import { ExcelExportService } from '../../../core/services/excel-export.service';
 
 @Component({
   selector: 'app-account-tree-page',
@@ -62,6 +63,8 @@ import { AccountTreeNodeDto } from '../models/account.models';
                 (importCoaStandard)="onOpenImportDialog()"
                 (expandAll)="store.expandAll()"
                 (collapseAll)="store.collapseAll()"
+                (exportExcel)="onExportExcel()"
+                [isExporting]="isExporting()"
               />
               <app-account-tree
                 [treeNodes]="store.treeNodes()"
@@ -205,10 +208,12 @@ export class AccountTreePageComponent implements OnInit {
   readonly store = inject(AccountTreeStore);
   readonly confirmationService = inject(ConfirmationService);
   readonly messageService = inject(MessageService);
+  private readonly excelExportService = inject(ExcelExportService);
   readonly importDialog = viewChild.required(ImportCoaDialogComponent);
   readonly totalCount = computed(() => this.store.accounts().length);
   readonly activeCount = computed(() => this.store.accounts().filter(a => !a.inactive).length);
   readonly inactiveCount = computed(() => this.store.accounts().filter(a => a.inactive).length);
+  readonly isExporting = signal(false);
 
   ngOnInit(): void {
     this.store.loadTree();
@@ -255,5 +260,17 @@ export class AccountTreePageComponent implements OnInit {
 
   onOpenImportDialog(): void {
     this.importDialog().open();
+  }
+
+  onExportExcel(): void {
+    const accounts = this.store.accounts();
+    if (accounts.length === 0) {
+      this.messageService.add({ severity: 'warn', summary: 'Không có dữ liệu', detail: 'Danh mục tài khoản trống.' });
+      return;
+    }
+    this.isExporting.set(true);
+    this.excelExportService.exportAccountsToExcel(accounts, accounts);
+    // Reset flag after setTimeout in service fires
+    setTimeout(() => this.isExporting.set(false), 100);
   }
 }

@@ -1,0 +1,74 @@
+:host {
+  display: block;
+}
+
+.action-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.divider {
+  width: 1px;
+  height: 20px;
+  background: var(--surface-border);
+  flex-shrink: 0;
+  margin: 0 2px;
+}
+
+/* Overflow button: hidden on desktop/tablet, shown on mobile */
+.btn-overflow {
+  display: none !important;
+}
+
+/* Primary add button */
+::ng-deep .btn-primary.p-button {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: var(--color-on-primary) !important;
+
+  &:hover:not(:disabled) {
+    background: var(--primary-dark) !important;
+    border-color: var(--primary-dark) !important;
+  }
+}
+
+/* Danger delete button */
+::ng-deep .btn-danger.p-button {
+  background: transparent !important;
+  border-color: var(--error-border) !important;
+  color: var(--error) !important;
+
+  &:hover:not(:disabled) {
+    background: var(--surface-ground) !important;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+/* Tablet: icon-only, tooltip enabled */
+@media (min-width: 768px) and (max-width: 959px) {
+  ::ng-deep .btn-full .p-button-label {
+    display: none;
+  }
+
+  ::ng-deep .btn-full.p-button {
+    .p-button-label {
+      display: none;
+    }
+  }
+}
+
+/* Mobile: hide optional buttons, show overflow */
+@media (max-width: 767px) {
+  ::ng-deep .btn-optional {
+    display: none !important;
+  }
+
+  .btn-overflow {
+    display: inline-flex !important;
+  }
+}

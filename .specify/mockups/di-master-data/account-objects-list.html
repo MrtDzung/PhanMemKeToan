@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Danh sách Đối tượng | PhanMemKeToan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/primeicons@7.0.0/primeicons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1B5E9E;
+      --primary-light: #E8F0FE;
+      --surface-ground: #F5F5F5;
+      --surface-card: #FFFFFF;
+      --surface-border: #E0E0E0;
+      --text-primary: #212121;
+      --text-secondary: #616161;
+      --text-disabled: #9E9E9E;
+      --success: #2E7D32;
+      --warning: #ED6C02;
+      --error: #D32F2F;
+      --info: #0288D1;
+      --success-bg: rgba(46, 125, 50, 0.1);
+      --warning-bg: rgba(237, 108, 2, 0.1);
+      --info-bg: rgba(2, 136, 209, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      margin: 0;
+      background: var(--surface-ground);
+      color: var(--text-primary);
+    }
+
+    .amount {
+      font-family: 'JetBrains Mono', monospace;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .viewport-toggle {
+      background: #333;
+      padding: 4px;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      color: white;
+    }
+
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 26px);
+    }
+
+    .topbar {
+      height: 48px;
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 16px;
+    }
+
+    .main-wrapper {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .sidebar {
+      width: 220px;
+      background: var(--surface-card);
+      border-right: 1px solid var(--surface-border);
+      padding: 8px 0;
+    }
+
+    .sidebar li {
+      padding: 12px 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sidebar li.active {
+      color: var(--primary);
+      background: var(--primary-light);
+      border-right: 3px solid var(--primary);
+      font-weight: 600;
+    }
+
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .toolbar {
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      align-items: center;
+      padding: 6px 16px;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .divider-v {
+      width: 1px;
+      height: 20px;
+      background: var(--surface-border);
+      margin: 0 2px;
+      flex-shrink: 0;
+    }
+
+    .btn-danger {
+      color: var(--error, #D32F2F);
+      border-color: #f5c2c2;
+    }
+
+    .btn-danger:hover {
+      background: #fef2f2;
+    }
+
+    .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .search-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .search-input {
+      padding: 5px 28px 5px 10px;
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: inherit;
+      width: 240px;
+    }
+
+    .search-input:focus {
+      outline: 2px solid var(--primary-light, #E8F0FE);
+      border-color: var(--primary);
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 8px;
+      cursor: pointer;
+      color: var(--text-secondary, #616161);
+      font-size: 10px;
+    }
+
+    .search-clear:hover {
+      color: var(--error, #D32F2F);
+    }
+
+    .btn {
+      padding: 6px 12px;
+      border: 1px solid var(--surface-border);
+      background: var(--surface-card);
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .status-tabs {
+      display: flex;
+      gap: 16px;
+      padding: 12px 16px 0;
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--surface-border);
+    }
+
+    .tab {
+      padding: 8px 0;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      color: var(--text-secondary);
+    }
+
+    .tab.active {
+      border-bottom-color: var(--primary);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .page-content {
+      flex: 1;
+      padding: 16px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .table-container {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      overflow: auto;
+      flex: 1;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--surface-border);
+      padding: 0 8px;
+      height: 32px;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #f8f9fa;
+      color: var(--text-primary);
+      font-weight: 600;
+      text-align: left;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    th.frozen {
+      z-index: 3;
+      left: 0;
+    }
+
+    td.frozen {
+      position: sticky;
+      left: 0;
+      background: inherit;
+      z-index: 1;
+    }
+
+    tbody tr:nth-child(even) {
+      background: var(--surface-ground);
+    }
+
+    tbody tr:nth-child(odd) td.frozen {
+      background: var(--surface-card);
+    }
+
+    tbody tr:nth-child(even) td.frozen {
+      background: var(--surface-ground);
+    }
+
+    tbody tr:hover {
+      background: var(--primary-light);
+    }
+
+    tbody tr:hover td.frozen {
+      background: var(--primary-light);
+    }
+
+    .badge {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .badge-kh {
+      background: var(--info-bg);
+      color: var(--info);
+      border: 1px solid var(--info);
+    }
+
+    .badge-ncc {
+      background: var(--warning-bg);
+      color: var(--warning);
+      border: 1px solid var(--warning);
+    }
+
+    .badge-nv {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+
+    .badge-active {
+      background: var(--success);
+      color: white;
+    }
+
+    .statusbar {
+      height: 24px;
+      background: var(--surface-card);
+      border-top: 1px solid var(--surface-border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="viewport-toggle">Desktop 1440px / Responsive preview bar</div>
+  <div class="app-shell">
+    <header class="topbar">
+      <b>PhanMemKeToan</b>
+      <span style="flex:1"></span>
+      <span>Nguyễn Văn A | Demo JSC</span>
+    </header>
+    <div class="main-wrapper">
+      <aside class="sidebar">
+        <ul style="list-style:none; padding:0; margin:0">
+          <li><i class="pi pi-home"></i> Tổng quan</li>
+          <li class="active"><i class="pi pi-users"></i> Đối tượng</li>
+          <li><i class="pi pi-box"></i> Vật tư hàng hóa</li>
+        </ul>
+      </aside>
+      <main class="content">
+        <div class="status-tabs">
+          <div class="tab active">Tất cả (24)</div>
+          <div class="tab">Đang hoạt động (20)</div>
+          <div class="tab">Ngừng hoạt động (4)</div>
+        </div>
+        <div class="toolbar">
+          <!-- GridActionBar: nút chuẩn tối thiểu -->
+          <button class="btn btn-primary" onclick="onAdd()"><i class="pi pi-plus"></i> Thêm mới</button>
+          <button class="btn" id="btn-edit" disabled onclick="onEdit()"><i class="pi pi-pencil"></i> Sửa</button>
+          <button class="btn btn-danger" id="btn-delete" disabled onclick="onDelete()"><i class="pi pi-trash"></i>
+            Xóa</button>
+          <span class="divider-v"></span>
+          <!-- GridActionBar: optional buttons -->
+          <button class="btn" onclick="onImport()"><i class="pi pi-file-import"></i> Nhập Excel</button>
+          <button class="btn" onclick="onExport()"><i class="pi pi-file-excel"></i> Xuất Excel</button>
+          <span class="divider-v"></span>
+          <button class="btn" onclick="onPrint()"><i class="pi pi-print"></i> In</button>
+          <span class="divider-v"></span>
+          <!-- ng-content slot: filter loại đối tượng -->
+          <select
+            style="padding:5px 8px; border:1px solid var(--surface-border); border-radius:4px; font-size:12px; font-family:inherit"
+            onchange="filterType(this)">
+            <option value="">Tất cả loại</option>
+            <option value="kh">Khách hàng</option>
+            <option value="ncc">Nhà cung cấp</option>
+            <option value="nv">Nhân viên</option>
+          </select>
+          <span style="flex:1"></span>
+          <!-- SearchBar -->
+          <div class="search-wrap">
+            <input type="text" class="search-input" id="search-kw" placeholder="Nhập từ khóa tìm kiếm..."
+              oninput="toggleClear()" onkeydown="if(event.key==='Enter') doSearch()">
+            <i class="pi pi-times search-clear" id="search-clear-btn" style="display:none" onclick="clearSearch()"
+              title="Xóa"></i>
+          </div>
+          <button class="btn btn-primary" onclick="doSearch()"><i class="pi pi-search"></i> Tìm kiếm</button>
+        </div>
+        <div class="page-content">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:36px; text-align:center"><input type="checkbox" id="chk-all"
+                      onchange="toggleAll(this)"></th>
+                  <th class="frozen" style="width:120px">Mã ĐT</th>
+                  <th>Tên đối tượng</th>
+                  <th>Loại ĐT</th>
+                  <th>Mã số thuế</th>
+                  <th>Điện thoại</th>
+                  <th>Địa chỉ</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr onclick="selectRow(this)">
+                  <td style="text-align:center"><input type="checkbox" class="row-chk"
+                      onclick="event.stopPropagation(); syncSelection()"></td>
+                  <td class="frozen">KH001</td>
+                  <td>Công ty CP TM Dịch vụ An Bình</td>
+                  <td><span class="badge badge-kh">Khách hàng</span></td>
+                  <td>0102030405</td>
+                  <td>02431234567</td>
+                  <td>123 Nguyễn Trãi, Thanh Xuân, HN</td>
+                  <td><span class="badge badge-active">Hoạt động</span></td>
+                </tr>
+                <tr onclick="selectRow(this)">
+                  <td style="text-align:center"><input type="checkbox" class="row-chk"
+                      onclick="event.stopPropagation(); syncSelection()"></td>
+                  <td class="frozen">NCC-020</td>
+                  <td>Công ty TNHH Cung ứng Vật tư X</td>
+                  <td><span class="badge badge-ncc">Nhà cung cấp</span></td>
+                  <td>0315123123</td>
+                  <td>02839998888</td>
+                  <td>KCN Tân Bình, TP. HCM</td>
+                  <td><span class="badge badge-active">Hoạt động</span></td>
+                </tr>
+                <tr onclick="selectRow(this)">
+                  <td style="text-align:center"><input type="checkbox" class="row-chk"
+                      onclick="event.stopPropagation(); syncSelection()"></td>
+                  <td class="frozen">NV-KD-001</td>
+                  <td>Nguyễn Văn Bình</td>
+                  <td><span class="badge badge-nv">Nhân viên</span></td>
+                  <td>8091234567</td>
+                  <td>0901234567</td>
+                  <td>Cầu Giấy, Hà Nội</td>
+                  <td><span class="badge badge-active">Hoạt động</span></td>
+                </tr>
+                <tr onclick="selectRow(this)">
+                  <td style="text-align:center"><input type="checkbox" class="row-chk"
+                      onclick="event.stopPropagation(); syncSelection()"></td>
+                  <td class="frozen">KH002</td>
+                  <td>Cửa hàng Tạp hóa Mười Phương</td>
+                  <td><span class="badge badge-kh">Khách hàng</span></td>
+                  <td></td>
+                  <td>0988777666</td>
+                  <td>Quận 1, Hồ Chí Minh</td>
+                  <td><span class="badge badge-active">Hoạt động</span></td>
+                </tr>
+                <tr onclick="selectRow(this)">
+                  <td style="text-align:center"><input type="checkbox" class="row-chk"
+                      onclick="event.stopPropagation(); syncSelection()"></td>
+                  <td class="frozen">KH-NCC-01</td>
+                  <td>Tập đoàn Vingroup (Vừa KH vừa NCC)</td>
+                  <td><span class="badge badge-kh">Khách hàng</span> <span class="badge badge-ncc">NCC</span></td>
+                  <td>0101245486</td>
+                  <td>02439749999</td>
+                  <td>Số 7 Bằng Lăng 1, Việt Hưng, Long Biên</td>
+                  <td><span class="badge badge-active">Hoạt động</span></td>
+                </tr>
+                <tr onclick="selectRow(this)">
+                  <td style="text-align:center"><input type="checkbox" class="row-chk"
+                      onclick="event.stopPropagation(); syncSelection()"></td>
+                  <td class="frozen">NV-KT-002</td>
+                  <td>Trần Thị Lan</td>
+                  <td><span class="badge badge-nv">Nhân viên</span></td>
+                  <td></td>
+                  <td>0912345678</td>
+                  <td>Đống Đa, Hà Nội</td>
+                  <td><span class="badge badge-active">Hoạt động</span></td>
+                </tr>
+                <tr onclick="selectRow(this)">
+                  <td style="text-align:center"><input type="checkbox" class="row-chk"
+                      onclick="event.stopPropagation(); syncSelection()"></td>
+                  <td class="frozen">NCC-021</td>
+                  <td>Cơ sở Sản xuất Gỗ Mỹ nghệ Vạn Phát</td>
+                  <td><span class="badge badge-ncc">Nhà cung cấp</span></td>
+                  <td>0401828282</td>
+                  <td>02363555666</td>
+                  <td>Liên Chiểu, Đà Nẵng</td>
+                  <td><span class="badge badge-active">Hoạt động</span></td>
+                </tr>
+                <tr onclick="selectRow(this)">
+                  <td style="text-align:center"><input type="checkbox" class="row-chk"
+                      onclick="event.stopPropagation(); syncSelection()"></td>
+                  <td class="frozen">KH003</td>
+                  <td>Công ty TNHH ABC</td>
+                  <td><span class="badge badge-kh">Khách hàng</span></td>
+                  <td>0102666777</td>
+                  <td></td>
+                  <td>Ba Đình, Hà Nội</td>
+                  <td><span class="badge badge-active">Hoạt động</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <footer class="statusbar">
+          Hiển thị 1-8 / 24 bản ghi
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    // ── Selection tracking ──
+    function updateToolbar() {
+      const count = document.querySelectorAll('.row-chk:checked').length;
+      document.getElementById('btn-edit').disabled = count === 0;
+      document.getElementById('btn-delete').disabled = count === 0;
+    }
+    function selectRow(tr) {
+      const chk = tr.querySelector('.row-chk');
+      chk.checked = !chk.checked;
+      tr.style.background = chk.checked ? '#e3f2fd' : '';
+      syncSelection();
+    }
+    function syncSelection() {
+      document.querySelectorAll('tbody tr').forEach(tr => {
+        const chk = tr.querySelector('.row-chk');
+        if (chk) tr.style.background = chk.checked ? '#e3f2fd' : '';
+      });
+      updateToolbar();
+    }
+    function toggleAll(chkAll) {
+      document.querySelectorAll('.row-chk').forEach(c => c.checked = chkAll.checked);
+      syncSelection();
+    }
+
+    // ── SearchBar ──
+    function toggleClear() {
+      document.getElementById('search-clear-btn').style.display =
+        document.getElementById('search-kw').value ? 'block' : 'none';
+    }
+    function clearSearch() {
+      document.getElementById('search-kw').value = '';
+      document.getElementById('search-clear-btn').style.display = 'none';
+    }
+    function doSearch() {
+      const kw = document.getElementById('search-kw').value;
+      // Demo: highlight matching rows
+      document.querySelectorAll('tbody tr').forEach(tr => {
+        if (!kw) { tr.style.display = ''; return; }
+        tr.style.display = tr.textContent.toLowerCase().includes(kw.toLowerCase()) ? '' : 'none';
+      });
+    }
+
+    // ── Action stubs ──
+    function onAdd() { alert('Mở form Thêm mới Đối tượng KT'); }
+    function onEdit() { alert('Mở form Sửa đối tượng đã chọn'); }
+    function onDelete() { if (confirm('Xóa đối tượng đã chọn?')) alert('Emit deleteClick'); }
+    function onImport() { alert('Mở wizard Nhập Excel'); }
+    function onExport() { alert('Xuất Excel'); }
+    function onPrint() { alert('In danh sách'); }
+    function filterType(sel) { /* demo filter by type badge */ }
+  </script>
+</body>
+
+</html>

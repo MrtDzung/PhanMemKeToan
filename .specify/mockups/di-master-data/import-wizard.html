@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Import Wizard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/primeicons@7.0.0/primeicons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1B5E9E;
+      --success: #2E7D32;
+      --error: #D32F2F;
+      --surface-ground: #F5F5F5;
+      --surface-card: #FFFFFF;
+      --surface-border: #E0E0E0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .modal {
+      background: var(--surface-card);
+      width: 100%;
+      max-width: 720px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .header {
+      padding: 16px;
+      border-bottom: 1px solid var(--surface-border);
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .stepper {
+      display: flex;
+      padding: 16px 24px;
+      background: var(--surface-ground);
+      border-bottom: 1px solid var(--surface-border);
+    }
+
+    .step {
+      flex: 1;
+      text-align: center;
+      color: #9E9E9E;
+      font-weight: 500;
+      border-bottom: 3px solid #E0E0E0;
+      padding-bottom: 8px;
+    }
+
+    .step.done {
+      color: var(--success);
+      border-color: var(--success);
+    }
+
+    .step.active {
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .body {
+      padding: 24px;
+      min-height: 200px;
+    }
+
+    .footer {
+      padding: 16px;
+      border-top: 1px solid var(--surface-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      background: var(--surface-ground);
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border: 1px solid var(--surface-border);
+      background: var(--surface-card);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .dropzone {
+      border: 2px dashed var(--primary);
+      background: #E8F0FE;
+      border-radius: 8px;
+      padding: 32px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+      font-size: 12px;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--surface-border);
+      padding: 4px 8px;
+    }
+
+    th {
+      background: #f8f9fa;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="modal">
+    <div class="header">Nhập dữ liệu từ Excel — Đối tượng</div>
+    <div class="stepper">
+      <div class="step done">1. Tải mẫu</div>
+      <div class="step active">2. Chọn file</div>
+      <div class="step">3. Kết quả</div>
+    </div>
+    <div class="body">
+      <div class="dropzone">
+        <i class="pi pi-cloud-upload" style="font-size: 2rem; color: var(--primary); margin-bottom: 8px;"></i>
+        <div>Kéo thả file .xlsx vào đây hoặc <b>Bấm để chọn file</b></div>
+      </div>
+      <div>
+        <b>Dữ liệu xem trước (5 dòng đầu)</b>
+        <table>
+          <tr>
+            <th>Mã đối tượng</th>
+            <th>Tên đối tượng</th>
+            <th>Loại ĐT</th>
+            <th>Mã số thuế</th>
+          </tr>
+          <tr>
+            <td>KH001</td>
+            <td>Công ty CP TM Dịch vụ An Bình</td>
+            <td>Khách hàng</td>
+            <td>0102030405</td>
+          </tr>
+          <tr>
+            <td>NCC-020</td>
+            <td>Công ty TNHH Cung ứng Vật tư X</td>
+            <td>Nhà cung cấp</td>
+            <td>0315123123</td>
+          </tr>
+          <tr>
+            <td>NV-KD-001</td>
+            <td>Nguyễn Văn Bình</td>
+            <td>Nhân viên</td>
+            <td>8091234567</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="footer">
+      <button class="btn">Quay lại</button>
+      <button class="btn btn-primary">Bắt đầu nhập</button>
+    </div>
+  </div>
+</body>
+
+</html>

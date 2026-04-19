@@ -1,0 +1,58 @@
+<div class="action-bar" role="toolbar" aria-label="Thanh công cụ">
+  <!-- Core buttons: always visible -->
+  <p-button label="Thêm mới" icon="pi pi-plus" styleClass="btn-primary btn-full" ariaLabel="Thêm mới"
+    pTooltip="Thêm mới" tooltipPosition="bottom" [tooltipDisabled]="!isIconOnly()"
+    (onClick)="addClick.emit()"></p-button>
+
+  <p-button label="Sửa" icon="pi pi-pencil" severity="secondary" styleClass="btn-full" ariaLabel="Sửa" pTooltip="Sửa"
+    tooltipPosition="bottom" [tooltipDisabled]="!isIconOnly()" [disabled]="!isEditEnabled()"
+    (onClick)="editClick.emit()"></p-button>
+
+  <p-button label="Xóa" icon="pi pi-trash" styleClass="btn-danger btn-full" ariaLabel="Xóa" pTooltip="Xóa"
+    tooltipPosition="bottom" [tooltipDisabled]="!isIconOnly()" [disabled]="!isEditEnabled()"
+    (onClick)="deleteClick.emit()"></p-button>
+
+  <!-- Divider after core buttons (desktop: always; tablet/mobile: if optional shown) -->
+  @if (hasOptional()) {
+  <div class="divider" role="separator" aria-orientation="vertical"></div>
+  }
+
+  <!-- Optional buttons: desktop/tablet only -->
+  @if (showDuplicate()) {
+  <p-button label="Nhân bản" icon="pi pi-copy" severity="secondary" styleClass="btn-optional btn-full"
+    ariaLabel="Nhân bản" pTooltip="Nhân bản" tooltipPosition="bottom" [tooltipDisabled]="!isIconOnly()"
+    [disabled]="!isEditEnabled()" (onClick)="duplicateClick.emit()"></p-button>
+  }
+
+  @if (showImport() || showExport()) {
+  @if (showImport()) {
+  <p-button label="Nhập Excel" icon="pi pi-file-excel" severity="secondary" styleClass="btn-optional btn-full"
+    ariaLabel="Nhập Excel" pTooltip="Nhập Excel" tooltipPosition="bottom" [tooltipDisabled]="!isIconOnly()"
+    (onClick)="importClick.emit()"></p-button>
+  }
+  @if (showExport()) {
+  <p-button label="Xuất Excel" icon="pi pi-file-export" severity="secondary" styleClass="btn-optional btn-full"
+    ariaLabel="Xuất Excel" pTooltip="Xuất Excel" tooltipPosition="bottom" [tooltipDisabled]="!isIconOnly()"
+    (onClick)="exportClick.emit()"></p-button>
+  }
+  }
+
+  @if (showPrint()) {
+  @if (showImport() || showExport() || showDuplicate()) {
+  <div class="divider" role="separator" aria-orientation="vertical"></div>
+  }
+  <p-button label="In" icon="pi pi-print" severity="secondary" styleClass="btn-optional btn-full" ariaLabel="In"
+    pTooltip="In" tooltipPosition="bottom" [tooltipDisabled]="!isIconOnly()" (onClick)="printClick.emit()"></p-button>
+  }
+
+  <!-- Mobile overflow menu -->
+  @if (hasOptional()) {
+  <p-menu #overflowMenu [model]="overflowItems()" [popup]="true"></p-menu>
+  <p-button icon="pi pi-ellipsis-h" severity="secondary" styleClass="btn-overflow" ariaLabel="Thêm tùy chọn"
+    pTooltip="Thêm tùy chọn" tooltipPosition="bottom" [tooltipDisabled]="!isIconOnly()"
+    (onClick)="overflowMenu.toggle($event)"></p-button>
+  }
+
+  <!-- Extra controls slot -->
+  <ng-content></ng-content>
+</div>

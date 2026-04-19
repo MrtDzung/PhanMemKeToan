@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Khai báo Hàng hóa | PhanMemKeToan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/primeicons@7.0.0/primeicons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1B5E9E;
+      --surface-ground: #F5F5F5;
+      --surface-card: #FFFFFF;
+      --surface-border: #E0E0E0;
+      --text-primary: #212121;
+      --text-secondary: #616161;
+      --error: #D32F2F;
+      --error-bg: #ffebee;
+      --success: #2E7D32;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      margin: 0;
+      background: var(--surface-ground);
+      color: var(--text-primary);
+    }
+
+    .amount {
+      font-family: 'JetBrains Mono', monospace;
+      text-align: right;
+    }
+
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .breadcrumb {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: var(--surface-ground);
+      border-bottom: 1px solid var(--surface-border);
+    }
+
+    .toolbar {
+      height: 44px;
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 6px 12px;
+      border: 1px solid var(--surface-border);
+      background: var(--surface-card);
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .page-content {
+      flex: 1;
+      padding: 16px;
+      overflow: auto;
+      background: var(--surface-card);
+      margin: 16px;
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--surface-border);
+      gap: 24px;
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+
+    .tab {
+      padding: 8px 0;
+      cursor: pointer;
+      color: var(--text-secondary);
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      font-weight: 600;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .form-group>label {
+      width: 140px;
+      padding-top: 6px;
+      color: var(--text-secondary);
+    }
+
+    .field {
+      flex: 1;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .required {
+      color: var(--error);
+      margin-left: 2px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--surface-border);
+      padding: 4px 8px;
+      height: 32px;
+      text-align: left;
+    }
+
+    th {
+      background: var(--surface-ground);
+      font-weight: 500;
+    }
+
+    .banner {
+      padding: 8px 16px;
+      background: #e3f2fd;
+      color: #1565c0;
+      border: 1px solid #bbdefb;
+      border-radius: 4px;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <nav class="breadcrumb">Danh mục > Vật tư Hàng hóa > Thêm mới</nav>
+    <div class="toolbar">
+      <button class="btn btn-primary" title="Ctrl+S"><i class="pi pi-save"></i> Lưu</button>
+      <button class="btn" title="Ctrl+Shift+S"><i class="pi pi-save"></i> Lưu & Thêm</button>
+      <button class="btn" disabled><i class="pi pi-print"></i> In</button>
+      <span style="flex:1"></span>
+      <button class="btn"><i class="pi pi-times"></i> Đóng</button>
+    </div>
+
+    <div class="page-content">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">Thông tin chung</div>
+        <div class="tab" onclick="switchTab(1)">Đơn vị tính phụ</div>
+        <div class="tab" onclick="switchTab(2)">Mã vạch</div>
+        <div class="tab" onclick="switchTab(3)">Thuộc tính</div>
+        <div class="tab" onclick="switchTab(4)">Định mức NVL</div>
+        <div class="tab" onclick="switchTab(5)">Cài đặt kho</div>
+      </div>
+
+      <div class="tab-content active" id="content-0">
+        <div class="grid-2">
+          <div>
+            <div class="form-group"><label>Mã VTHH<span class="required">*</span></label>
+              <div class="field"><input type="text" value="LAP-DELL-01"></div>
+            </div>
+            <div class="form-group"><label>Tên VTHH<span class="required">*</span></label>
+              <div class="field"><input type="text" value="Laptop Dell Vostro 3500"></div>
+            </div>
+            <div class="form-group"><label>Tên tiếng Anh</label>
+              <div class="field"><input type="text" value="Dell Vostro 3500 Laptop"></div>
+            </div>
+            <div class="form-group"><label>Nhóm VTHH</label>
+              <div class="field"><select>
+                  <option>Thiết bị điện tử</option>
+                </select></div>
+            </div>
+            <div class="form-group"><label>Tính chất</label>
+              <div class="field"><select>
+                  <option>VTHH (Vật tư, Hàng hóa, Thành phẩm)</option>
+                  <option>Dịch vụ</option>
+                </select></div>
+            </div>
+            <div class="form-group"><label>P/pháp tính giá</label>
+              <div class="field"><select>
+                  <option>Bình quân gia quyền</option>
+                  <option>FIFO</option>
+                </select></div>
+            </div>
+          </div>
+          <div>
+            <div class="form-group"><label>ĐVT chính<span class="required">*</span></label>
+              <div class="field"><select>
+                  <option>Cái</option>
+                  <option>Thùng</option>
+                </select></div>
+            </div>
+            <div class="form-group"
+              title="Đơn vị đóng gói lớn nhất, chỉ dùng khi bật Khai báo Hàng theo thùng (ở tab Cài đặt kho)"><label
+                style="color:var(--text-secondary)">ĐVT bao bì (Thùng)</label>
+              <div class="field"><select disabled>
+                  <option>--Chọn--</option>
+                  <option>Thùng</option>
+                </select><span style="font-size:11px; color:var(--text-secondary)">Bật “Hàng theo thùng” ở tab Cài đặt
+                  kho để mở kóa</span></div>
+            </div>
+            <div class="form-group"><label>Thuế suất GTGT (%)</label>
+              <div class="field"><input type="number" value="10"></div>
+            </div>
+            <div class="form-group"><label>Đơn giá bán 1</label>
+              <div class="field"><input type="text" class="amount" value="15.500.000"></div>
+            </div>
+            <div class="form-group"><label>Đơn giá bán 2</label>
+              <div class="field"><input type="text" class="amount" value="15.000.000"></div>
+            </div>
+            <div class="form-group">
+              <label>Khác</label>
+              <div class="field">
+                <label><input type="checkbox" checked> Hoạt động</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="content-1">
+        <button class="btn" style="margin-bottom:8px" onclick="addUnitRow()"><i class="pi pi-plus"></i> Thêm ĐVT
+          phụ</button>
+        <table id="unit-table">
+          <thead>
+            <tr>
+              <th style="width:160px">ĐVT phụ<span class="required">*</span></th>
+              <th style="width:130px">Tỷ lệ quy đổi<span class="required">*</span></th>
+              <th style="width:80px; text-align:center">Phép tính</th>
+              <th>Ghi chú (tự tính)</th>
+              <th style="width:36px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><select name="dvt">
+                  <option>Thùng</option>
+                  <option>Lốc</option>
+                  <option>Hộp</option>
+                </select></td>
+              <td><input type="number" class="amount" value="24" oninput="calcNote(this)"></td>
+              <td style="text-align:center"><select name="op"
+                  onchange="calcNote(this.closest('tr').querySelector('input[type=number]'))"
+                  style="width:60px; text-align:center">
+                  <option value="*">×</option>
+                  <option value="/">÷</option>
+                </select></td>
+              <td class="note-cell" style="color:var(--text-secondary); font-style:italic">1 Thùng = 24 Cái</td>
+              <td><i class="pi pi-trash" style="color:#c62828; cursor:pointer"
+                  onclick="this.closest('tr').remove()"></i></td>
+            </tr>
+            <tr>
+              <td><select name="dvt">
+                  <option>Lốc</option>
+                  <option>Thùng</option>
+                </select></td>
+              <td><input type="number" class="amount" value="6" oninput="calcNote(this)"></td>
+              <td style="text-align:center"><select name="op"
+                  onchange="calcNote(this.closest('tr').querySelector('input[type=number]'))"
+                  style="width:60px; text-align:center">
+                  <option value="*">×</option>
+                  <option value="/">÷</option>
+                </select></td>
+              <td class="note-cell" style="color:var(--text-secondary); font-style:italic">1 Lốc = 6 Cái</td>
+              <td><i class="pi pi-trash" style="color:#c62828; cursor:pointer"
+                  onclick="this.closest('tr').remove()"></i></td>
+            </tr>
+          </tbody>
+        </table>
+        <p style="font-size:11px; color:var(--text-secondary); margin-top:8px">× (Nhân): 1 ĐVT phụ = Tỷ lệ × ĐVT chính
+          &nbsp;|÷ (Chia): 1 ĐVT phụ = 1 ÷ Tỷ lệ ĐVT chính</p>
+      </div>
+
+      <div class="tab-content" id="content-2">
+        <button class="btn" style="margin-bottom:8px"><i class="pi pi-plus"></i> Thêm mã vạch</button>
+        <table>
+          <thead>
+            <tr>
+              <th>Mã vạch*</th>
+              <th>Loại mã</th>
+              <th>Đơn vị tính</th>
+              <th>Kích hoạt</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="text" value="893123456789"></td>
+              <td><select>
+                  <option>EAN-13</option>
+                </select></td>
+              <td><select>
+                  <option>Cái</option>
+                </select></td>
+              <td><input type="checkbox" checked></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tab-content" id="content-3">
+        <button class="btn" style="margin-bottom:8px"><i class="pi pi-plus"></i> Thêm thuộc tính</button>
+        <table>
+          <thead>
+            <tr>
+              <th>Loại thuộc tính*</th>
+              <th>Giá trị*</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><select>
+                  <option>Thương hiệu</option>
+                </select></td>
+              <td><input type="text" value="Dell"></td>
+            </tr>
+            <tr>
+              <td><select>
+                  <option>Màu sắc</option>
+                </select></td>
+              <td><input type="text" value="Đen"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tab-content" id="content-4">
+        <div class="banner" id="bom-note" style="background:#fff3e0; color:#e65100; border:1px solid #ffe0b2">Tab này
+          dùng cho hàng <b>Thành phẩm (TP)</b> — khai báo định mức nguyên vật liệu cho 1 đơn vị sản phẩm. Hiện tại hàng
+          này là Hàng hóa.</div>
+        <div style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center">
+          <span style="font-size:12px; color:var(--text-secondary)">Định mức cho: <b>LAP-DELL-01</b> &mdash; 1
+            <b>Cái</b> thành phẩm cần:</span>
+          <button class="btn" onclick="addBomRow()"><i class="pi pi-plus"></i> Thêm NVL</button>
+        </div>
+        <table id="bom-table">
+          <thead>
+            <tr>
+              <th>Vật tư<span class="required">*</span></th>
+              <th style="width:100px">ĐVT</th>
+              <th style="width:140px" class="amount">Số lượng / 1 TP<span class="required">*</span></th>
+              <th>Ghi chú</th>
+              <th style="width:36px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><select style="width:100%">
+                  <option>NVL-MB-01 — Bo mạch chủ Intel i5</option>
+                  <option>NVL-MH-15 — Màn hình 15.6"</option>
+                  <option>NVL-RAM-8G — RAM DDR4 8GB</option>
+                </select></td>
+              <td>Cái</td>
+              <td><input type="number" class="amount" value="1"></td>
+              <td><input type="text" placeholder="Ghi chú"></td>
+              <td><i class="pi pi-trash" style="color:#c62828; cursor:pointer"
+                  onclick="this.closest('tr').remove()"></i></td>
+            </tr>
+            <tr>
+              <td><select style="width:100%">
+                  <option>NVL-MH-15 — Màn hình 15.6"</option>
+                </select></td>
+              <td>Cái</td>
+              <td><input type="number" class="amount" value="1"></td>
+              <td><input type="text" value="Full HD IPS"></td>
+              <td><i class="pi pi-trash" style="color:#c62828; cursor:pointer"
+                  onclick="this.closest('tr').remove()"></i></td>
+            </tr>
+            <tr>
+              <td><select style="width:100%">
+                  <option>NVL-RAM-8G — RAM DDR4 8GB</option>
+                </select></td>
+              <td>Cái</td>
+              <td><input type="number" class="amount" value="2"></td>
+              <td><input type="text" value="2 thanh 4GB"></td>
+              <td><i class="pi pi-trash" style="color:#c62828; cursor:pointer"
+                  onclick="this.closest('tr').remove()"></i></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tab-content" id="content-5">
+        <div class="grid-2">
+          <div><label><input type="checkbox"> Theo dõi số Serial</label></div>
+          <div><label><input type="checkbox"> Theo dõi Lô / Date</label></div>
+          <div><label><input type="checkbox"> Theo dõi hạn sử dụng</label></div>
+          <div><label><input type="checkbox" id="chk-panel" onchange="togglePanelUnit()"> Khai báo Hàng theo
+              thùng</label></div>
+        </div>
+        <div id="panel-unit-row" style="display:none; margin-top:12px">
+          <div class="form-group"><label>ĐVT bao bì (Thùng)<span class="required">*</span></label>
+            <div class="field"><select>
+                <option>Thùng</option>
+                <option>Kiện</option>
+              </select></div>
+          </div>
+        </div>
+        <hr style="border:0;border-top:1px solid #eee;margin:16px 0">
+        <div class="grid-2">
+          <div class="form-group"><label>Tồn kho tối thiểu</label><input type="number" value="10"></div>
+          <div class="form-group"><label>Tồn kho tối đa</label><input type="number" value="500"></div>
+          <div class="form-group"><label>Thời gian nhập (ngày)</label><input type="number" value="3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(idx) {
+      document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+      document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === idx));
+    }
+    function calcNote(input) {
+      const row = input.closest('tr');
+      const dvtSel = row.querySelector('select[name="dvt"]');
+      const dvt = dvtSel ? dvtSel.options[dvtSel.selectedIndex].text : '?';
+      const rate = parseFloat(input.value) || 0;
+      const opSel = row.querySelector('select[name="op"]');
+      const op = opSel ? opSel.value : '*';
+      const note = row.querySelector('.note-cell');
+      if (!note) return;
+      if (op === '*') note.textContent = `1 ${dvt} = ${rate} Cái`;
+      else note.textContent = `1 ${dvt} = 1÷${rate} Cái`;
+    }
+    function addUnitRow() {
+      const tbody = document.querySelector('#unit-table tbody');
+      tbody.insertAdjacentHTML('beforeend', `<tr><td><select name="dvt"><option>Hộp</option><option>Thùng</option></select></td><td><input type="number" class="amount" value="1" oninput="calcNote(this)"></td><td style="text-align:center"><select name="op" onchange="calcNote(this.closest('tr').querySelector('input[type=number]'))" style="width:60px; text-align:center"><option value="*">×</option><option value="/">÷</option></select></td><td class="note-cell" style="color:var(--text-secondary); font-style:italic">1 Hộp = 1 Cái</td><td><i class="pi pi-trash" style="color:#c62828; cursor:pointer" onclick="this.closest('tr').remove()"></i></td></tr>`);
+    }
+    function addBomRow() {
+      const tbody = document.querySelector('#bom-table tbody');
+      tbody.insertAdjacentHTML('beforeend', `<tr><td><select style="width:100%"><option>-- Chọn vật tư --</option></select></td><td></td><td><input type="number" class="amount" value="1"></td><td><input type="text"></td><td><i class="pi pi-trash" style="color:#c62828; cursor:pointer" onclick="this.closest('tr').remove()"></i></td></tr>`);
+    }
+    function togglePanelUnit() {
+      document.getElementById('panel-unit-row').style.display = document.getElementById('chk-panel').checked ? 'block' : 'none';
+      // Also enable/disable ĐVT bao bì field on Tab 1
+      const dvtBaoBi = document.querySelector('select[disabled]');
+      if (dvtBaoBi) dvtBaoBi.disabled = !document.getElementById('chk-panel').checked;
+    }
+  </script>
+</body>
+
+</html>

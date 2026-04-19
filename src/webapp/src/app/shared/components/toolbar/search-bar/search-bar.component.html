@@ -1,0 +1,19 @@
+<div class="search-bar" role="search">
+  <div class="search-wrap">
+    <i class="pi pi-search search-icon" aria-hidden="true"></i>
+    <input type="text" class="search-input" [placeholder]="placeholder()" [ngModel]="keyword()"
+      (ngModelChange)="keyword.set($event)" (keydown.enter)="onSearch()" aria-label="Từ khóa tìm kiếm"
+      autocomplete="off" />
+    @if (hasKeyword()) {
+    <button type="button" class="search-clear" (click)="onClear()" aria-label="Xóa từ khóa" title="Xóa từ khóa">
+      <i class="pi pi-times" aria-hidden="true"></i>
+    </button>
+    }
+  </div>
+
+  <p-button label="Tìm kiếm" icon="pi pi-search" styleClass="btn-search" ariaLabel="Tìm kiếm"
+    (onClick)="onSearch()"></p-button>
+
+  <!-- Slot for extra filters -->
+  <ng-content select="[slot='filters']"></ng-content>
+</div>

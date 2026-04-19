@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Vật tư Hàng hóa | PhanMemKeToan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/primeicons@7.0.0/primeicons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1B5E9E;
+      --surface-ground: #F5F5F5;
+      --surface-card: #FFFFFF;
+      --surface-border: #E0E0E0;
+      --text-primary: #212121;
+      --text-secondary: #616161;
+      --success: #2E7D32;
+      --success-bg: rgba(46, 125, 50, 0.1);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      margin: 0;
+      background: var(--surface-ground);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .amount {
+      font-family: 'JetBrains Mono', monospace;
+      text-align: right;
+    }
+
+    .toolbar {
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      align-items: center;
+      padding: 6px 16px;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .divider-v {
+      width: 1px;
+      height: 20px;
+      background: var(--surface-border);
+      margin: 0 2px;
+      flex-shrink: 0;
+    }
+
+    .btn-danger {
+      color: var(--error, #D32F2F);
+      border-color: #f5c2c2;
+    }
+
+    .btn-danger:hover {
+      background: #fef2f2;
+    }
+
+    .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .search-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .search-input {
+      padding: 5px 28px 5px 10px;
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: inherit;
+      width: 240px;
+    }
+
+    .search-input:focus {
+      outline: 2px solid var(--primary-light, #E8F0FE);
+      border-color: var(--primary);
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 8px;
+      cursor: pointer;
+      color: var(--text-secondary, #616161);
+      font-size: 10px;
+    }
+
+    .search-clear:hover {
+      color: var(--error, #D32F2F);
+    }
+
+    .btn {
+      padding: 6px 12px;
+      border: 1px solid var(--surface-border);
+      background: var(--surface-card);
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .split-layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      padding: 16px;
+      gap: 16px;
+    }
+
+    /* Tree */
+    .tree-panel {
+      width: 280px;
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .tree-header {
+      padding: 8px 12px;
+      background: var(--surface-ground);
+      font-weight: 600;
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .tree-content {
+      padding: 8px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    ul.tree {
+      list-style: none;
+      padding-left: 16px;
+      margin: 0;
+    }
+
+    ul.tree.root {
+      padding-left: 0;
+    }
+
+    ul.tree li {
+      padding: 4px 0;
+    }
+
+    .tree-node {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+    }
+
+    .tree-node:hover {
+      background: #E8F0FE;
+    }
+
+    /* Table */
+    .table-container {
+      flex: 1;
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--surface-border);
+      padding: 0 8px;
+      height: 32px;
+      white-space: nowrap;
+    }
+
+    th {
+      background: var(--surface-ground);
+      text-align: left;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      font-weight: 600;
+    }
+
+    th.frozen {
+      left: 0;
+      z-index: 3;
+    }
+
+    td.frozen {
+      position: sticky;
+      left: 0;
+      background: var(--surface-card);
+      z-index: 1;
+    }
+
+    .badge {
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+    }
+
+    .badge-hh {
+      background: #e3f2fd;
+      color: #1565c0;
+      border: 1px solid #1565c0;
+    }
+
+    .sum-row td {
+      font-weight: bold;
+      background: var(--surface-ground);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="toolbar">
+    <!-- GridActionBar: nút chuẩn -->
+    <button class="btn btn-primary" onclick="onAdd()"><i class="pi pi-plus"></i> Thêm mới</button>
+    <button class="btn" id="btn-edit" disabled onclick="onEdit()"><i class="pi pi-pencil"></i> Sửa</button>
+    <button class="btn btn-danger" id="btn-delete" disabled onclick="onDelete()"><i class="pi pi-trash"></i>
+      Xóa</button>
+    <span class="divider-v"></span>
+    <!-- Optional buttons -->
+    <button class="btn" onclick="onImport()"><i class="pi pi-file-import"></i> Nhập Excel</button>
+    <button class="btn" onclick="onExport()"><i class="pi pi-file-excel"></i> Xuất Excel</button>
+    <span class="divider-v"></span>
+    <button class="btn" onclick="onPrint()"><i class="pi pi-print"></i> In</button>
+    <span class="divider-v"></span>
+    <!-- ng-content slot: ItemType filter (specific to VTHH screen) -->
+    <select
+      style="padding:5px 8px; border:1px solid var(--surface-border); border-radius:4px; font-size:12px; font-family:inherit"
+      onchange="filterType(this)">
+      <option value="">Tất cả loại</option>
+      <option value="hh">Hàng hóa (HH)</option>
+      <option value="nvl">Nguyên vật liệu (NVL)</option>
+      <option value="tp">Thành phẩm (TP)</option>
+      <option value="dv">Dịch vụ (DV)</option>
+    </select>
+    <span style="flex:1"></span>
+    <!-- SearchBar -->
+    <div class="search-wrap">
+      <input type="text" class="search-input" id="search-kw" placeholder="Nhập từ khóa tìm kiếm..."
+        oninput="toggleClear()" onkeydown="if(event.key==='Enter') doSearch()">
+      <i class="pi pi-times search-clear" id="search-clear-btn" style="display:none" onclick="clearSearch()"
+        title="Xóa"></i>
+    </div>
+    <button class="btn btn-primary" onclick="doSearch()"><i class="pi pi-search"></i> Tìm kiếm</button>
+  </div>
+  <div class="split-layout">
+    <div class="tree-panel">
+      <div class="tree-header">Loại hàng hóa <i class="pi pi-angle-down"></i></div>
+      <div class="tree-content">
+        <ul class="tree root">
+          <li>
+            <div class="tree-node"><i class="pi pi-folder-open" style="color:#fbc02d"></i> <b>Tất cả</b></div>
+            <ul class="tree">
+              <li>
+                <div class="tree-node"><i class="pi pi-folder-open" style="color:#fbc02d"></i> Hàng hóa</div>
+                <ul class="tree">
+                  <li>
+                    <div class="tree-node"><i class="pi pi-folder" style="color:#fbc02d"></i> Thiết bị điện tử</div>
+                  </li>
+                  <li>
+                    <div class="tree-node"><i class="pi pi-folder" style="color:#fbc02d"></i> Linh kiện máy tính</div>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <div class="tree-node"><i class="pi pi-folder" style="color:#fbc02d"></i> Nguyên vật liệu</div>
+              </li>
+              <li>
+                <div class="tree-node"><i class="pi pi-folder" style="color:#fbc02d"></i> Thành phẩm</div>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div style="flex:1; overflow:auto">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:36px; text-align:center"><input type="checkbox" id="chk-all" onchange="toggleAll(this)">
+              </th>
+              <th class="frozen">Mã VTHH</th>
+              <th>Tên VTHH</th>
+              <th>ĐVT</th>
+              <th>Nhóm VTHH</th>
+              <th class="amount">Tồn kho (tổng)</th>
+              <th class="amount">Giá trị tồn kho</th>
+              <th>Tính chất</th>
+              <th>Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="selectRow(this)">
+              <td style="text-align:center"><input type="checkbox" class="row-chk"
+                  onclick="event.stopPropagation(); syncSelection()"></td>
+              <td class="frozen">LAP-DELL-01</td>
+              <td>Laptop Dell Vostro 3500</td>
+              <td>Cái</td>
+              <td>Thiết bị điện tử</td>
+              <td class="amount">48</td>
+              <td class="amount">576.000.000</td>
+              <td><span class="badge badge-hh">Hàng hóa</span></td>
+              <td>Đang HĐ</td>
+            </tr>
+            <tr onclick="selectRow(this)">
+              <td style="text-align:center"><input type="checkbox" class="row-chk"
+                  onclick="event.stopPropagation(); syncSelection()"></td>
+              <td class="frozen">CHUOT-L-01</td>
+              <td>Chuột không dây Logitech</td>
+              <td>Cái</td>
+              <td>Linh kiện máy tính</td>
+              <td class="amount">125</td>
+              <td class="amount">18.750.000</td>
+              <td><span class="badge badge-hh">Hàng hóa</span></td>
+              <td>Đang HĐ</td>
+            </tr>
+            <tr onclick="selectRow(this)">
+              <td style="text-align:center"><input type="checkbox" class="row-chk"
+                  onclick="event.stopPropagation(); syncSelection()"></td>
+              <td class="frozen">BAN-PHIM-01</td>
+              <td>Bàn phím cơ Akko</td>
+              <td>Cái</td>
+              <td>Linh kiện máy tính</td>
+              <td class="amount">80</td>
+              <td class="amount">96.000.000</td>
+              <td><span class="badge badge-hh">Hàng hóa</span></td>
+              <td>Đang HĐ</td>
+            </tr>
+            <tr onclick="selectRow(this)">
+              <td style="text-align:center"><input type="checkbox" class="row-chk"
+                  onclick="event.stopPropagation(); syncSelection()"></td>
+              <td class="frozen">MAN-HINH-01</td>
+              <td>Màn hình LG 24 inch</td>
+              <td>Cái</td>
+              <td>Thiết bị điện tử</td>
+              <td class="amount">35</td>
+              <td class="amount">105.000.000</td>
+              <td><span class="badge badge-hh">Hàng hóa</span></td>
+              <td>Đang HĐ</td>
+            </tr>
+            <tr onclick="selectRow(this)">
+              <td style="text-align:center"><input type="checkbox" class="row-chk"
+                  onclick="event.stopPropagation(); syncSelection()"></td>
+              <td class="frozen">THE-NHO-16G</td>
+              <td>Thẻ nhớ SanDisk 16GB</td>
+              <td>Cái</td>
+              <td>Linh kiện máy tính</td>
+              <td class="amount">200</td>
+              <td class="amount">30.000.000</td>
+              <td><span class="badge badge-hh">Hàng hóa</span></td>
+              <td>Đang HĐ</td>
+            </tr>
+            <tr onclick="selectRow(this)">
+              <td style="text-align:center"><input type="checkbox" class="row-chk"
+                  onclick="event.stopPropagation(); syncSelection()"></td>
+              <td class="frozen">CAP-HDMI-2M</td>
+              <td>Cáp HDMI 2 mét</td>
+              <td>Sợi</td>
+              <td>Linh kiện máy tính</td>
+              <td class="amount">300</td>
+              <td class="amount">24.000.000</td>
+              <td><span class="badge badge-hh">Hàng hóa</span></td>
+              <td>Đang HĐ</td>
+            </tr>
+            <tr onclick="selectRow(this)">
+              <td style="text-align:center"><input type="checkbox" class="row-chk"
+                  onclick="event.stopPropagation(); syncSelection()"></td>
+              <td class="frozen">USB-32G</td>
+              <td>USB Kingston 32GB</td>
+              <td>Cái</td>
+              <td>Linh kiện máy tính</td>
+              <td class="amount">150</td>
+              <td class="amount">18.000.000</td>
+              <td><span class="badge badge-hh">Hàng hóa</span></td>
+              <td>Đang HĐ</td>
+            </tr>
+            <tr onclick="selectRow(this)">
+              <td style="text-align:center"><input type="checkbox" class="row-chk"
+                  onclick="event.stopPropagation(); syncSelection()"></td>
+              <td class="frozen">NVL-SAT-01</td>
+              <td>Sắt cuộn phi 10</td>
+              <td>Kg</td>
+              <td>Nguyên vật liệu</td>
+              <td class="amount">5.200</td>
+              <td class="amount">93.600.000</td>
+              <td><span class="badge" style="background:#fff3e0; color:#e65100; border:1px solid #e65100">Vật tư</span>
+              </td>
+              <td>Đang HĐ</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="sum-row">
+              <td colspan="4">Tổng cộng (8 mặt hàng)</td>
+              <td class="amount">6.138</td>
+              <td class="amount">961.350.000</td>
+              <td colspan="2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Selection tracking ──
+    function updateToolbar() {
+      const count = document.querySelectorAll('.row-chk:checked').length;
+      document.getElementById('btn-edit').disabled = count === 0;
+      document.getElementById('btn-delete').disabled = count === 0;
+    }
+    function selectRow(tr) {
+      const chk = tr.querySelector('.row-chk');
+      chk.checked = !chk.checked;
+      tr.style.background = chk.checked ? '#e3f2fd' : '';
+      syncSelection();
+    }
+    function syncSelection() {
+      document.querySelectorAll('tbody tr').forEach(tr => {
+        const chk = tr.querySelector('.row-chk');
+        if (chk) tr.style.background = chk.checked ? '#e3f2fd' : '';
+      });
+      updateToolbar();
+    }
+    function toggleAll(chkAll) {
+      document.querySelectorAll('.row-chk').forEach(c => c.checked = chkAll.checked);
+      syncSelection();
+    }
+
+    // ── SearchBar ──
+    function toggleClear() {
+      document.getElementById('search-clear-btn').style.display =
+        document.getElementById('search-kw').value ? 'block' : 'none';
+    }
+    function clearSearch() {
+      document.getElementById('search-kw').value = '';
+      document.getElementById('search-clear-btn').style.display = 'none';
+    }
+    function doSearch() {
+      const kw = document.getElementById('search-kw').value;
+      document.querySelectorAll('tbody tr').forEach(tr => {
+        if (!kw) { tr.style.display = ''; return; }
+        tr.style.display = tr.textContent.toLowerCase().includes(kw.toLowerCase()) ? '' : 'none';
+      });
+    }
+
+    // ── Action stubs ──
+    function onAdd() { alert('Mở form Thêm mới Vật tư Hàng hóa'); }
+    function onEdit() { alert('Mở form Sửa mặt hàng đã chọn'); }
+    function onDelete() { if (confirm('Xóa mặt hàng đã chọn?')) alert('Emit deleteClick'); }
+    function onImport() { alert('Mở wizard Nhập Excel'); }
+    function onExport() { alert('Xuất Excel'); }
+    function onPrint() { alert('In danh sách'); }
+    function filterType(sel) { /* demo filter */ }
+  </script>
+</body>
+
+</html>
