@@ -16,6 +16,8 @@ import { MenuItem } from 'primeng/api';
 export class GridActionBarComponent {
   // Inputs
   selectedCount = input<number>(0);
+  showEdit = input<boolean>(true);
+  showDelete = input<boolean>(true);
   showDuplicate = input<boolean>(false);
   showImport = input<boolean>(false);
   showExport = input<boolean>(false);

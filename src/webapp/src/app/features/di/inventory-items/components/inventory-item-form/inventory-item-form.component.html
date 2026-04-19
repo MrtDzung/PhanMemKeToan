@@ -1,0 +1,306 @@
+<p-toast />
+
+<div class="form-container" [class.opacity-50]="loadingDetail()">
+  <!-- Toolbar -->
+  <div class="form-toolbar">
+    <p-button label="Lưu (Ctrl+S)" icon="pi pi-save" (onClick)="save()" [loading]="store.saving()" />
+    <p-button label="Lưu & Thêm (Ctrl+Shift+S)" icon="pi pi-save" severity="secondary" (onClick)="saveAndNew()" />
+    <p-button label="In" icon="pi pi-print" severity="secondary" [disabled]="true" />
+    <div style="flex: 1"></div>
+    <p-button label="Đóng" icon="pi pi-times" severity="secondary" (onClick)="store.closeForm()" />
+  </div>
+
+  <!-- Tabs -->
+  <p-tabs [(value)]="activeTab">
+    <p-tablist>
+      <p-tab value="0">Thông tin chung</p-tab>
+      <p-tab value="1">Đơn vị tính phụ</p-tab>
+      <p-tab value="2">Mã vạch</p-tab>
+      <p-tab value="3">Thuộc tính</p-tab>
+      <p-tab value="4">Định mức NVL</p-tab>
+      <p-tab value="5">Cài đặt kho</p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+      <!-- Tab 0: Thông tin chung -->
+      <p-tabpanel value="0">
+        <form [formGroup]="form" style="margin-top: 12px;">
+          <div class="grid-2">
+            <!-- Left Column -->
+            <div>
+              <div class="form-group">
+                <label>Mã VTHH<span class="required">*</span></label>
+                <div class="field">
+                  <input pInputText formControlName="itemCode" class="w-full text-sm"
+                    [invalid]="isFieldInvalid('itemCode')" />
+                  @if(isFieldInvalid('itemCode')) { <small class="field-error">Mã không hợp lệ</small> }
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Tên VTHH<span class="required">*</span></label>
+                <div class="field">
+                  <input pInputText formControlName="itemName" class="w-full text-sm"
+                    [invalid]="isFieldInvalid('itemName')" />
+                  @if(isFieldInvalid('itemName')) { <small class="field-error">Tên không hợp lệ</small> }
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Tên tiếng Anh</label>
+                <div class="field">
+                  <input pInputText formControlName="itemNameEnglish" class="w-full text-sm" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Nhóm VTHH</label>
+                <div class="field">
+                  <p-treeSelect formControlName="categoryId" [options]="categoryTreeNodes()" placeholder=""
+                    styleClass="w-full text-sm" selectionMode="single" display="chip" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Tính chất</label>
+                <div class="field">
+                  <p-select formControlName="itemType" [options]="itemTypeOptions" optionLabel="label"
+                    optionValue="value" styleClass="w-full text-sm" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Phương pháp tính giá</label>
+                <div class="field">
+                  <p-select formControlName="costingMethod" [options]="costingMethodOptions" optionLabel="label"
+                    optionValue="value" styleClass="w-full text-sm" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+              <div class="form-group">
+                <label>ĐVT chính<span class="required">*</span></label>
+                <div class="field">
+                  <p-select formControlName="unitId" [options]="units()" optionLabel="unitName" optionValue="id"
+                    styleClass="w-full text-sm" [invalid]="isFieldInvalid('unitId')" />
+                  @if(isFieldInvalid('unitId')) { <small class="field-error">Bắt buộc</small> }
+                </div>
+              </div>
+              <div class="form-group">
+                <label>ĐVT bao bì/Thùng</label>
+                <div class="field">
+                  <p-select formControlName="panelUnitId" [options]="units()" optionLabel="unitName" optionValue="id"
+                    styleClass="w-full text-sm" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Thuế suất GTGT (%)</label>
+                <div class="field">
+                  <p-inputnumber formControlName="defaultTaxRate" [min]="0" [max]="100" [maxFractionDigits]="2"
+                    styleClass="w-full text-sm" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Đơn giá bán 1</label>
+                <div class="field">
+                  <p-inputnumber formControlName="salePrice1" [min]="0" [useGrouping]="true" styleClass="w-full text-sm"
+                    inputStyleClass="text-right"
+                    style="font-family: var(--font-mono); font-variant-numeric: tabular-nums;" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Đơn giá bán 2</label>
+                <div class="field">
+                  <p-inputnumber formControlName="salePrice2" [min]="0" [useGrouping]="true" styleClass="w-full text-sm"
+                    inputStyleClass="text-right"
+                    style="font-family: var(--font-mono); font-variant-numeric: tabular-nums;" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Khác</label>
+                <div class="field pt-2">
+                  <p-checkbox formControlName="isActive" [binary]="true" label="Hoạt động" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </p-tabpanel>
+
+      <!-- Tab 1: Đơn vị tính phụ -->
+      <p-tabpanel value="1">
+        <div style="margin-top: 12px;">
+          <p-button label="Thêm ĐVT phụ" icon="pi pi-plus" severity="secondary" size="small"
+            (onClick)="addUnitConvert()" class="mb-2 block" />
+          <p-table [value]="unitConvertsArray.controls" size="small"
+            styleClass="p-datatable-sm p-datatable-gridlines mt-2">
+            <ng-template pTemplate="header">
+              <tr>
+                <th style="min-width: 200px;">ĐVT phụ<span class="required">*</span></th>
+                <th style="min-width: 150px;">Tỷ lệ quy đổi<span class="required">*</span></th>
+                <th style="min-width: 120px;">Phép tính</th>
+                <th>Ghi chú</th>
+                <th style="width: 60px;"></th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-ctrl let-i="rowIndex">
+              <tr [formGroup]="ctrl">
+                <td>
+                  <p-select formControlName="unitId" [options]="units()" optionLabel="unitName" optionValue="id"
+                    styleClass="w-full text-sm" />
+                </td>
+                <td>
+                  <p-inputnumber formControlName="convertRate" [min]="0.0001" [maxFractionDigits]="6"
+                    styleClass="w-full text-sm" inputStyleClass="text-right"
+                    style="font-family: var(--font-mono); font-variant-numeric: tabular-nums;" />
+                </td>
+                <td>
+                  <p-select formControlName="operator" [options]="operatorOptions" optionLabel="label"
+                    optionValue="value" styleClass="w-full text-sm" />
+                </td>
+                <td style="font-size: 13px; color: var(--text-secondary);">{{ getUnitConvertNote(i) }}</td>
+                <td class="text-center">
+                  <p-button icon="pi pi-trash" severity="danger" variant="text" size="small"
+                    ariaLabel="Xóa dòng" (onClick)="removeUnitConvert(i)" />
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="5" class="text-center p-4 text-sm" style="color: var(--text-secondary);">Chưa có đơn vị
+                  tính phụ</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </p-tabpanel>
+
+      <!-- Tab 2: Mã vạch -->
+      <p-tabpanel value="2">
+        <div style="margin-top: 12px;">
+          <p-button label="Thêm mã vạch" icon="pi pi-plus" severity="secondary" size="small" (onClick)="addBarcode()"
+            class="mb-2 block" />
+          <p-table [value]="barcodesArray.controls" size="small" styleClass="p-datatable-sm p-datatable-gridlines mt-2">
+            <ng-template pTemplate="header">
+              <tr>
+                <th style="min-width: 250px;">Mã vạch<span class="required">*</span></th>
+                <th style="min-width: 200px;">Loại mã</th>
+                <th style="width: 60px;"></th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-ctrl let-i="rowIndex">
+              <tr [formGroup]="ctrl">
+                <td><input pInputText formControlName="barcodeValue" class="w-full text-sm" /></td>
+                <td>
+                  <p-select formControlName="barcodeType" [options]="barcodeTypeOptions" optionLabel="label"
+                    optionValue="value" styleClass="w-full text-sm" />
+                </td>
+                <td class="text-center"><p-button icon="pi pi-trash" severity="danger" variant="text" size="small"
+                    ariaLabel="Xóa mã vạch" (onClick)="removeBarcode(i)" /></td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="3" class="text-center p-4 text-sm" style="color: var(--text-secondary);">Chưa có mã vạch
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </p-tabpanel>
+
+      <!-- Tab 3: Thuộc tính -->
+      <p-tabpanel value="3">
+        <div style="margin-top: 12px;">
+          <p-button label="Thêm thuộc tính" icon="pi pi-plus" severity="secondary" size="small"
+            (onClick)="addAttribute()" class="mb-2 block" />
+          <p-table [value]="itemAttributesArray.controls" size="small"
+            styleClass="p-datatable-sm p-datatable-gridlines mt-2">
+            <ng-template pTemplate="header">
+              <tr>
+                <th style="min-width: 200px;">Loại thuộc tính<span class="required">*</span></th>
+                <th style="min-width: 200px;">Giá trị</th>
+                <th style="width: 60px;"></th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-ctrl let-i="rowIndex">
+              <tr [formGroup]="ctrl">
+                <td><input pInputText formControlName="attributeTypeId" class="w-full text-sm" /></td>
+                <td><input pInputText formControlName="attributeValue" class="w-full text-sm" /></td>
+                <td class="text-center"><p-button icon="pi pi-trash" severity="danger" variant="text" size="small"
+                    ariaLabel="Xóa thuộc tính" (onClick)="removeAttribute(i)" /></td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="3" class="text-center p-4 text-sm" style="color: var(--text-secondary);">Chưa có thuộc tính
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </p-tabpanel>
+
+      <!-- Tab 4: Định mức NVL -->
+      <p-tabpanel value="4">
+        <form [formGroup]="form" style="margin-top: 12px;">
+          <div class="form-group mb-4">
+            <label>Formula Template</label>
+            <div class="field" style="max-width: 400px; display: flex; gap: 8px;">
+              <p-select formControlName="formulaTemplateId" [options]="[]" placeholder="Chọn mẫu định mức..."
+                styleClass="w-full text-sm" />
+              <p-button icon="pi pi-external-link" text="true" size="small" ariaLabel="Đi tới trang Định mức" pTooltip="Đi tới trang Định mức" />
+            </div>
+          </div>
+        </form>
+        <div
+          style="padding: 16px; background: var(--surface-ground); border-radius: 4px; color: var(--text-secondary); font-size: 13px;">
+          Tính năng chi tiết định mức NVL sẽ được bổ sung trong phiên bản sau.
+        </div>
+      </p-tabpanel>
+
+      <!-- Tab 5: Cài đặt kho -->
+      <p-tabpanel value="5">
+        <form [formGroup]="form" style="margin-top: 12px;">
+          <div class="form-group">
+            <label>Mức tồn tối thiểu</label>
+            <div class="field" style="max-width: 200px;">
+              <p-inputnumber formControlName="minStockLevel" [min]="0" styleClass="w-full text-sm"
+                inputStyleClass="text-right" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Mức tồn tối đa</label>
+            <div class="field" style="max-width: 200px;">
+              <p-inputnumber formControlName="maxStockLevel" [min]="0" styleClass="w-full text-sm"
+                inputStyleClass="text-right" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Thời gian đặt hàng (ngày)</label>
+            <div class="field" style="max-width: 200px;">
+              <p-inputnumber formControlName="leadTimeDays" [min]="0" styleClass="w-full text-sm"
+                inputStyleClass="text-right" />
+            </div>
+          </div>
+
+          <div style="margin-top: 24px; display: flex; flex-direction: column; gap: 12px;">
+            <div class="flex align-items-center gap-2">
+              <p-checkbox formControlName="isFollowSerial" [binary]="true" inputId="isFollowSerial" />
+              <label for="isFollowSerial" style="font-size: 13px; cursor: pointer;">Theo dõi theo số Serial</label>
+            </div>
+            <div class="flex align-items-center gap-2">
+              <p-checkbox formControlName="isFollowLot" [binary]="true" inputId="isFollowLot" />
+              <label for="isFollowLot" style="font-size: 13px; cursor: pointer;">Theo dõi theo lô hàng</label>
+            </div>
+            <div class="flex align-items-center gap-2">
+              <p-checkbox formControlName="isFollowExpiry" [binary]="true" inputId="isFollowExpiry" />
+              <label for="isFollowExpiry" style="font-size: 13px; cursor: pointer;">Theo dõi hạn sử dụng</label>
+            </div>
+            <div class="flex align-items-center gap-2">
+              <p-checkbox formControlName="isPanelItem" [binary]="true" inputId="isPanelItem" />
+              <label for="isPanelItem" style="font-size: 13px; cursor: pointer;">Khai báo hàng theo thùng</label>
+            </div>
+          </div>
+        </form>
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+</div>

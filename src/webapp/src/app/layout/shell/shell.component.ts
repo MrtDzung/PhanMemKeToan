@@ -65,6 +65,49 @@ import { AuthStore } from '../../core/stores/auth.store';
               <span>Tài khoản kế toán</span>
             </a>
           </li>
+          <li>
+            <a routerLink="/di/account-objects" routerLinkActive="active" class="nav-item">
+              <i class="pi pi-users"></i>
+              <span>Đối tượng kế toán</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/di/inventory-items" routerLinkActive="active" class="nav-item">
+              <i class="pi pi-box"></i>
+              <span>Hàng tồn kho</span>
+            </a>
+          </li>
+          <li class="nav-group-label">Danh mục phụ</li>
+          <li>
+            <a routerLink="/di/setup/currencies" routerLinkActive="active" class="nav-item">
+              <i class="pi pi-dollar"></i>
+              <span>Tiền tệ</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/di/setup/units" routerLinkActive="active" class="nav-item">
+              <i class="pi pi-box"></i>
+              <span>Đơn vị tính</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/di/setup/warehouses" routerLinkActive="active" class="nav-item">
+              <i class="pi pi-warehouse"></i>
+              <span>Kho hàng</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/di/setup/departments" routerLinkActive="active" class="nav-item">
+              <i class="pi pi-sitemap"></i>
+              <span>Phòng ban</span>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/di/setup/expense-items" routerLinkActive="active" class="nav-item">
+              <i class="pi pi-tags"></i>
+              <span>Khoản mục chi phí</span>
+            </a>
+          </li>
           <li class="nav-group-label">Hệ thống</li>
           <li>
             <a routerLink="/system/users" routerLinkActive="active" class="nav-item">

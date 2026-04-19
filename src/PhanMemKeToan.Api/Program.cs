@@ -98,7 +98,15 @@ try
             // DI module — Account Tree
             "DI.Accounts.View", "DI.Accounts.Manage", "DI.Accounts.Import",
             // DI module — Account Objects
-            "DI.AccountObjects.View", "DI.AccountObjects.Manage"
+            "DI.AccountObjects.View", "DI.AccountObjects.Manage",
+            // DI module — Lookups
+            "DI.Currencies.View", "DI.Currencies.Manage",
+            "DI.Units.View", "DI.Units.Manage",
+            "DI.Warehouses.View", "DI.Warehouses.Manage",
+            "DI.Departments.View", "DI.Departments.Manage",
+            "DI.ExpenseItems.View", "DI.ExpenseItems.Manage",
+            // IN module — Inventory Items
+            "IN.InventoryItems.View", "IN.InventoryItems.Manage"
         };
         foreach (var perm in permissions)
         {

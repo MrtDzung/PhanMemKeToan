@@ -4,13 +4,17 @@
     pTooltip="Thêm mới" tooltipPosition="bottom" [tooltipDisabled]="!isIconOnly()"
     (onClick)="addClick.emit()"></p-button>
 
+  @if (showEdit()) {
   <p-button label="Sửa" icon="pi pi-pencil" severity="secondary" styleClass="btn-full" ariaLabel="Sửa" pTooltip="Sửa"
     tooltipPosition="bottom" [tooltipDisabled]="!isIconOnly()" [disabled]="!isEditEnabled()"
     (onClick)="editClick.emit()"></p-button>
+  }
 
+  @if (showDelete()) {
   <p-button label="Xóa" icon="pi pi-trash" styleClass="btn-danger btn-full" ariaLabel="Xóa" pTooltip="Xóa"
     tooltipPosition="bottom" [tooltipDisabled]="!isIconOnly()" [disabled]="!isEditEnabled()"
     (onClick)="deleteClick.emit()"></p-button>
+  }
 
   <!-- Divider after core buttons (desktop: always; tablet/mobile: if optional shown) -->
   @if (hasOptional()) {

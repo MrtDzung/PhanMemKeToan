@@ -1,0 +1,78 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="page-container flex flex-column h-full">
+  <div class="status-tabs mb-2">
+    <p-tabs [value]="selectedStatus()" (valueChange)="onStatusChange($event)">
+      <p-tab value="all">Tất cả ({{store.pagination().totalCount}})</p-tab>
+      <p-tab value="active">Đang hoạt động</p-tab>
+      <p-tab value="inactive">Ngưng hoạt động</p-tab>
+    </p-tabs>
+  </div>
+
+  <app-grid-action-bar [selectedCount]="store.selectedCount()" [showEdit]="true" [showDelete]="true" [showImport]="true"
+    [showExport]="true" [showPrint]="true" (addClick)="store.openCreate()" (editClick)="onEdit()"
+    (deleteClick)="onDelete()" (importClick)="onImport()" (exportClick)="onExport()" (printClick)="onPrint()">
+
+    <p-select [options]="typeFilterOptions" [ngModel]="selectedTypeFilter()" optionLabel="label" optionValue="value"
+      (onChange)="onTypeFilterChange($event)" styleClass="mr-2" [style]="{ 'min-width': '160px' }" />
+
+    <app-search-bar placeholder="Nhập từ khóa tìm kiếm..." (search)="onSearch($event)" />
+
+  </app-grid-action-bar>
+
+  <div class="table-wrapper flex-auto">
+    <p-table [value]="store.items()" [loading]="store.loading()" [selection]="selectedRow()"
+      (selectionChange)="selectedRow.set($event)" selectionMode="single" dataKey="id" size="small" [paginator]="true"
+      [totalRecords]="store.pagination().totalCount" [rows]="store.pagination().pageSize" [lazy]="true"
+      (onPage)="onPage($event)" (onRowSelect)="onRowSelect($event)" (onRowUnselect)="onRowUnselect()" scrollable="true"
+      scrollHeight="flex" styleClass="p-datatable-sm p-datatable-gridlines default-grid-height" [rowHover]="true">
+
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 3rem"></th>
+          <th pFrozenColumn style="min-width: 120px">Mã ĐT</th>
+          <th pFrozenColumn style="min-width: 200px">Tên đối tượng</th>
+          <th style="min-width: 180px">Loại ĐT</th>
+          <th style="min-width: 130px">Mã số thuế</th>
+          <th style="min-width: 120px">Điện thoại</th>
+          <th style="min-width: 250px">Địa chỉ</th>
+          <th style="min-width: 100px">Trạng thái</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-row>
+        <tr [pSelectableRow]="row">
+          <td>
+            <p-tableRadioButton [value]="row" />
+          </td>
+          <td pFrozenColumn>{{ row.objectCode }}</td>
+          <td pFrozenColumn>{{ row.objectName }}</td>
+          <td>
+            <span class="flex gap-1 flex-wrap">
+              @if (hasTypeBit(row.objectType, 1)) {
+              <p-tag value="Khách hàng" severity="info" />
+              }
+              @if (hasTypeBit(row.objectType, 2)) {
+              <p-tag value="Nhà cung cấp" severity="warn" />
+              }
+              @if (hasTypeBit(row.objectType, 4)) {
+              <p-tag value="Nhân viên" severity="success" />
+              }
+            </span>
+          </td>
+          <td>{{ row.taxCode }}</td>
+          <td>{{ row.phone }}</td>
+          <td>{{ row.address }}</td>
+          <td>
+            @if (row.isActive) {
+            <p-tag value="Hoạt động" severity="success" />
+            } @else {
+            <p-tag value="Ngưng HĐ" severity="secondary" />
+            }
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

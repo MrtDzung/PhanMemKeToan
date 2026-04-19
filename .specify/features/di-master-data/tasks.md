@@ -465,7 +465,7 @@
 
 **deps**: T2.12, T2.15
 
-- [ ] T5.1 [P] Create Currency CQRS `src/PhanMemKeToan.Application/Features/Lookups/`
+- [x] T5.1 [P] Create Currency CQRS `src/PhanMemKeToan.Application/Features/Lookups/`
   - **Files**:
     - `DTOs/CurrencyDto.cs` — Id, CurrencyCode, CurrencyName, CurrencyNameEnglish?, Symbol, ExchangeRate, IsActive
     - `Queries/GetCurrencies/GetCurrenciesQuery.cs + Handler` — return all for tenant, no pagination (max ~20 currencies)
@@ -474,7 +474,7 @@
   - **Acceptance**: GET returns full list. Create/Update validated. Delete blocked when referenced.
   - **Complexity**: M
 
-- [ ] T5.2 [P] Create Unit CQRS `src/PhanMemKeToan.Application/Features/Lookups/`
+- [x] T5.2 [P] Create Unit CQRS `src/PhanMemKeToan.Application/Features/Lookups/`
   - **Files** (same pattern as Currency):
     - `DTOs/UnitDto.cs` — Id, UnitCode, UnitName, IsActive
     - `Queries/GetUnits/GetUnitsQuery.cs + Handler` — optional search param
@@ -482,18 +482,18 @@
   - **Delete logic**: block if referenced by InventoryItem, UnitConvert, OpeningBalance, or FormulaDetail (return 422 `has_references` with counts per entity type)
   - **Complexity**: M
 
-- [ ] T5.3 [P] Create Warehouse CQRS `src/PhanMemKeToan.Application/Features/Lookups/`
+- [x] T5.3 [P] Create Warehouse CQRS `src/PhanMemKeToan.Application/Features/Lookups/`
   - **Files**: `DTOs/WarehouseDto.cs`, `Queries/GetWarehouses/`, `Commands/UpsertWarehouse/`, `Commands/DeleteWarehouse/`
   - **Delete logic**: block if referenced by InventoryItemOpeningBalance
   - **Complexity**: M
 
-- [ ] T5.4 [P] Create Department CQRS `src/PhanMemKeToan.Application/Features/Lookups/`
+- [x] T5.4 [P] Create Department CQRS `src/PhanMemKeToan.Application/Features/Lookups/`
   - **Files**: `DTOs/DepartmentDto.cs` (Id, Code, Name, ParentId?, Level, IsActive), `Queries/GetDepartments/` (returns tree structure), `Commands/UpsertDepartment/` (enforce Level ≤ 5), `Commands/DeleteDepartment/`
   - **Delete logic**: block if has children OR referenced by EmployeeProfile
   - **GetDepartments**: returns flat list with level info (frontend builds tree client-side)
   - **Complexity**: M
 
-- [ ] T5.5 [P] Create ExpenseItem CQRS `src/PhanMemKeToan.Application/Features/Lookups/`
+- [x] T5.5 [P] Create ExpenseItem CQRS `src/PhanMemKeToan.Application/Features/Lookups/`
   - **Files**: `DTOs/ExpenseItemDto.cs`, `Queries/GetExpenseItems/`, `Commands/UpsertExpenseItem/`, `Commands/DeleteExpenseItem/`
   - **Complexity**: S
 
@@ -559,7 +559,7 @@
   - **Complexity**: S
   - **deps**: T6.2
 
-- [ ] T7.6 [P] Create Lookup Controllers (5 controllers) `src/PhanMemKeToan.Api/Controllers/`
+- [x] T7.6 [P] Create Lookup Controllers (5 controllers) `src/PhanMemKeToan.Api/Controllers/`
   - **Files**:
     - `CurrenciesController.cs` — `[Route("api/currencies")]`, GET list, POST, PUT/{id}, DELETE/{id}
     - `UnitsController.cs` — same pattern, `[Route("api/units")]`
@@ -598,17 +598,17 @@
 
 **deps**: T7.6, T7.5 (APIs must exist)
 
-- [ ] T8.1 Create lookups API service `src/webapp/src/app/features/di/setup/services/lookups-api.service.ts`
+- [x] T8.1 Create lookups API service `src/webapp/src/app/features/di/setup/services/lookups-api.service.ts`
   - **Description**: Angular injectable service. Methods: `getCurrencies()`, `createCurrency(dto)`, `updateCurrency(id, dto)`, `deleteCurrency(id)`, `getUnits(search?)`, `createUnit(dto)`, `updateUnit(id, dto)`, `deleteUnit(id)`, `getWarehouses()`, `createWarehouse(dto)`, `updateWarehouse(id,dto)`, `deleteWarehouse(id)`, `getDepartments()`, `createDepartment(dto)`, `updateDepartment(id,dto)`, `deleteDepartment(id)`, `getExpenseItems()`, `createExpenseItem(dto)`, `updateExpenseItem(id,dto)`, `deleteExpenseItem(id)`. All return `Observable<T>`.
   - **Acceptance**: Service compiles. URL paths match contracts/lookups-api.md.
   - **Complexity**: M
 
-- [ ] T8.2 Create master-data TypeScript models `src/webapp/src/app/features/di/models/master-data.models.ts`
+- [x] T8.2 Create master-data TypeScript models `src/webapp/src/app/features/di/models/master-data.models.ts`
   - **Description**: Export interfaces: `AccountObject`, `AccountObjectListItem`, `AccountObjectDetail`, `BankAccountDto`, `OpeningBalanceDto`, `EmployeeProfileDto`, `InventoryItem`, `InventoryItemListItem`, `InventoryItemDetail`, `UnitConvertDto`, `BarcodeDto`, `ItemAttributeDto`, `InventoryItemOpeningBalanceDto`, `CategoryTreeNode`, `Currency`, `Unit`, `Warehouse`, `Department`, `ExpenseItem`, `FormulaTemplate`, `FormulaDetail`, `ItemAttributeType`, `ImportResult`, `ImportError`. Match API contract response shapes.
   - **Acceptance**: All interfaces compile. Enums: `ObjectType` (bitmask constants), `InventoryItemType` (0–3), `CostingMethod` (1–4), `BarcodeType` (0–5).
   - **Complexity**: M
 
-- [ ] T8.3 [P] Create inline-editable DataTable lookup screens (Currency, Unit, Warehouse, ExpenseItem)
+- [x] T8.3 [P] Create inline-editable DataTable lookup screens (Currency, Unit, Warehouse, ExpenseItem)
   - **Files** (4 components, each standalone, Angular 20):
     - `src/webapp/src/app/features/di/setup/currencies/currencies-page.component.ts/html`
     - `src/webapp/src/app/features/di/setup/units/units-page.component.ts/html`
@@ -619,7 +619,7 @@
   - **deps**: T8.1, T8.2
   - **Complexity**: L
 
-- [ ] T8.4 [P] Create Department tree screen `src/webapp/src/app/features/di/setup/departments/departments-page.component.ts/html`
+- [x] T8.4 [P] Create Department tree screen `src/webapp/src/app/features/di/setup/departments/departments-page.component.ts/html`
   - **Description**: Left panel: PrimeNG `p-tree` showing department hierarchy. Right panel: form dialog for add/edit with fields: Code, Name, Parent (tree-select dropdown), IsActive. Delete button (blocked if children/references). Max level 5 validation shown on parent selection.
   - **Acceptance**: Tree renders hierarchy. Adding child under parent shows correct level. Delete blocked with message. Max 5 levels enforced client-side.
   - **deps**: T8.1, T8.2
@@ -631,12 +631,12 @@
   - **deps**: T8.1, T8.2
   - **Complexity**: M
 
-- [ ] T8.6 Add i18n keys for lookup screens to `src/webapp/src/app/core/i18n/vi.json`
+- [x] T8.6 Add i18n keys for lookup screens to `src/webapp/src/app/core/i18n/vi.json`
   - **Description**: Add under keys: `lookups.*`, `currencies.*`, `units.*`, `warehouses.*`, `departments.*`, `expense-items.*`, `attribute-types.*`. Vietnamese values for all labels, column headers, messages, error messages. Minimum 40 keys.
   - **Complexity**: M
   - **deps**: T8.3, T8.4, T8.5
 
-- [ ] T8.7 Update DI routes to include setup sub-routes `src/webapp/src/app/features/di/di.routes.ts`
+- [x] T8.7 Update DI routes to include setup sub-routes `src/webapp/src/app/features/di/di.routes.ts`
   - **Description**: Add lazy-loaded routes: `/di/setup/currencies`, `/di/setup/units`, `/di/setup/warehouses`, `/di/setup/departments`, `/di/setup/expense-items`, `/di/setup/item-attribute-types`. Each maps to its page component.
   - **Acceptance**: Navigation to each route loads correct component.
   - **deps**: T8.3, T8.4, T8.5
@@ -989,5 +989,9 @@ T14 → T15
 | L complexity tasks | 11 |
 | M complexity tasks | 30 |
 | S complexity tasks | 29 |
+
+
+
+
 
 
