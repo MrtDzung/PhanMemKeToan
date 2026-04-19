@@ -116,6 +116,10 @@ For each changed file, run applicable checks:
 - [ ] 4.8 — No sensitive data in localStorage (tokens in memory or httpOnly cookies only)
 - [ ] 4.9 — No `innerHTML` binding with user-provided data (XSS risk)
 - [ ] 4.10 — **CRITICAL**: No secrets (JWT signing key, connection strings, API keys) in appsettings.json — use User Secrets or environment variables
+- [ ] 4.11 — **CRITICAL**: No mass assignment — DTO-to-entity mapping must NOT allow setting TenantId, PostedDate, PostedBy, IsPosted, CreatedDate, CreatedBy. Verify explicit `Ignore()` or allowlisting in AutoMapper/manual mapping.
+- [ ] 4.12 — Export endpoints (Excel/PDF) enforce the same TenantId + module permission checks as data grid endpoints — export is a common permission bypass vector
+- [ ] 4.13 — All lazy-loaded Angular module routes have AuthGuard + PermissionGuard applied (`canActivate`/`canMatch`)
+- [ ] 4.14 — NgRx Signal stores holding financial data cleared on logout AND on tenant switch (prevent data leak on shared devices)
 
 #### CAT-5: Accounting Business Rules
 

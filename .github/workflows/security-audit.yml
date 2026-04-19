@@ -1,0 +1,64 @@
+name: Security Audit (AI)
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+    branches: [main, develop]
+
+jobs:
+  security-audit:
+    name: AI Security Audit
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed
+        run: |
+          FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | head -100)
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          # Count security-relevant files only (skip docs, configs, tests)
+          SEC_FILES=$(echo "$FILES" | grep -E '\.(cs|ts|html|scss|json)$' | grep -vE '(\.spec\.ts|test-results|node_modules|\.md)' | wc -l)
+          echo "sec_count=$SEC_FILES" >> $GITHUB_OUTPUT
+
+      - name: Run security audit
+        if: steps.changed.outputs.sec_count > 0
+        uses: anthropics/claude-code-action@beta
+        with:
+          model: claude-sonnet-4-5-20250514
+          prompt: |
+            You are the security-audit agent for PhanMemKeToan — a Vietnamese multi-tenant accounting ERP.
+
+            PR: "${{ github.event.pull_request.title }}"
+            Changed files:
+            ${{ steps.changed.outputs.files }}
+
+            Instructions:
+            1. Read the security audit agent definition at `.github/agents/security-audit.agent.md`
+            2. Read each security-relevant changed file fully (skip: *.spec.ts, *.md, lock files, auto-generated migrations)
+            3. Load project standards from `.specify/memory/constitution.md`
+            4. Run ALL 7 security check domains (SEC-1 through SEC-7), skipping domains with no relevant files
+            5. Output the complete Security Audit Report in the format defined in the agent file
+
+            Focus priorities:
+            - SEC-1 (TenantId isolation) — automatic BLOCK if violated
+            - SEC-3 IV-004 (Mass assignment) — TenantId/Amount must not be settable via DTO
+            - SEC-4 FD-003 (Export bypass) — export must enforce same permissions as grid
+            - SEC-6 (Secrets in source) — automatic BLOCK if found
+
+            Decision actions:
+            - If verdict is SECURE: Comment summary, no action needed
+            - If verdict is ADVISORY: Comment with findings, add label "security: advisory"
+            - If verdict is BLOCK: Request changes, add label "security: blocked"
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
