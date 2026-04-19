@@ -1,7 +1,7 @@
 using FluentValidation;
 using PhanMemKeToan.Application.Features.AccountObjects.Commands.UpdateAccountObject;
 
-namespace PhanMemKeToan.Application.Features.AccountObjects;
+namespace PhanMemKeToan.Application.Features.AccountObjects.Commands.UpdateAccountObject;
 
 public class UpdateAccountObjectCommandValidator : AbstractValidator<UpdateAccountObjectCommand>
 {

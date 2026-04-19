@@ -1,7 +1,7 @@
 using FluentValidation;
 using PhanMemKeToan.Application.Features.AccountObjects.Commands.CreateAccountObject;
 
-namespace PhanMemKeToan.Application.Features.AccountObjects;
+namespace PhanMemKeToan.Application.Features.AccountObjects.Commands.CreateAccountObject;
 
 public class CreateAccountObjectCommandValidator : AbstractValidator<CreateAccountObjectCommand>
 {
