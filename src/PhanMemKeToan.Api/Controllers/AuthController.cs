@@ -38,6 +38,7 @@ public class AuthController(ISender sender) : ControllerBase
     /// <summary>Step 2: Select company, issue JWT + refresh cookie.</summary>
     [HttpPost("select-company")]
     [AllowAnonymous]
+    [EnableRateLimiting("login")]
     public async Task<IActionResult> SelectCompany([FromBody] SelectCompanyRequest request, CancellationToken cancellationToken)
     {
         var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
@@ -70,6 +71,7 @@ public class AuthController(ISender sender) : ControllerBase
 
     [HttpPost("refresh")]
     [AllowAnonymous]
+    [EnableRateLimiting("refresh")]
     public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
     {
         var refreshToken = Request.Cookies[RefreshTokenCookieName];

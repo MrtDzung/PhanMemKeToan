@@ -96,7 +96,9 @@ try
             "SYS.Roles.View", "SYS.Roles.Manage",
             "SYS.Permissions.View", "SYS.Permissions.Manage",
             // DI module — Account Tree
-            "DI.Accounts.View", "DI.Accounts.Manage", "DI.Accounts.Import"
+            "DI.Accounts.View", "DI.Accounts.Manage", "DI.Accounts.Import",
+            // DI module — Account Objects
+            "DI.AccountObjects.View", "DI.AccountObjects.Manage"
         };
         foreach (var perm in permissions)
         {
@@ -113,6 +115,13 @@ try
             limiterOptions.PermitLimit = 20;
             limiterOptions.Window = TimeSpan.FromMinutes(1);
             limiterOptions.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
+            limiterOptions.QueueLimit = 0;
+        });
+        options.AddFixedWindowLimiter("refresh", limiterOptions =>
+        {
+            limiterOptions.PermitLimit = 20;
+            limiterOptions.Window = TimeSpan.FromMinutes(1);
+            limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
             limiterOptions.QueueLimit = 0;
         });
         options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -143,6 +152,19 @@ try
 
     app.UseSerilogRequestLogging();
     app.UseExceptionHandler();
+
+    // Security headers (API-003 fix)
+    app.Use(async (ctx, next) =>
+    {
+        ctx.Response.Headers["X-Content-Type-Options"] = "nosniff";
+        ctx.Response.Headers["X-Frame-Options"] = "DENY";
+        ctx.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+        ctx.Response.Headers["X-Permitted-Cross-Domain-Policies"] = "none";
+        ctx.Response.Headers["Content-Security-Policy"] =
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none';";
+        await next();
+    });
+
     app.UseHttpsRedirection();
     app.UseCors("DefaultCors");
     app.UseRateLimiter();
