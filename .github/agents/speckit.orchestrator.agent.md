@@ -131,18 +131,33 @@ Wait for user response:
 📋 CODE REVIEW COMPLETE
 
   Overall: ✅ PASS / ⚠️ WARN / ❌ FAIL
-  [Summary table from speckit.review output]
+  Score: [XX]% ([earned]/[possible] points)
+
+  ┌─────────────────────────────┬────────┬───────┐
+  │ Category                    │ Status │ Score │
+  ├─────────────────────────────┼────────┼───────┤
+  │ CAT-1: Architecture         │ ✅/❌  │ 10/10 │
+  │ CAT-2: Design System        │ ✅/❌  │ 10/10 │
+  │ CAT-3: Number/Date          │ ✅/❌  │ 10/10 │
+  │ CAT-4: Security             │ ✅/❌  │ 10/10 │
+  │ CAT-5: Business Rules       │ ➖ N/A │  —    │
+  │ CAT-6: UX/A11y              │ ✅/❌  │ 10/10 │
+  │ CAT-7: Spec/Quality         │ ✅/❌  │ 10/10 │
+  │ CAT-8: Migration Quality    │ ✅/❌  │ 10/10 │
+  │ CAT-9: Performance          │ ✅/❌  │ 10/10 │
+  └─────────────────────────────┴────────┴───────┘
 
   CRITICAL issues: [count]
   Warnings: [count]
+  Auto-block triggered: [yes/no — which rule]
 ```
 
 Wait for user response:
-- **✅ PASS (0 critical, 0 warnings)** → Auto-proceed to step 10
-- **⚠️ WARN (0 critical, 1+ warnings)** → Ask: "Fix warnings or proceed to commit?"
+- **✅ PASS (score ≥ 85%, 0 critical, no auto-block)** → Auto-proceed to step 10
+- **⚠️ WARN (score 70-84%, or warnings on auto-block categories)** → Ask: "Fix warnings or proceed to commit?"
   - Fix → **MUST use `speckit.implement`** with fix instructions → Re-run `speckit.review` (do NOT use beastmode3.1 for fixes)
   - Proceed → Continue to step 10
-- **❌ FAIL (1+ critical)** → STOP. Present issues. Ask: "Fix and re-review?"
+- **❌ FAIL (score < 70%, or 1+ critical, or auto-block triggered)** → STOP. Present issues. Ask: "Fix and re-review?"
   - Fix → **MUST use `speckit.implement`** with fix instructions → Re-run `speckit.review` (do NOT use beastmode3.1 for fixes)
   - Abort → Stop pipeline
 - **Maximum review cycles**: 3. After 3 FAIL rounds, present all remaining issues and ask user to decide.

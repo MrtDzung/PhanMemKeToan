@@ -58,7 +58,7 @@ Read these files for review criteria (use progressive disclosure — only load s
 - **If Backend files exist**: `.specify/memory/architecture-technology-report.md` — Sections: §4 Architecture, §9 Permissions, §15 Security, §20 Testing
 - **Feature spec**: FEATURE_DIR/spec.md — Requirements coverage
 
-### 4. Execute Review (7 Categories)
+### 4. Execute Review (9 Categories)
 
 For each changed file, run applicable checks:
 
@@ -76,6 +76,10 @@ For each changed file, run applicable checks:
 - [ ] 1.7 — Lazy loading: Feature modules loaded via `loadChildren` / `loadComponent` in routes
 - [ ] 1.8 — State management: Uses Angular signals or NgRx SignalStore. No raw BehaviorSubject for shared state
 - [ ] 1.9 — HttpClient: API calls use HttpClient with interceptors, not raw fetch()
+- [ ] 1.10 — API controllers are thin: call MediatR.Send() + return ActionResult — no business logic in action methods
+- [ ] 1.11 — CancellationToken passed to all async MediatR.Send() calls
+- [ ] 1.12 — Frontend: OnPush change detection strategy on all components (not Default)
+- [ ] 1.13 — Frontend: NgRx SignalStore per feature — loading/error state tracked per operation, not globally
 
 #### CAT-2: Design System Compliance (Frontend only)
 
@@ -111,6 +115,7 @@ For each changed file, run applicable checks:
 **Frontend:**
 - [ ] 4.8 — No sensitive data in localStorage (tokens in memory or httpOnly cookies only)
 - [ ] 4.9 — No `innerHTML` binding with user-provided data (XSS risk)
+- [ ] 4.10 — **CRITICAL**: No secrets (JWT signing key, connection strings, API keys) in appsettings.json — use User Secrets or environment variables
 
 #### CAT-5: Accounting Business Rules
 
@@ -121,6 +126,11 @@ Only check if the feature involves vouchers/posting:
 - [ ] 5.4 — Period closed → posting rejected with clear error message
 - [ ] 5.5 — Optimistic concurrency: RowVersion/ConcurrencyToken on voucher entities
 - [ ] 5.6 — Dual-book support: DisplayOnBook filter applied correctly
+- [ ] 5.7 — **CRITICAL**: Posted voucher is immutable — IsPosted=true, PostedDate=UTC now, PostedBy=UserId set; no further edits allowed
+- [ ] 5.8 — Unposting requires explicit "Unpost" command with audit trail, not a simple flag flip
+- [ ] 5.9 — Cannot post if referenced accounts are inactive (Account.IsActive check)
+- [ ] 5.10 — Multi-currency: functional currency amount calculated and stored alongside foreign amount
+- [ ] 5.11 — Currency exchange rate taken from system rate table, not from voucher input (for revaluation)
 
 #### CAT-6: UX & Accessibility (Frontend only)
 
@@ -141,6 +151,31 @@ Only check if the feature has UI components:
 - [ ] 7.4 — No unused imports or dead code blocks
 - [ ] 7.5 — Domain terminology: Uses project conventions (Voucher, PostingEntry, AccountObject, RefType, etc.)
 
+#### CAT-8: Database Migration Quality (Backend only)
+
+Only check if the feature includes new/altered EF Core migrations:
+- [ ] 8.1 — Migration file present for every new table/column/index
+- [ ] 8.2 — Migration has both `Up()` and `Down()` implemented
+- [ ] 8.3 — No data migrations mixed with schema migrations (separate migration for data seeding)
+- [ ] 8.4 — **CRITICAL**: Money/amount columns use `decimal(18,6)` — NEVER `float` or `double` (floating-point precision errors in accounting)
+- [ ] 8.5 — All FK constraints are explicit (not just EF Core shadow properties)
+- [ ] 8.6 — New tables have: TenantId, CreatedDate, CreatedBy, ModifiedDate, ModifiedBy, IsDeleted (soft delete)
+- [ ] 8.7 — IsDeleted global query filter applied in `ApplicationDbContext.OnModelCreating`
+
+#### CAT-9: Performance
+
+**Backend:**
+- [ ] 9.1 — No N+1 queries: navigation properties loaded via `.Include()` or projection, not lazy loading
+- [ ] 9.2 — List queries use `.Select(x => new Dto {...})` projections — never load full entity for read-only operations
+- [ ] 9.3 — Async all the way: no `.Result`, `.Wait()`, or sync-over-async patterns
+- [ ] 9.4 — No unbounded queries: all list endpoints have pagination (page + pageSize with upper bound)
+
+**Frontend:**
+- [ ] 9.5 — No heavy computations in template expressions (move to `computed()` signals or pipes)
+- [ ] 9.6 — No memory leaks: `effect()` cleaned up, subscriptions unsubscribed, timers cleared on destroy
+- [ ] 9.7 — New lazy-loaded module does NOT increase initial bundle size
+- [ ] 9.8 — Virtual scroll active for lists expected to exceed 200 items
+
 ### 5. Generate Review Report
 
 Format the output as:
@@ -153,18 +188,22 @@ Format the output as:
 ═══════════════════════════════════════════════
 
 Overall: ✅ PASS / ⚠️ WARN / ❌ FAIL
+Score: [XX]% ([earned]/[possible] points)
 
-┌────────────────────────┬────────┬──────┬──────┐
-│ Category               │ Status │ Pass │ Fail │
-├────────────────────────┼────────┼──────┼──────┤
-│ CAT-1: Architecture    │ ✅/❌  │ X/Y  │ Z    │
-│ CAT-2: Design System   │ ✅/❌  │ X/Y  │ Z    │
-│ CAT-3: Number/Date     │ ✅/❌  │ X/Y  │ Z    │
-│ CAT-4: Security        │ ✅/❌  │ X/Y  │ Z    │
-│ CAT-5: Business Rules  │ ✅/❌  │ X/Y  │ Z    │
-│ CAT-6: UX/A11y         │ ✅/❌  │ X/Y  │ Z    │
-│ CAT-7: Spec/Quality    │ ✅/❌  │ X/Y  │ Z    │
-└────────────────────────┴────────┴──────┴──────┘
+┌─────────────────────────────┬────────┬───────┬──────┬──────┐
+│ Category                    │ Status │ Score │ Pass │ Fail │
+├─────────────────────────────┼────────┼───────┼──────┼──────┤
+│ CAT-1: Architecture         │ ✅/❌  │ 10/10 │ X/Y  │ Z    │
+│ CAT-2: Design System        │ ✅/❌  │ 10/10 │ X/Y  │ Z    │
+│ CAT-3: Number/Date          │ ✅/❌  │ 10/10 │ X/Y  │ Z    │
+│ CAT-4: Security             │ ✅/❌  │ 10/10 │ X/Y  │ Z    │
+│ CAT-5: Business Rules       │ ✅/❌  │ 10/10 │ X/Y  │ Z    │
+│ CAT-6: UX/A11y              │ ✅/❌  │ 10/10 │ X/Y  │ Z    │
+│ CAT-7: Spec/Quality         │ ✅/❌  │ 10/10 │ X/Y  │ Z    │
+│ CAT-8: Migration Quality    │ ✅/❌  │ 10/10 │ X/Y  │ Z    │
+│ CAT-9: Performance          │ ✅/❌  │ 10/10 │ X/Y  │ Z    │
+└─────────────────────────────┴────────┴───────┴──────┴──────┘
+N/A categories excluded from score denominator.
 
 ## ❌ CRITICAL Issues (must fix before commit)
 [number]. [CAT-X.Y] [file:line] — [description]. Fix: [suggestion]
@@ -178,13 +217,35 @@ Overall: ✅ PASS / ⚠️ WARN / ❌ FAIL
 👉 [verdict action — see below]
 ```
 
-### 6. Verdict & Action
+### 6. Scoring & Verdict
+
+#### Scoring per Category
+
+| Check result | Points |
+|-------------|--------|
+| All checks PASS | **10** |
+| Has WARNING (0 CRITICAL) | **6** |
+| Has CRITICAL | **0** |
+| N/A (category skipped) | Excluded from denominator |
+
+Calculate: `score% = (earned / possible) × 100`
+
+#### Automatic Block Rules (override score)
+
+These violations trigger **immediate ❌ FAIL** regardless of overall score:
+- **CAT-4** (4.1): Any TenantId filter missing → data isolation breach
+- **CAT-5** (5.1): Double-entry balance check missing → financial correctness
+- **CAT-3** (3.3): Hardcoded number format → tenant config ignored
+- **CAT-4** (4.10): Secrets in appsettings.json → security breach
+- **CAT-8** (8.4): `float`/`double` for money columns → precision errors
+
+#### Verdict Decision
 
 | Condition | Verdict | Output |
 |-----------|---------|--------|
-| 0 CRITICAL + 0 WARNING | **✅ PASS** | "All checks passed. Ready to commit." |
-| 0 CRITICAL + 1+ WARNING | **⚠️ WARN** | "No blocking issues. Fix warnings recommended. Proceed to commit? (yes / fix first)" |
-| 1+ CRITICAL | **❌ FAIL** | "CRITICAL issues found. Must fix before commit. Run `/speckit.review` again after fixing." |
+| Score ≥ 85% AND 0 CRITICAL AND no auto-block | **✅ PASS** | "All checks passed. Score: X%. Ready to commit." |
+| Score 70-84% OR has WARNING on auto-block categories | **⚠️ WARN** | "Score: X%. Fix warnings recommended. Proceed to commit? (yes / fix first)" |
+| Score < 70% OR 1+ CRITICAL OR auto-block triggered | **❌ FAIL** | "Score: X%. CRITICAL issues found. Must fix before commit." |
 
 ## Rules
 

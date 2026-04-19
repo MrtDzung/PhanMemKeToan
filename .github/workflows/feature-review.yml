@@ -1,0 +1,63 @@
+name: Feature Review (AI)
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+    branches: [main, develop]
+
+jobs:
+  feature-review:
+    name: AI Code Review
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed
+        run: |
+          FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | head -100)
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo "$FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          COUNT=$(echo "$FILES" | wc -l)
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+
+      - name: Run feature review
+        if: steps.changed.outputs.count > 0
+        uses: anthropics/claude-code-action@beta
+        with:
+          model: claude-sonnet-4-5-20250514
+          prompt: |
+            You are the feature-review agent for PhanMemKeToan — a Vietnamese enterprise accounting ERP.
+
+            PR: "${{ github.event.pull_request.title }}"
+            Changed files:
+            ${{ steps.changed.outputs.files }}
+
+            Instructions:
+            1. Read the review agent definition at `.github/agents/speckit.review.agent.md`
+            2. Read each changed file fully (skip binary, lock files, and auto-generated files)
+            3. Load project standards from `.specify/memory/constitution.md`
+            4. If frontend files changed: also load `.specify/memory/frontend-design-system.md`
+            5. Run ALL 9 review categories (CAT-1 through CAT-9), skipping N/A categories
+            6. Output the complete review report using the format defined in the agent file
+            7. Pay extra attention to:
+               - CAT-4 (TenantId isolation) — automatic BLOCK if violated
+               - CAT-5 (Posting engine balance) — debit must equal credit
+               - CAT-3 (NumberFormatService) — financial amounts must use tenant config
+               - CAT-8 (Migration quality) — no float/double for money columns
+            8. Include exact file paths and line numbers for every finding
+
+            Decision actions:
+            - If verdict is PASS (≥85%, 0 critical): Approve the PR
+            - If verdict is WARN (70-84%): Comment with findings, add label "review: needs-work"
+            - If verdict is FAIL (<70% or auto-block): Request changes, add label "review: blocked"
+          api-key: ${{ secrets.ANTHROPIC_API_KEY }}
