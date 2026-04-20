@@ -1,0 +1,98 @@
+<p-toast />
+<p-confirmDialog />
+
+<div class="page-container">
+  <p-splitter [panelSizes]="[20, 80]" styleClass="h-full">
+
+    <!-- Left: Category Tree -->
+    <ng-template pTemplate="panel">
+      <div class="category-panel">
+        <div class="category-title">Nhóm hàng</div>
+        <p-tree [value]="treeNodes()" selectionMode="single" [(selection)]="selectedTreeNode"
+          (onNodeSelect)="onCategorySelect($event)" styleClass="w-full border-none"
+          [style]="{ flex: 1, overflow: 'auto', fontSize: '13px' }" />
+      </div>
+    </ng-template>
+
+    <!-- Right: Toolbar + Table -->
+    <ng-template pTemplate="panel">
+      <div class="right-panel">
+
+        <app-grid-action-bar [selectedCount]="store.selectedCount()" [showEdit]="true" [showDelete]="true"
+          [showImport]="true" [showExport]="true" [showPrint]="true" (addClick)="store.openCreate()"
+          (editClick)="onEdit()" (deleteClick)="onDelete()">
+
+          <p-select [options]="itemTypeOptions" [ngModel]="selectedItemType()" optionLabel="label" optionValue="value"
+            (onChange)="onItemTypeChange($event)" styleClass="mr-2 text-sm" [style]="{ 'min-width': '160px' }" />
+
+          <app-search-bar placeholder="Nhập từ khóa tìm kiếm..." (search)="onSearch($event)" />
+
+        </app-grid-action-bar>
+
+        <div class="table-wrapper">
+          <p-table [value]="store.items()" [loading]="store.loading()" [selection]="selectedRow()"
+            (selectionChange)="selectedRow.set($event)" selectionMode="single" dataKey="id" size="small"
+            [paginator]="true" [totalRecords]="store.pagination().totalCount" [rows]="store.pagination().pageSize"
+            [lazy]="true" (onPage)="onPage($event)" (onRowSelect)="onRowSelect($event)"
+            (onRowUnselect)="onRowUnselect()" scrollable="true" scrollHeight="flex"
+            styleClass="p-datatable-sm p-datatable-gridlines" [rowHover]="true">
+
+            <ng-template pTemplate="header">
+              <tr>
+                <th style="width: 3rem"></th>
+                <th pFrozenColumn style="min-width: 120px">Mã VTHH</th>
+                <th style="min-width: 200px">Tên VTHH</th>
+                <th style="min-width: 80px">ĐVT</th>
+                <th style="min-width: 150px">Nhóm VTHH</th>
+                <th style="min-width: 120px; text-align: right;">Tồn kho (tổng)</th>
+                <th style="min-width: 140px; text-align: right;">Giá trị tồn kho</th>
+                <th style="min-width: 100px; text-align: center;">Tính chất</th>
+                <th style="min-width: 100px">Trạng thái</th>
+              </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-row>
+              <tr [pSelectableRow]="row">
+                <td>
+                  <p-tableRadioButton [value]="row" />
+                </td>
+                <td pFrozenColumn>{{ row.itemCode }}</td>
+                <td>{{ row.itemName }}</td>
+                <td>{{ row.unitCode }}</td>
+                <td>{{ row.categoryName }}</td>
+                <td style="text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums;">
+                  0
+                </td>
+                <td style="text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums;">
+                  0
+                </td>
+                <td style="text-align: center;">
+                  @let badge = getItemTypeBadge(row.itemType);
+                  <span [class]="'custom-badge ' + badge.class" [style]="badge.style">{{ badge.label }}</span>
+                </td>
+                <td>
+                  @if (row.isActive) {
+                  <p-tag value="Hoạt động" severity="success" />
+                  } @else {
+                  <p-tag value="Ngừng HĐ" severity="secondary" />
+                  }
+                </td>
+              </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="9" class="text-center" style="padding: 32px; color: var(--text-secondary);">
+                  Không có dữ liệu
+                </td>
+              </tr>
+            </ng-template>
+
+          </p-table>
+        </div>
+
+      </div>
+    </ng-template>
+
+  </p-splitter>
+</div>

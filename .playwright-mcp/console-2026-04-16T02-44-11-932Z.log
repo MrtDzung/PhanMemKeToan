@@ -1,0 +1,26 @@
+[     421ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/F:/DuAn/PhanMemKeToan/src/webapp/.angular/cache/20.3.23/webapp/vite/deps/chunk-4XTOXYJZ.js?v=35386847:14751
+[    2744ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5000/api/auth/refresh:0
+[   51356ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:5000/api/auth/login:0
+[  174254ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5086/api/auth/login:0
+[  315504ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5086/api/auth/login:0
+[  369694ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5086/api/auth/login:0
+[  468903ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:5086/api/auth/login:0
+[  547637ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5086/api/auth/login:0
+[  651397ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:5000/api/auth/login:0
+[  673970ms] [ERROR] Failed to load resource: the server responded with a status of 400 (Bad Request) @ http://localhost:5000/api/auth/login:0
+[ 1329342ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/F:/DuAn/PhanMemKeToan/src/webapp/.angular/cache/20.3.23/webapp/vite/deps/chunk-4XTOXYJZ.js?v=35386847:14751
+[ 1342808ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://localhost:5086/api/me:0
+[ 1352388ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://localhost:5086/api/me:0
+[ 1377280ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/F:/DuAn/PhanMemKeToan/src/webapp/.angular/cache/20.3.23/webapp/vite/deps/chunk-4XTOXYJZ.js?v=35386847:14751
+[ 1382932ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://localhost:5086/api/me:0
+[ 1390109ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://localhost:5086/api/me:0
+[ 2504537ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/F:/DuAn/PhanMemKeToan/src/webapp/.angular/cache/20.3.23/webapp/vite/deps/chunk-4XTOXYJZ.js?v=35386847:14751
+[ 2727232ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/F:/DuAn/PhanMemKeToan/src/webapp/.angular/cache/20.3.23/webapp/vite/deps/chunk-4XTOXYJZ.js?v=35386847:14751
+[ 2727292ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://localhost:5086/api/auth/refresh:0
+[ 2737683ms] [ERROR] Failed to load resource: the server responded with a status of 403 (Forbidden) @ http://localhost:5086/api/auth/refresh:0
+[ 2790463ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:5086/api/auth/login:0
+[ 2887207ms] [ERROR] Failed to load resource: the server responded with a status of 401 (Unauthorized) @ http://localhost:5086/api/auth/login:0
+[ 6955550ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5086/api/roles:0
+[28733937ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/F:/DuAn/PhanMemKeToan/src/webapp/.angular/cache/20.3.23/webapp/vite/deps/chunk-4XTOXYJZ.js?v=35386847:14751
+[28812155ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/F:/DuAn/PhanMemKeToan/src/webapp/.angular/cache/20.3.23/webapp/vite/deps/chunk-4XTOXYJZ.js?v=35386847:14751
+[28848482ms] [LOG] Angular is running in development mode. @ http://localhost:4200/@fs/F:/DuAn/PhanMemKeToan/src/webapp/.angular/cache/20.3.23/webapp/vite/deps/chunk-4XTOXYJZ.js?v=35386847:14751

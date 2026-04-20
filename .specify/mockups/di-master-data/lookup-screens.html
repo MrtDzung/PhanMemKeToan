@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Danh mục con | PhanMemKeToan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/primeicons@7.0.0/primeicons.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1B5E9E;
+      --surface-ground: #F5F5F5;
+      --surface-card: #FFFFFF;
+      --surface-border: #E0E0E0;
+      --text-primary: #212121;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--surface-ground);
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .tabs {
+      display: flex;
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--surface-border);
+      padding: 0 16px;
+    }
+
+    .tab {
+      padding: 12px 16px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      font-weight: 500;
+    }
+
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .content {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      gap: 16px;
+    }
+
+    .tab-view {
+      display: none;
+      flex: 1;
+      flex-direction: column;
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      padding: 16px;
+    }
+
+    .tab-view.active {
+      display: flex;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--surface-border);
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background: #f8f9fa;
+    }
+
+    .btn {
+      padding: 6px 12px;
+      border: 1px solid var(--surface-border);
+      background: var(--surface-card);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="tabs">
+    <div class="tab active" onclick="showTab(0)">Tiền tệ</div>
+    <div class="tab" onclick="showTab(1)">Đơn vị tính</div>
+    <div class="tab" onclick="showTab(2)">Kho hàng</div>
+    <div class="tab" onclick="showTab(3)">Phòng ban</div>
+    <div class="tab" onclick="showTab(4)">Khoản mục chi phí</div>
+  </div>
+
+  <div class="content">
+    <div class="tab-view active" id="view-0">
+      <div><button class="btn btn-primary"><i class="pi pi-plus"></i> Thêm mới</button></div>
+      <table>
+        <tr>
+          <th>Mã TT</th>
+          <th>Tên Tiền tệ</th>
+          <th>Tên Tiếng anh</th>
+          <th>Ký hiệu</th>
+          <th>Tỷ giá mặc định</th>
+        </tr>
+        <tr>
+          <td>VND</td>
+          <td>Đồng Việt Nam</td>
+          <td>Vietnam Dong</td>
+          <td>₫</td>
+          <td style="text-align:right">1.00</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="tab-view" id="view-1">
+      <div><button class="btn btn-primary"><i class="pi pi-plus"></i> Thêm mới</button></div>
+      <table>
+        <tr>
+          <th>Mã ĐVT</th>
+          <th>Tên đơn vị tính</th>
+          <th>Tên tiếng Anh</th>
+          <th>Quy đổi</th>
+          <th>Đang dùng</th>
+          <th>Thao tác</th>
+        </tr>
+        <tr>
+          <td>CAI</td>
+          <td>Cái</td>
+          <td>Piece</td>
+          <td>1</td>
+          <td><input type="checkbox" checked></td>
+          <td><i class="pi pi-pencil"></i></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="tab-view" id="view-2">
+      <div><button class="btn btn-primary"><i class="pi pi-plus"></i> Thêm mới</button></div>
+      <table>
+        <tr>
+          <th>Mã kho</th>
+          <th>Tên kho</th>
+          <th>Địa chỉ</th>
+          <th>Thủ kho</th>
+          <th>Đang dùng</th>
+          <th>Thao tác</th>
+        </tr>
+        <tr>
+          <td>KHH</td>
+          <td>Kho hàng hóa</td>
+          <td>123 Nguyễn Trãi</td>
+          <td>Trần Văn A</td>
+          <td><input type="checkbox" checked></td>
+          <td><i class="pi pi-pencil"></i></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="tab-view" id="view-3">
+      <div><button class="btn btn-primary"><i class="pi pi-plus"></i> Thêm mới</button></div>
+      <table>
+        <tr>
+          <th>Tên phòng ban</th>
+          <th>Mã phòng</th>
+          <th>Trực thuộc</th>
+          <th>Đang hoạt động</th>
+          <th>Thao tác</th>
+        </tr>
+        <tr>
+          <td>Ban Giám đốc</td>
+          <td>BGD</td>
+          <td>—</td>
+          <td><input type="checkbox" checked></td>
+          <td><i class="pi pi-pencil"></i></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="tab-view" id="view-4">
+      <div><button class="btn btn-primary"><i class="pi pi-plus"></i> Thêm mới</button></div>
+      <table>
+        <tr>
+          <th>Mã khoản mục</th>
+          <th>Tên khoản mục</th>
+          <th>Tên tiếng Anh</th>
+          <th>Đang dùng</th>
+          <th>Thao tác</th>
+        </tr>
+        <tr>
+          <td>KM01</td>
+          <td>Chi phí văn phòng</td>
+          <td>Office expenses</td>
+          <td><input type="checkbox" checked></td>
+          <td><i class="pi pi-pencil"></i></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function showTab(idx) {
+      document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+      document.querySelectorAll('.tab-view').forEach((c, i) => c.classList.toggle('active', i === idx));
+    }
+  </script>
+</body>
+
+</html>

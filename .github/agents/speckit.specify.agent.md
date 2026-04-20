@@ -1,5 +1,7 @@
 ---
 description: Create or update the feature specification from a natural language feature description.
+model: ['Claude Opus 4.6 (copilot)', 'Claude Sonnet 4.6 (copilot)']
+tools: [read, edit, search, execute, web, 'context7/*', todo, vscode/askQuestions, vscode/memory]
 handoffs: 
   - label: Build Technical Plan
     agent: speckit.plan
@@ -65,10 +67,10 @@ Given that feature description, do this:
    - Preserve technical terms and acronyms (OAuth2, API, JWT, etc.)
    - Keep it concise but descriptive enough to understand the feature at a glance
    - Examples:
-     - "I want to add user authentication" → "user-auth"
-     - "Implement OAuth2 integration for the API" → "oauth2-api-integration"
-     - "Create a dashboard for analytics" → "analytics-dashboard"
-     - "Fix payment processing timeout bug" → "fix-payment-timeout"
+     - "I want to add user authentication" â†’ "user-auth"
+     - "Implement OAuth2 integration for the API" â†’ "oauth2-api-integration"
+     - "Create a dashboard for analytics" â†’ "analytics-dashboard"
+     - "Fix payment processing timeout bug" â†’ "fix-payment-timeout"
 
 2. **Branch creation** (optional, via hook):
 
@@ -104,7 +106,7 @@ Given that feature description, do this:
 
    **IMPORTANT**:
    - You must only create one feature per `/speckit.specify` invocation
-   - The spec directory name and the git branch name are independent — they may be the same but that is the user's choice
+   - The spec directory name and the git branch name are independent â€” they may be the same but that is the user's choice
    - The spec directory and file are always created by this command, never by the hook
 
 4. Load `.specify/templates/spec-template.md` to understand required sections.
@@ -229,8 +231,8 @@ Given that feature description, do this:
    d. **Update Checklist**: After each validation iteration, update the checklist file with current pass/fail status
 
 8. **Report completion** to the user with:
-   - `SPECIFY_FEATURE_DIRECTORY` — the feature directory path
-   - `SPEC_FILE` — the spec file path
+   - `SPECIFY_FEATURE_DIRECTORY` â€” the feature directory path
+   - `SPEC_FILE` â€” the spec file path
    - Checklist results summary
    - Readiness for the next phase (`/speckit.clarify` or `/speckit.plan`)
 

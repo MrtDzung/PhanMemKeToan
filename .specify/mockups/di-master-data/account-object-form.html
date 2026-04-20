@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Khai báo Đối tượng | PhanMemKeToan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/primeicons@7.0.0/primeicons.css" rel="stylesheet">
+  <style>
+    /* ... tokens same as list ... */
+    :root {
+      --primary: #1B5E9E;
+      --surface-ground: #F5F5F5;
+      --surface-card: #FFFFFF;
+      --surface-border: #E0E0E0;
+      --text-primary: #212121;
+      --text-secondary: #616161;
+      --error: #D32F2F;
+      --error-bg: #ffebee;
+      --success: #2E7D32;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      margin: 0;
+      background: var(--surface-ground);
+      color: var(--text-primary);
+    }
+
+    .amount {
+      font-family: 'JetBrains Mono', monospace;
+      text-align: right;
+    }
+
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .breadcrumb {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: var(--surface-ground);
+      border-bottom: 1px solid var(--surface-border);
+    }
+
+    .toolbar {
+      height: 44px;
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 6px 12px;
+      border: 1px solid var(--surface-border);
+      background: var(--surface-card);
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .page-content {
+      flex: 1;
+      padding: 16px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: var(--surface-card);
+      margin: 16px;
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--surface-border);
+      gap: 24px;
+    }
+
+    .tab {
+      padding: 8px 0;
+      cursor: pointer;
+      color: var(--text-secondary);
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      font-weight: 600;
+    }
+
+    .tab-content {
+      display: none;
+      padding-top: 16px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .form-group>label {
+      width: 140px;
+      padding-top: 6px;
+      color: var(--text-secondary);
+    }
+
+    .field {
+      flex: 1;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    input.error {
+      border-color: var(--error);
+    }
+
+    .error-msg {
+      color: var(--error);
+      font-size: 11px;
+      margin-top: 4px;
+      display: block;
+    }
+
+    .required {
+      color: var(--error);
+      margin-left: 2px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--surface-border);
+      padding: 4px 8px;
+      height: 32px;
+      text-align: left;
+    }
+
+    th {
+      background: var(--surface-ground);
+      font-weight: 500;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-shell">
+    <nav class="breadcrumb">Danh mục > Đối tượng > Thêm mới</nav>
+    <div class="toolbar">
+      <button class="btn btn-primary" title="Ctrl+S"><i class="pi pi-save"></i> Lưu</button>
+      <button class="btn" title="Ctrl+Shift+S"><i class="pi pi-save"></i> Lưu & Thêm</button>
+      <button class="btn" disabled><i class="pi pi-print"></i> In</button>
+      <span style="flex:1"></span>
+      <button class="btn"><i class="pi pi-times"></i> Đóng</button>
+    </div>
+
+    <div class="page-content">
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab(0)">Thông tin chung</div>
+        <div class="tab" onclick="switchTab(1)">Tài khoản ngân hàng</div>
+        <div class="tab" id="tab-employee" style="display:none" onclick="switchTab(2)">TT Nhân viên</div>
+      </div>
+
+      <div class="tab-content active" id="content-0">
+        <div class="grid-2">
+          <!-- Left Col -->
+          <div>
+            <div class="form-group">
+              <label>Loại đối tượng</label>
+              <div class="field" style="display:flex; gap:16px; padding-top:6px;">
+                <label><input type="checkbox" checked> Khách hàng</label>
+                <label><input type="checkbox"> Nhà cung cấp</label>
+                <label><input type="checkbox" id="chk-nv" onchange="toggleNV()"> Nhân viên</label>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Mã đối tượng<span class="required">*</span></label>
+              <div class="field">
+                <input type="text" class="error" value="">
+                <span class="error-msg">Mã đối tượng là bắt buộc</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Tên đối tượng<span class="required">*</span></label>
+              <div class="field"><input type="text" placeholder="Nhập tên đối tượng"></div>
+            </div>
+            <div class="form-group">
+              <label>Tên tiếng Anh</label>
+              <div class="field"><input type="text"></div>
+            </div>
+            <div class="form-group">
+              <label>Nhóm đối tượng</label>
+              <div class="field">
+                <select>
+                  <option>-- Chọn nhóm --</option>
+                  <option>Khách hàng đại lý</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <!-- Right Col -->
+          <div>
+            <div class="form-group">
+              <label>Mã số thuế</label>
+              <div class="field"><input type="text"></div>
+            </div>
+            <div class="form-group">
+              <label>Địa chỉ</label>
+              <div class="field"><input type="text"></div>
+            </div>
+            <div class="form-group">
+              <label>Điện thoại</label>
+              <div class="field"><input type="text"></div>
+            </div>
+            <div class="form-group">
+              <label>Người liên hệ</label>
+              <div class="field"><input type="text"></div>
+            </div>
+            <div class="form-group">
+              <label>Hạn mức nợ</label>
+              <div class="field"><input type="text" class="amount" placeholder="0"></div>
+            </div>
+            <div class="form-group">
+              <label>Số ngày được nợ</label>
+              <div class="field"><input type="number" class="amount" placeholder="0"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="content-1">
+        <button class="btn" style="margin-bottom:8px"><i class="pi pi-plus"></i> Thêm dòng</button>
+        <table>
+          <thead>
+            <tr>
+              <th>Số tài khoản</th>
+              <th>Tên ngân hàng</th>
+              <th>Chi nhánh</th>
+              <th>Swift Code</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="text" value="001100223344"></td>
+              <td><input type="text" value="Vietcombank"></td>
+              <td><input type="text" value="Chi nhánh Sở Giao Dịch"></td>
+              <td><input type="text"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tab-content" id="content-2">
+        <div class="grid-2">
+          <div>
+            <div class="form-group"><label>Số CMND/CCCD</label>
+              <div class="field"><input type="text"></div>
+            </div>
+            <div class="form-group"><label>Ngày sinh</label>
+              <div class="field"><input type="date"></div>
+            </div>
+            <div class="form-group">
+              <label>Giới tính</label>
+              <div class="field"><select>
+                  <option>Nam</option>
+                  <option>Nữ</option>
+                </select></div>
+            </div>
+          </div>
+          <div>
+            <div class="form-group"><label>Phòng ban</label>
+              <div class="field"><select>
+                  <option>Phòng Kế toán</option>
+                </select></div>
+            </div>
+            <div class="form-group"><label>Số BHXH</label>
+              <div class="field"><input type="text"></div>
+            </div>
+            <div class="form-group"><label>Số NPT</label>
+              <div class="field"><input type="number" value="0"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function switchTab(idx) {
+      document.querySelectorAll('.tab').forEach((t, i) => {
+        if (t.style.display !== 'none') t.classList.toggle('active', i === idx);
+      });
+      document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === idx));
+    }
+    function toggleNV() {
+      const isChecked = document.getElementById('chk-nv').checked;
+      document.getElementById('tab-employee').style.display = isChecked ? 'block' : 'none';
+      if (!isChecked) switchTab(0);
+    }
+  </script>
+</body>
+
+</html>

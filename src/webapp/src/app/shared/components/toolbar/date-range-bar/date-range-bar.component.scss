@@ -1,0 +1,49 @@
+:host {
+  display: block;
+}
+
+.date-range-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.date-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+::ng-deep .preset-select {
+  min-width: 220px;
+}
+
+::ng-deep .date-input {
+  width: 140px;
+}
+
+::ng-deep .btn-fetch.p-button {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: var(--color-on-primary) !important;
+
+  &:hover:not(:disabled) {
+    background: var(--primary-dark) !important;
+    border-color: var(--primary-dark) !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .date-range-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  ::ng-deep .preset-select,
+  ::ng-deep .date-input {
+    width: 100%;
+    min-width: unset;
+  }
+}

@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shared Toolbar Components — DI Master Data</title>
+  <link rel="stylesheet" href="https://unpkg.com/primeicons/primeicons.css">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary: #1B5E9E;
+      --primary-dark: #0D3F6E;
+      --primary-light: #E8F0FE;
+      --error: #D32F2F;
+      --warning: #ED6C02;
+      --surface-ground: #F5F5F5;
+      --surface-card: #FFFFFF;
+      --surface-border: #E0E0E0;
+      --text-primary: #212121;
+      --text-secondary: #616161;
+      --text-disabled: #9E9E9E;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      font-size: 13px;
+      background: var(--surface-ground);
+      color: var(--text-primary);
+      padding: 24px;
+    }
+
+    h1 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--primary-dark);
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+
+    h2 {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 32px 0 8px;
+      color: var(--primary-dark);
+      border-bottom: 2px solid var(--primary-light);
+      padding-bottom: 6px;
+    }
+
+    h3 {
+      font-size: 13px;
+      font-weight: 600;
+      margin: 20px 0 10px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .spec-note {
+      font-size: 11px;
+      color: var(--text-secondary);
+      background: #fffde7;
+      border: 1px solid #fff176;
+      border-radius: 4px;
+      padding: 6px 10px;
+      margin-bottom: 12px;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      background: #fff;
+      color: var(--text-primary);
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+      line-height: 1.4;
+      transition: background .15s, border-color .15s;
+    }
+
+    .btn:hover {
+      background: var(--surface-ground);
+      border-color: #bbb;
+    }
+
+    .btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+
+    .btn-danger {
+      color: var(--error);
+      border-color: #f5c2c2;
+    }
+
+    .btn-danger:hover {
+      background: #fef2f2;
+    }
+
+    .btn-icon-only {
+      padding: 6px 9px;
+    }
+
+    .divider-v {
+      width: 1px;
+      background: var(--surface-border);
+      height: 24px;
+      margin: 0 4px;
+      align-self: center;
+      display: inline-block;
+    }
+
+    /* ── TOOLBAR CONTAINER ── */
+    .toolbar-demo {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .toolbar-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .spacer {
+      flex: 1;
+    }
+
+    /* ── DATE RANGE BAR ── */
+    .drange-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .drange-select {
+      padding: 5px 8px;
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: inherit;
+      background: #fff;
+      cursor: pointer;
+      min-width: 200px;
+    }
+
+    .drange-input {
+      padding: 5px 8px;
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: inherit;
+      width: 110px;
+    }
+
+    .drange-input:focus,
+    .drange-select:focus {
+      outline: 2px solid var(--primary-light);
+      border-color: var(--primary);
+    }
+
+    /* ── SEARCH BAR ── */
+    .search-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .search-input {
+      padding: 5px 28px 5px 10px;
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: inherit;
+      width: 260px;
+    }
+
+    .search-input:focus {
+      outline: 2px solid var(--primary-light);
+      border-color: var(--primary);
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 8px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      font-size: 10px;
+    }
+
+    .search-clear:hover {
+      color: var(--error);
+    }
+
+    /* ── OVERFLOW MENU ── */
+    .overflow-menu {
+      position: relative;
+      display: inline-block;
+    }
+
+    .overflow-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #fff;
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
+      min-width: 160px;
+      z-index: 100;
+    }
+
+    .overflow-menu:hover .overflow-dropdown {
+      display: block;
+    }
+
+    .overflow-dropdown button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 8px 14px;
+      background: none;
+      border: none;
+      font-size: 12px;
+      font-family: inherit;
+      cursor: pointer;
+      color: var(--text-primary);
+    }
+
+    .overflow-dropdown button:hover {
+      background: var(--surface-ground);
+    }
+
+    /* ── SCENARIO FRAMES ── */
+    .scenario {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .scenario-label {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 14px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .scenario-body {
+      padding: 0;
+    }
+
+    .scenario-toolbar {
+      padding: 8px 12px;
+      background: #f9f9f9;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .scenario-grid {
+      padding: 12px;
+    }
+
+    .mock-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .mock-table th {
+      background: var(--surface-ground);
+      padding: 6px 10px;
+      text-align: left;
+      border-bottom: 2px solid var(--surface-border);
+      white-space: nowrap;
+    }
+
+    .mock-table td {
+      padding: 6px 10px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .mock-table tr.selected td {
+      background: #e3f2fd;
+    }
+
+    .mock-table tfoot td {
+      font-weight: 600;
+      background: var(--surface-ground);
+    }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+
+    .badge-hh {
+      background: #e3f2fd;
+      color: #1565c0;
+      border: 1px solid #90caf9;
+    }
+
+    /* ── RESPONSIVE PREVIEW TABS ── */
+    .viewport-tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+
+    .vp-tab {
+      padding: 5px 14px;
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      background: #fff;
+    }
+
+    .vp-tab.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+
+    .vp-frame {
+      border: 2px dashed var(--surface-border);
+      border-radius: 6px;
+      padding: 12px;
+      background: #fafafa;
+    }
+
+    .vp-label {
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-align: right;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Shared Toolbar Components</h1>
+  <p class="subtitle">FR-TB-001 – FR-TB-024 · Mockup v1 · 2026-04-18 · Dùng cho mọi màn hình danh sách</p>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>1. GridActionBar — Component đơn lẻ</h2>
+  <p class="spec-note">FR-TB-001…007 · 3 nút chuẩn tối thiểu + optional buttons + ng-content slot + disabled state khi
+    chưa chọn row</p>
+
+  <h3>1a. Trạng thái mặc định (chưa chọn row)</h3>
+  <div class="toolbar-demo">
+    <div class="toolbar-row">
+      <button class="btn btn-primary"><i class="pi pi-plus"></i> Thêm mới</button>
+      <button class="btn" disabled><i class="pi pi-pencil"></i> Sửa</button>
+      <button class="btn btn-danger" disabled><i class="pi pi-trash"></i> Xóa</button>
+      <span class="divider-v"></span>
+      <button class="btn"><i class="pi pi-file-import"></i> Nhập Excel</button>
+      <button class="btn"><i class="pi pi-file-excel"></i> Xuất Excel</button>
+      <span class="divider-v"></span>
+      <button class="btn"><i class="pi pi-print"></i> In</button>
+    </div>
+    <p style="font-size:11px; color:var(--text-secondary); margin-top:8px">Sửa / Xóa → disabled vì selectedCount = 0</p>
+  </div>
+
+  <h3>1b. Đã chọn 1 row (selectedCount = 1)</h3>
+  <div class="toolbar-demo">
+    <div class="toolbar-row">
+      <button class="btn btn-primary"><i class="pi pi-plus"></i> Thêm mới</button>
+      <button class="btn"><i class="pi pi-pencil"></i> Sửa</button>
+      <button class="btn btn-danger"><i class="pi pi-trash"></i> Xóa</button>
+      <span class="divider-v"></span>
+      <button class="btn"><i class="pi pi-file-import"></i> Nhập Excel</button>
+      <button class="btn"><i class="pi pi-file-excel"></i> Xuất Excel</button>
+      <span class="divider-v"></span>
+      <button class="btn"><i class="pi pi-print"></i> In</button>
+      <span class="divider-v"></span>
+      <!-- ng-content slot: extra control do form chủ inject -->
+      <select style="padding:5px 8px; border:1px solid var(--surface-border); border-radius:4px; font-size:12px">
+        <option>Tất cả loại</option>
+        <option>Hàng hóa</option>
+        <option>Nguyên vật liệu</option>
+      </select>
+    </div>
+    <p style="font-size:11px; color:var(--text-secondary); margin-top:8px"><i class="pi pi-info-circle"></i> Phần
+      dropdown "Loại hàng" được inject qua <code>&lt;ng-content&gt;</code> — không phải built-in của component</p>
+  </div>
+
+  <h3>1c. Viewport 768–959px — icon only + tooltip</h3>
+  <div class="toolbar-demo">
+    <div class="toolbar-row">
+      <button class="btn btn-primary btn-icon-only" title="Thêm mới"><i class="pi pi-plus"></i></button>
+      <button class="btn btn-icon-only" title="Sửa" disabled><i class="pi pi-pencil"></i></button>
+      <button class="btn btn-danger btn-icon-only" title="Xóa" disabled><i class="pi pi-trash"></i></button>
+      <span class="divider-v"></span>
+      <button class="btn btn-icon-only" title="Nhập Excel"><i class="pi pi-file-import"></i></button>
+      <button class="btn btn-icon-only" title="Xuất Excel"><i class="pi pi-file-excel"></i></button>
+      <button class="btn btn-icon-only" title="In"><i class="pi pi-print"></i></button>
+    </div>
+    <p style="font-size:11px; color:var(--text-secondary); margin-top:8px">Label ẩn, chỉ icon + pTooltip khi hover</p>
+  </div>
+
+  <h3>1d. Viewport &lt;768px — optional buttons collapse vào [···]</h3>
+  <div class="toolbar-demo">
+    <div class="toolbar-row">
+      <button class="btn btn-primary btn-icon-only"><i class="pi pi-plus"></i></button>
+      <button class="btn btn-icon-only" disabled><i class="pi pi-pencil"></i></button>
+      <button class="btn btn-danger btn-icon-only" disabled><i class="pi pi-trash"></i></button>
+      <div class="overflow-menu">
+        <button class="btn"><i class="pi pi-ellipsis-h"></i> ···</button>
+        <div class="overflow-dropdown">
+          <button><i class="pi pi-file-import"></i> Nhập Excel</button>
+          <button><i class="pi pi-file-excel"></i> Xuất Excel</button>
+          <button><i class="pi pi-print"></i> In</button>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:11px; color:var(--text-secondary); margin-top:8px">Nhập/Xuất/In gộp vào overflow menu</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>2. DateRangeBar — Component đơn lẻ</h2>
+  <p class="spec-note">FR-TB-010…015 · Chỉ dùng cho màn hình phát sinh · Chọn preset → tự fill Từ/Đến · Nhấn "Lấy dữ
+    liệu" mới fetch</p>
+
+  <div class="toolbar-demo">
+    <div class="toolbar-row">
+      <span class="drange-label">Kỳ:</span>
+      <select class="drange-select" onchange="onPresetChange(this)">
+        <optgroup label="Ngày">
+          <option>Hôm nay</option>
+          <option>Hôm qua</option>
+        </optgroup>
+        <optgroup label="Tuần">
+          <option>Tuần này</option>
+          <option>Tuần trước</option>
+        </optgroup>
+        <optgroup label="Tháng">
+          <option>Tháng này</option>
+          <option>Tháng trước</option>
+          <option selected>Đầu tháng đến hiện tại</option>
+        </optgroup>
+        <optgroup label="Quý">
+          <option>Đầu quý đến hiện tại</option>
+          <option>Quý này</option>
+          <option>Quý trước</option>
+        </optgroup>
+        <optgroup label="Năm">
+          <option>Đầu năm đến hiện tại</option>
+          <option>Năm nay</option>
+          <option>Năm trước</option>
+          <option>6 tháng đầu năm</option>
+          <option>6 tháng cuối năm</option>
+        </optgroup>
+        <optgroup label="Tháng cụ thể">
+          <option>Tháng 1</option>
+          <option>Tháng 2</option>
+          <option>Tháng 3</option>
+          <option>Tháng 4</option>
+          <option>Tháng 5</option>
+          <option>Tháng 6</option>
+          <option>Tháng 7</option>
+          <option>Tháng 8</option>
+          <option>Tháng 9</option>
+          <option>Tháng 10</option>
+          <option>Tháng 11</option>
+          <option>Tháng 12</option>
+        </optgroup>
+        <optgroup label="">
+          <option id="opt-custom">Tùy chỉnh</option>
+        </optgroup>
+      </select>
+      <span class="drange-label">Từ:</span>
+      <input type="date" class="drange-input" id="from-date" value="2026-04-01" onchange="setCustomPreset()">
+      <span class="drange-label">Đến:</span>
+      <input type="date" class="drange-input" id="to-date" value="2026-04-18" onchange="setCustomPreset()">
+      <button class="btn btn-primary" onclick="fetchData()"><i class="pi pi-refresh"></i> Lấy dữ liệu</button>
+    </div>
+    <p id="fetch-status" style="font-size:11px; color:var(--text-secondary); margin-top:8px">Nhấn "Lấy dữ liệu" để tải —
+      không auto-fetch khi đổi ngày</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>3. SearchBar — Component đơn lẻ</h2>
+  <p class="spec-note">FR-TB-020…024 · Enter hoặc nút Tìm kiếm · Nút × clear · ng-content slot cho extra filters</p>
+
+  <div class="toolbar-demo">
+    <div class="toolbar-row">
+      <div class="search-wrap">
+        <input type="text" class="search-input" id="search-kw" placeholder="Nhập từ khóa tìm kiếm..."
+          oninput="toggleClear()" onkeydown="if(event.key==='Enter') doSearch()">
+        <i class="pi pi-times search-clear" id="search-clear-btn" style="display:none" onclick="clearSearch()"
+          title="Xóa"></i>
+      </div>
+      <button class="btn btn-primary" onclick="doSearch()"><i class="pi pi-search"></i> Tìm kiếm</button>
+      <!-- ng-content slot: filter riêng inject vào đây -->
+      <select style="padding:5px 8px; border:1px solid var(--surface-border); border-radius:4px; font-size:12px">
+        <option>Tất cả loại</option>
+        <option>Hàng hóa</option>
+        <option>Vật tư</option>
+        <option>Dịch vụ</option>
+      </select>
+    </div>
+    <p id="search-status" style="font-size:11px; color:var(--text-secondary); margin-top:8px">Nhập keyword → Enter hoặc
+      nhấn "Tìm kiếm"</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>4. Kết hợp — Màn hình Danh mục (GridActionBar + SearchBar)</h2>
+  <p class="spec-note">Ví dụ: Danh sách VTHH — FR-TB composition: Danh mục = GridActionBar + SearchBar (không có
+    DateRangeBar)</p>
+
+  <div class="scenario">
+    <div class="scenario-label">Màn hình: Danh sách Vật tư Hàng hóa</div>
+    <div class="scenario-body">
+      <div class="scenario-toolbar">
+        <!-- GridActionBar -->
+        <button class="btn btn-primary"><i class="pi pi-plus"></i> Thêm mới</button>
+        <button class="btn" disabled><i class="pi pi-pencil"></i> Sửa</button>
+        <button class="btn btn-danger" disabled><i class="pi pi-trash"></i> Xóa</button>
+        <span class="divider-v"></span>
+        <button class="btn"><i class="pi pi-file-import"></i> Nhập Excel</button>
+        <button class="btn"><i class="pi pi-file-excel"></i> Xuất Excel</button>
+        <span class="divider-v"></span>
+        <button class="btn"><i class="pi pi-print"></i> In</button>
+        <!-- ng-content extra: loại hàng -->
+        <span class="divider-v"></span>
+        <select style="padding:5px 8px; border:1px solid var(--surface-border); border-radius:4px; font-size:12px">
+          <option>Tất cả loại</option>
+          <option>Hàng hóa</option>
+          <option>Nguyên vật liệu</option>
+          <option>Thành phẩm</option>
+          <option>Dịch vụ</option>
+        </select>
+        <span class="spacer"></span>
+        <!-- SearchBar -->
+        <div class="search-wrap">
+          <input type="text" class="search-input" placeholder="Nhập từ khóa tìm kiếm..." style="width:220px">
+        </div>
+        <button class="btn btn-primary"><i class="pi pi-search"></i> Tìm kiếm</button>
+      </div>
+      <div class="scenario-grid">
+        <table class="mock-table">
+          <thead>
+            <tr>
+              <th style="width:32px"></th>
+              <th>Mã VTHH</th>
+              <th>Tên VTHH</th>
+              <th>ĐVT</th>
+              <th>Loại</th>
+              <th style="text-align:right">Tồn kho</th>
+              <th style="text-align:right">Giá trị tồn</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td>LAP-DELL-01</td>
+              <td>Laptop Dell Vostro 3500</td>
+              <td>Cái</td>
+              <td><span class="badge badge-hh">Hàng hóa</span></td>
+              <td style="text-align:right;font-family:monospace">48</td>
+              <td style="text-align:right;font-family:monospace">576.000.000</td>
+            </tr>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td>CHUOT-L-01</td>
+              <td>Chuột không dây Logitech</td>
+              <td>Cái</td>
+              <td><span class="badge badge-hh">Hàng hóa</span></td>
+              <td style="text-align:right;font-family:monospace">125</td>
+              <td style="text-align:right;font-family:monospace">18.750.000</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="5">Tổng (2 mặt hàng)</td>
+              <td style="text-align:right;font-family:monospace">173</td>
+              <td style="text-align:right;font-family:monospace">594.750.000</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>5. Kết hợp — Màn hình Phát sinh (GridActionBar + DateRangeBar + SearchBar)</h2>
+  <p class="spec-note">Ví dụ: Danh sách Phiếu nhập kho — 3 component đầy đủ</p>
+
+  <div class="scenario">
+    <div class="scenario-label">Màn hình: Danh sách Phiếu nhập kho (demo pattern — chưa implement trong DI Part 2)</div>
+    <div class="scenario-body">
+      <div class="scenario-toolbar" style="flex-wrap:wrap; gap:6px">
+        <!-- GridActionBar -->
+        <button class="btn btn-primary"><i class="pi pi-plus"></i> Thêm mới</button>
+        <button class="btn" disabled><i class="pi pi-pencil"></i> Sửa</button>
+        <button class="btn btn-danger" disabled><i class="pi pi-trash"></i> Xóa</button>
+        <span class="divider-v"></span>
+        <button class="btn"><i class="pi pi-file-excel"></i> Xuất Excel</button>
+        <button class="btn"><i class="pi pi-print"></i> In</button>
+        <span class="spacer"></span>
+        <!-- SearchBar -->
+        <div class="search-wrap">
+          <input type="text" class="search-input" placeholder="Tìm số phiếu, kho..." style="width:200px">
+        </div>
+        <button class="btn btn-primary"><i class="pi pi-search"></i> Tìm kiếm</button>
+      </div>
+      <!-- DateRangeBar — row riêng khi viewport vừa -->
+      <div
+        style="padding:7px 12px; background:#f4f8ff; border-bottom:1px solid #dde8f5; display:flex; align-items:center; gap:6px; flex-wrap:wrap">
+        <span class="drange-label">Kỳ:</span>
+        <select class="drange-select" style="min-width:200px">
+          <option selected>Đầu tháng đến hiện tại</option>
+          <option>Tháng này</option>
+          <option>Quý này</option>
+          <option>Năm nay</option>
+        </select>
+        <span class="drange-label">Từ:</span>
+        <input type="date" class="drange-input" value="2026-04-01">
+        <span class="drange-label">Đến:</span>
+        <input type="date" class="drange-input" value="2026-04-18">
+        <button class="btn btn-primary"><i class="pi pi-refresh"></i> Lấy dữ liệu</button>
+      </div>
+      <div class="scenario-grid">
+        <table class="mock-table">
+          <thead>
+            <tr>
+              <th style="width:32px"></th>
+              <th>Số phiếu</th>
+              <th>Ngày</th>
+              <th>Kho nhập</th>
+              <th>NCC</th>
+              <th style="text-align:right">Tổng tiền</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="checkbox"></td>
+              <td>PN-2604-001</td>
+              <td>01/04/2026</td>
+              <td>Kho HN</td>
+              <td>Công ty TNHH ABC</td>
+              <td style="text-align:right;font-family:monospace">45.200.000</td>
+            </tr>
+            <tr class="selected">
+              <td><input type="checkbox" checked></td>
+              <td>PN-2604-002</td>
+              <td>05/04/2026</td>
+              <td>Kho HN</td>
+              <td>Cơ sở Vạn Phát</td>
+              <td style="text-align:right;font-family:monospace">12.500.000</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="5">Tổng (2 phiếu)</td>
+              <td style="text-align:right;font-family:monospace">57.700.000</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <h2>6. Angular Component API Summary</h2>
+  <p class="spec-note">Tham khảo khi implement — input/output binding chính thức</p>
+
+  <table
+    style="width:100%; border-collapse:collapse; font-size:12px; background:#fff; border:1px solid var(--surface-border); border-radius:6px; overflow:hidden">
+    <thead style="background:var(--surface-ground)">
+      <tr>
+        <th style="padding:8px 12px; text-align:left; border-bottom:2px solid var(--surface-border)">Component</th>
+        <th style="padding:8px 12px; text-align:left; border-bottom:2px solid var(--surface-border)">Inputs</th>
+        <th style="padding:8px 12px; text-align:left; border-bottom:2px solid var(--surface-border)">Outputs</th>
+        <th style="padding:8px 12px; text-align:left; border-bottom:2px solid var(--surface-border)">Slots</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid #f0f0f0">
+        <td style="padding:8px 12px; font-weight:600">GridActionBar</td>
+        <td style="padding:8px 12px; font-family:monospace; font-size:11px; color:#5c35a0">
+          [selectedCount]: number<br>
+          [showDuplicate]: boolean = false<br>
+          [showImport]: boolean = false<br>
+          [showExport]: boolean = false<br>
+          [showPrint]: boolean = false
+        </td>
+        <td style="padding:8px 12px; font-family:monospace; font-size:11px; color:#b85c00">
+          (addClick): void<br>
+          (editClick): void<br>
+          (deleteClick): void<br>
+          (duplicateClick): void<br>
+          (importClick): void<br>
+          (exportClick): void<br>
+          (printClick): void
+        </td>
+        <td style="padding:8px 12px; font-size:11px">
+          <code>&lt;ng-content&gt;</code><br>
+          Extra controls inject sau nút In
+        </td>
+      </tr>
+      <tr style="border-bottom:1px solid #f0f0f0">
+        <td style="padding:8px 12px; font-weight:600">DateRangeBar</td>
+        <td style="padding:8px 12px; font-family:monospace; font-size:11px; color:#5c35a0">
+          [defaultPreset]: string<br>
+          = 'Đầu tháng đến hiện tại'
+        </td>
+        <td style="padding:8px 12px; font-family:monospace; font-size:11px; color:#b85c00">
+          (rangeChange): {<br>
+          &nbsp;&nbsp;fromDate: Date,<br>
+          &nbsp;&nbsp;toDate: Date,<br>
+          &nbsp;&nbsp;preset: string<br>
+          }
+        </td>
+        <td style="padding:8px 12px; font-size:11px">—</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 12px; font-weight:600">SearchBar</td>
+        <td style="padding:8px 12px; font-family:monospace; font-size:11px; color:#5c35a0">
+          [placeholder]: string<br>
+          = 'Nhập từ khóa...'
+        </td>
+        <td style="padding:8px 12px; font-family:monospace; font-size:11px; color:#b85c00">
+          (search): { keyword: string }
+        </td>
+        <td style="padding:8px 12px; font-size:11px">
+          <code>&lt;ng-content slot="filters"&gt;</code><br>
+          Extra filter controls sau nút Tìm kiếm
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <script>
+    function onPresetChange(sel) {
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = today.getMonth();
+      const pad = n => String(n).padStart(2, '0');
+      const fmt = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+      const preset = sel.value;
+      let from, to = fmt(today);
+      if (preset === 'Hôm nay') { from = to; }
+      else if (preset === 'Hôm qua') { const d = new Date(today); d.setDate(d.getDate() - 1); from = to = fmt(d); }
+      else if (preset === 'Tuần này') { const d = new Date(today); d.setDate(d.getDate() - d.getDay() + 1); from = fmt(d); }
+      else if (preset === 'Tuần trước') { const s = new Date(today); s.setDate(s.getDate() - s.getDay() - 6); const e = new Date(s); e.setDate(e.getDate() + 6); from = fmt(s); to = fmt(e); }
+      else if (preset === 'Tháng này') { from = `${y}-${pad(m + 1)}-01`; }
+      else if (preset === 'Tháng trước') { const pm = m === 0 ? 12 : m; const py = m === 0 ? y - 1 : y; const last = new Date(y, m, 0); from = `${py}-${pad(pm)}-01`; to = fmt(last); }
+      else if (preset === 'Đầu tháng đến hiện tại') { from = `${y}-${pad(m + 1)}-01`; }
+      else if (preset === 'Quý này') { const q = Math.floor(m / 3); from = `${y}-${pad(q * 3 + 1)}-01`; }
+      else if (preset === 'Quý trước') { const q = Math.floor(m / 3); const pqs = q === 0 ? 10 : q * 3 - 2; const pqy = q === 0 ? y - 1 : y; const pqe = new Date(pqy, q === 0 ? 12 : q * 3, 0); from = `${pqy}-${pad(pqs)}-01`; to = fmt(pqe); }
+      else if (preset === 'Đầu quý đến hiện tại') { const q = Math.floor(m / 3); from = `${y}-${pad(q * 3 + 1)}-01`; }
+      else if (preset === 'Năm nay') { from = `${y}-01-01`; }
+      else if (preset === 'Năm trước') { from = `${y - 1}-01-01`; to = `${y - 1}-12-31`; }
+      else if (preset === 'Đầu năm đến hiện tại') { from = `${y}-01-01`; }
+      else if (preset === '6 tháng đầu năm') { from = `${y}-01-01`; to = `${y}-06-30`; }
+      else if (preset === '6 tháng cuối năm') { from = `${y}-07-01`; to = `${y}-12-31`; }
+      else if (preset.startsWith('Tháng ')) {
+        const mn = parseInt(preset.replace('Tháng ', ''));
+        const last = new Date(y, mn, 0);
+        from = `${y}-${pad(mn)}-01`; to = fmt(last);
+      }
+      if (from) { document.getElementById('from-date').value = from; document.getElementById('to-date').value = to; }
+      document.getElementById('fetch-status').textContent = 'Ngày đã cập nhật — nhấn "Lấy dữ liệu" để tải';
+    }
+    function setCustomPreset() {
+      const sel = document.querySelector('.drange-select');
+      sel.value = 'Tùy chỉnh';
+      if (!sel.value) { /* optgroup fallback */ }
+      document.getElementById('fetch-status').textContent = 'Ngày tùy chỉnh — nhấn "Lấy dữ liệu" để tải';
+    }
+    function fetchData() {
+      const from = document.getElementById('from-date').value;
+      const to = document.getElementById('to-date').value;
+      document.getElementById('fetch-status').textContent = `✅ Đã emit rangeChange { fromDate: ${from}, toDate: ${to} }`;
+      document.getElementById('fetch-status').style.color = '#2e7d32';
+    }
+    function toggleClear() {
+      const kw = document.getElementById('search-kw').value;
+      document.getElementById('search-clear-btn').style.display = kw ? 'block' : 'none';
+    }
+    function clearSearch() {
+      document.getElementById('search-kw').value = '';
+      document.getElementById('search-clear-btn').style.display = 'none';
+      document.getElementById('search-status').textContent = '✅ Đã emit search { keyword: "" } — reset danh sách';
+      document.getElementById('search-status').style.color = '#2e7d32';
+    }
+    function doSearch() {
+      const kw = document.getElementById('search-kw').value;
+      document.getElementById('search-status').textContent = `✅ Đã emit search { keyword: "${kw}" }`;
+      document.getElementById('search-status').style.color = '#2e7d32';
+    }
+  </script>
+</body>
+
+</html>

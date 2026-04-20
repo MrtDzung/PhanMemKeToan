@@ -1,5 +1,7 @@
 ---
-description: Execute the implementation plan by processing and executing all tasks defined in tasks.md
+description: Execute backend implementation tasks (C#/.NET/EF Core). Handles all [BE] tasks from tasks.md. Frontend tasks are handled by speckit.implement.frontend.
+model: ['Claude Sonnet 4.6 (copilot)', 'GPT-5.4 (copilot)']
+tools: [read, edit, search, execute, web, 'context7/*', todo, vscode/askQuestions, vscode/memory, agent/runSubagent]
 ---
 
 ## User Input
@@ -44,6 +46,15 @@ You **MUST** consider the user input before proceeding (if not empty).
     ```
 - If no hooks are registered or `.specify/extensions.yml` does not exist, skip silently
 
+## Scope
+
+This agent handles **BACKEND tasks only**:
+- Files in `src/PhanMemKeToan.Api/`, `src/PhanMemKeToan.Application/`, `src/PhanMemKeToan.Domain/`, `src/PhanMemKeToan.Infrastructure/`, `tests/` directories
+- File types: `*.cs`, `*.csproj`, `*.json` (appsettings), migration files
+- Task markers: `[BE]` in tasks.md
+- **SKIP** all `[FE]` tasks — those are handled by `speckit.implement.frontend`
+- For tasks without a marker that clearly belong to backend (e.g., C# classes, EF migrations, API controllers), include them
+
 ## Outline
 
 1. Run `.specify/scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks` from repo root and parse FEATURE_DIR and AVAILABLE_DOCS list. All paths must be absolute. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
@@ -59,9 +70,9 @@ You **MUST** consider the user input before proceeding (if not empty).
      ```text
      | Checklist | Total | Completed | Incomplete | Status |
      |-----------|-------|-----------|------------|--------|
-     | ux.md     | 12    | 12        | 0          | ✓ PASS |
-     | test.md   | 8     | 5         | 3          | ✗ FAIL |
-     | security.md | 6   | 6         | 0          | ✓ PASS |
+     | ux.md     | 12    | 12        | 0          | âœ“ PASS |
+     | test.md   | 8     | 5         | 3          | âœ— FAIL |
+     | security.md | 6   | 6         | 0          | âœ“ PASS |
      ```
 
    - Calculate overall status:
@@ -97,13 +108,13 @@ You **MUST** consider the user input before proceeding (if not empty).
      git rev-parse --git-dir 2>/dev/null
      ```
 
-   - Check if Dockerfile* exists or Docker in plan.md → create/verify .dockerignore
-   - Check if .eslintrc* exists → create/verify .eslintignore
-   - Check if eslint.config.* exists → ensure the config's `ignores` entries cover required patterns
-   - Check if .prettierrc* exists → create/verify .prettierignore
-   - Check if .npmrc or package.json exists → create/verify .npmignore (if publishing)
-   - Check if terraform files (*.tf) exist → create/verify .terraformignore
-   - Check if .helmignore needed (helm charts present) → create/verify .helmignore
+   - Check if Dockerfile* exists or Docker in plan.md â†’ create/verify .dockerignore
+   - Check if .eslintrc* exists â†’ create/verify .eslintignore
+   - Check if eslint.config.* exists â†’ ensure the config's `ignores` entries cover required patterns
+   - Check if .prettierrc* exists â†’ create/verify .prettierignore
+   - Check if .npmrc or package.json exists â†’ create/verify .npmignore (if publishing)
+   - Check if terraform files (*.tf) exist â†’ create/verify .terraformignore
+   - Check if .helmignore needed (helm charts present) â†’ create/verify .helmignore
 
    **If ignore file already exists**: Verify it contains essential patterns, append missing critical patterns only
    **If ignore file missing**: Create with full pattern set for detected technology
@@ -131,7 +142,9 @@ You **MUST** consider the user input before proceeding (if not empty).
    - **Terraform**: `.terraform/`, `*.tfstate*`, `*.tfvars`, `.terraform.lock.hcl`
    - **Kubernetes/k8s**: `*.secret.yaml`, `secrets/`, `.kube/`, `kubeconfig*`, `*.key`, `*.crt`
 
-5. Parse tasks.md structure and extract:
+5. **Filter tasks**: From tasks.md, extract ONLY tasks marked `[BE]`. Ignore all `[FE]` tasks. For tasks without a marker that clearly belong to backend (e.g., C# classes, EF migrations, API controllers), include them.
+
+6. Parse filtered backend tasks and extract:
    - **Task phases**: Setup, Tests, Core, Integration, Polish
    - **Task dependencies**: Sequential vs parallel execution rules
    - **Task details**: ID, description, file paths, parallel markers [P]

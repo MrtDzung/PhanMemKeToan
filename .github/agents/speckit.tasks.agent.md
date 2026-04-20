@@ -1,13 +1,19 @@
 ---
 description: Generate an actionable, dependency-ordered tasks.md for the feature based on available design artifacts.
+model: ['Claude Sonnet 4.6 (copilot)', 'GPT-5.4 (copilot)']
+tools: [read, edit, search, execute, todo, vscode/askQuestions, vscode/memory]
 handoffs: 
   - label: Analyze For Consistency
     agent: speckit.analyze
     prompt: Run a project analysis for consistency
     send: true
-  - label: Implement Project
+  - label: Implement Backend
     agent: speckit.implement
-    prompt: Start the implementation in phases
+    prompt: Start the backend implementation in phases
+    send: true
+  - label: Implement Frontend
+    agent: speckit.implement.frontend
+    prompt: Start the frontend implementation in phases
     send: true
 ---
 
@@ -138,7 +144,7 @@ The tasks.md should be immediately executable - each task must be specific enoug
 Every task MUST strictly follow this format:
 
 ```text
-- [ ] [TaskID] [P?] [Story?] Description with file path
+- [ ] [TaskID] [P?] [BE/FE] [Story?] Description with file path
 ```
 
 **Format Components**:
@@ -146,24 +152,29 @@ Every task MUST strictly follow this format:
 1. **Checkbox**: ALWAYS start with `- [ ]` (markdown checkbox)
 2. **Task ID**: Sequential number (T001, T002, T003...) in execution order
 3. **[P] marker**: Include ONLY if task is parallelizable (different files, no dependencies on incomplete tasks)
-4. **[Story] label**: REQUIRED for user story phase tasks only
+4. **[BE/FE] marker**: REQUIRED for all tasks in user story phases
+   - `[BE]` = Backend task (C#, .NET, EF Core, API controllers, migrations, tests)
+   - `[FE]` = Frontend task (Angular, TypeScript, PrimeNG, SCSS, HTML templates)
+   - Setup/Foundational phases: marker is optional (but recommended)
+   - Tasks touching BOTH backend and frontend: split into separate `[BE]` and `[FE]` tasks
+5. **[Story] label**: REQUIRED for user story phase tasks only
    - Format: [US1], [US2], [US3], etc. (maps to user stories from spec.md)
    - Setup phase: NO story label
    - Foundational phase: NO story label  
    - User Story phases: MUST have story label
    - Polish phase: NO story label
-5. **Description**: Clear action with exact file path
+6. **Description**: Clear action with exact file path
 
 **Examples**:
 
-- ✅ CORRECT: `- [ ] T001 Create project structure per implementation plan`
-- ✅ CORRECT: `- [ ] T005 [P] Implement authentication middleware in src/middleware/auth.py`
-- ✅ CORRECT: `- [ ] T012 [P] [US1] Create User model in src/models/user.py`
-- ✅ CORRECT: `- [ ] T014 [US1] Implement UserService in src/services/user_service.py`
-- ❌ WRONG: `- [ ] Create User model` (missing ID and Story label)
-- ❌ WRONG: `T001 [US1] Create model` (missing checkbox)
-- ❌ WRONG: `- [ ] [US1] Create User model` (missing Task ID)
-- ❌ WRONG: `- [ ] T001 [US1] Create model` (missing file path)
+- âœ… CORRECT: `- [ ] T001 [BE] Create project structure per implementation plan`
+- âœ… CORRECT: `- [ ] T005 [P] [BE] Implement authentication middleware in src/middleware/auth.py`
+- âœ… CORRECT: `- [ ] T012 [P] [FE] [US1] Create User list component in src/webapp/src/app/features/user/user-list.component.ts`
+- âœ… CORRECT: `- [ ] T014 [BE] [US1] Implement UserService in src/services/user_service.py`
+- âŒ WRONG: `- [ ] Create User model` (missing ID, BE/FE marker, and Story label)
+- âŒ WRONG: `T001 [US1] Create model` (missing checkbox)
+- âŒ WRONG: `- [ ] [US1] Create User model` (missing Task ID and BE/FE marker)
+- âŒ WRONG: `- [ ] T001 [US1] Create model` (missing BE/FE marker and file path)
 
 ### Task Organization
 
@@ -177,24 +188,24 @@ Every task MUST strictly follow this format:
    - Mark story dependencies (most stories should be independent)
 
 2. **From Contracts**:
-   - Map each interface contract → to the user story it serves
-   - If tests requested: Each interface contract → contract test task [P] before implementation in that story's phase
+   - Map each interface contract â†’ to the user story it serves
+   - If tests requested: Each interface contract â†’ contract test task [P] before implementation in that story's phase
 
 3. **From Data Model**:
    - Map each entity to the user story(ies) that need it
    - If entity serves multiple stories: Put in earliest story or Setup phase
-   - Relationships → service layer tasks in appropriate story phase
+   - Relationships â†’ service layer tasks in appropriate story phase
 
 4. **From Setup/Infrastructure**:
-   - Shared infrastructure → Setup phase (Phase 1)
-   - Foundational/blocking tasks → Foundational phase (Phase 2)
-   - Story-specific setup → within that story's phase
+   - Shared infrastructure â†’ Setup phase (Phase 1)
+   - Foundational/blocking tasks â†’ Foundational phase (Phase 2)
+   - Story-specific setup â†’ within that story's phase
 
 ### Phase Structure
 
 - **Phase 1**: Setup (project initialization)
 - **Phase 2**: Foundational (blocking prerequisites - MUST complete before user stories)
 - **Phase 3+**: User Stories in priority order (P1, P2, P3...)
-  - Within each story: Tests (if requested) → Models → Services → Endpoints → Integration
+  - Within each story: Tests (if requested) â†’ Models â†’ Services â†’ Endpoints â†’ Integration
   - Each phase should be a complete, independently testable increment
 - **Final Phase**: Polish & Cross-Cutting Concerns

@@ -1,0 +1,181 @@
+@use "tailwindcss";
+
+/* ============================================
+   Design System — CSS Custom Properties
+   Per copilot-instructions.md
+   ============================================ */
+
+:root {
+  /* Brand */
+  --primary: #1b5e9e;
+  --primary-dark: #0d3f6e;
+  --primary-light: #e8f0fe;
+
+  /* Accounting */
+  --debit: #1565c0;
+  --credit: #c62828;
+
+  /* Semantic */
+  --positive: #2e7d32;
+  --negative: #c62828;
+  --posted: #2e7d32;
+  --unposted: #f57c00;
+  --draft: #757575;
+
+  /* Status */
+  --success: #2e7d32;
+  --warning: #ed6c02;
+  --error: #d32f2f;
+  --info: #0288d1;
+
+  /* Semantic background tints (8-12% opacity — use color-mix for CSS variable compatibility) */
+  --debit-bg: color-mix(in srgb, var(--debit) 8%, transparent);
+  --credit-bg: color-mix(in srgb, var(--credit) 8%, transparent);
+  --success-bg: color-mix(in srgb, var(--success) 12%, transparent);
+  --success-bg-light: color-mix(in srgb, var(--success) 8%, transparent);
+  --success-border-light: color-mix(in srgb, var(--success) 30%, transparent);
+  --info-bg: color-mix(in srgb, var(--info) 8%, transparent);
+  --warning-bg: color-mix(in srgb, var(--warning) 8%, transparent);
+  --error-bg: color-mix(in srgb, var(--error) 8%, transparent);
+  --error-bg-light: color-mix(in srgb, var(--error) 8%, transparent);
+  --debit-bg-light: color-mix(in srgb, var(--debit) 6%, transparent);
+  --credit-bg-light: color-mix(in srgb, var(--credit) 6%, transparent);
+  --primary-selected: color-mix(in srgb, var(--primary) 12%, white);
+
+  /* On-color tokens (text on colored backgrounds) */
+  --color-on-primary: #ffffff;
+  --color-on-primary-muted: rgba(255, 255, 255, 0.9);
+  --color-on-primary-dim: rgba(255, 255, 255, 0.4);
+  --color-on-primary-hover: rgba(255, 255, 255, 0.15);
+  --color-on-primary-border: rgba(255, 255, 255, 0.3);
+
+  /* Darker variants for hover states */
+  --error-dark: #a41b1b;
+  --error-border: #f5c2c2;
+
+  /* Surfaces */
+  --surface-ground: #f5f5f5;
+  --surface-card: #ffffff;
+  --surface-border: #e0e0e0;
+
+  /* Text */
+  --text-primary: #212121;
+  --text-secondary: #616161;
+  --text-disabled: #9e9e9e;
+
+  /* Spacing (8px base) */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Typography */
+  --font-family: 'Inter', 'Roboto', 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  --font-size-base: 13px;
+  --font-size-table: 12px;
+  --font-size-title: 16px;
+}
+
+/* ============================================
+   PrimeNG Dialog & ConfirmDialog overrides
+   ============================================ */
+
+.p-dialog .p-dialog-header {
+  padding: 1.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.p-dialog .p-dialog-content {
+  padding: 1.5rem;
+}
+
+.p-dialog .p-dialog-footer {
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.p-confirm-dialog .p-dialog-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.p-confirm-dialog-icon {
+  font-size: 1.75rem !important;
+  color: var(--negative) !important;
+  background-color: var(--error-bg) !important;
+  padding: 0.75rem !important;
+  border-radius: 50% !important;
+}
+
+.p-confirm-dialog-message {
+  margin-left: 0 !important;
+  margin-top: 0.25rem !important;
+  line-height: 1.5 !important;
+}
+
+/* Fix Tailwind resetting button styles inside PrimeNG dialogs */
+.p-dialog .p-dialog-footer button {
+  padding: 0.5rem 1rem !important;
+  border-radius: 4px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+}
+
+.p-dialog .p-dialog-footer button.p-button-danger {
+  background-color: var(--negative) !important;
+  border: 1px solid var(--negative) !important;
+  color: white !important;
+}
+
+.p-dialog .p-dialog-footer button.p-button-danger:hover {
+  background-color: var(--error-dark) !important;
+}
+
+.p-dialog .p-dialog-footer button.p-button-text {
+  background-color: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--text-secondary) !important;
+}
+
+.p-dialog .p-dialog-footer button.p-button-text:hover {
+  background-color: var(--surface-ground) !important;
+  color: var(--text-primary) !important;
+}
+
+
+/* ============================================
+   Global Resets & Defaults
+   ============================================ */
+
+html {
+  font-size: var(--font-size-base);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  color: var(--text-primary);
+  background-color: var(--surface-ground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Financial amounts: monospace, tabular-nums, right-aligned */
+.amount {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.amount--negative {
+  color: var(--negative);
+}
+
+/* PrimeNG icon font */
+@import "primeicons/primeicons.css";

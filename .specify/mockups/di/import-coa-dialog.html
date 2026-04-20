@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Danh mục tài khoản | PhanMemKeToan Mockup</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/primeicons@7.0.0/primeicons.css" rel="stylesheet">
+  <style>
+    :root {
+      /* Primary */
+      --primary: #1B5E9E;
+      --primary-dark: #0D3F6E;
+      --primary-light: #E8F0FE;
+
+      /* Accounting Semantic */
+      --debit: #1565C0;
+      --credit: #C62828;
+      --positive: #2E7D32;
+      --negative: #C62828;
+
+      /* Status */
+      --posted: #2E7D32;
+      --unposted: #F57C00;
+      --draft: #757575;
+
+      /* Alerts */
+      --success: #2E7D32;
+      --warning: #ED6C02;
+      --error: #D32F2F;
+      --info: #0288D1;
+
+      /* Surface */
+      --surface-ground: #F5F5F5;
+      --surface-card: #FFFFFF;
+      --surface-border: #E0E0E0;
+
+      /* Text */
+      --text-primary: #212121;
+      --text-secondary: #616161;
+      --text-disabled: #9E9E9E;
+
+      /* Background tints */
+      --warning-bg: color-mix(in srgb, var(--warning) 8%, transparent);
+      --error-bg: color-mix(in srgb, var(--error) 8%, transparent);
+      --success-bg: color-mix(in srgb, var(--success) 8%, transparent);
+      --info-bg: color-mix(in srgb, var(--info) 8%, transparent);
+
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', 'Roboto', 'Segoe UI', -apple-system, sans-serif;
+      font-size: 13px;
+      color: var(--text-primary);
+      background: var(--surface-ground);
+      overflow: hidden;
+    }
+
+    .amount,
+    .monospace {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+
+    /* --- App Shell Layout --- */
+    .viewport-toggle {
+      height: 32px;
+      background: #333;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      font-size: 12px;
+    }
+
+    .viewport-toggle button {
+      background: none;
+      border: 1px solid #555;
+      color: #ddd;
+      padding: 2px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .viewport-toggle button:hover {
+      background: #555;
+      color: white;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      grid-template-rows: 48px 1fr 24px;
+      height: calc(100vh - 32px);
+    }
+
+    .topbar {
+      grid-column: 1 / -1;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+
+    .sidebar {
+      background: var(--surface-card);
+      border-right: 1px solid var(--surface-border);
+      padding: 16px 0;
+    }
+
+    .menu-item {
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      color: var(--text-primary);
+    }
+
+    .menu-item:hover,
+    .menu-item.active {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+    }
+
+    .menu-item.active {
+      border-right: 3px solid var(--primary);
+      font-weight: 500;
+    }
+
+    .content-area {
+      display: flex;
+      flex-direction: column;
+      background: var(--surface-ground);
+      overflow: hidden;
+    }
+
+    .breadcrumb {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .toolbar {
+      height: 48px;
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 32px;
+      padding: 0 12px;
+      border: 1px solid var(--surface-border);
+      background: var(--surface-card);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--text-primary);
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .btn:hover:not(:disabled) {
+      background: var(--surface-ground);
+      border-color: #ccc;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: var(--surface-ground);
+    }
+
+    .page-content {
+      flex: 1;
+      padding: 16px;
+      overflow: auto;
+    }
+
+    .statusbar {
+      grid-column: 1 / -1;
+      background: var(--surface-card);
+      border-top: 1px solid var(--surface-border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      justify-content: space-between;
+    }
+
+    /* --- Dialog Overlay & Base --- */
+    .dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .dialog {
+      background: var(--surface-card);
+      border-radius: 8px;
+      width: 560px;
+      max-width: 90vw;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: fadeIn 0.15s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .dialog-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .dialog-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .dialog-close {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .dialog-close:hover {
+      color: var(--error);
+    }
+
+    .dialog-content {
+      padding: 24px;
+      min-height: 250px;
+    }
+
+    .dialog-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--surface-border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      background: var(--surface-ground);
+    }
+
+    /* --- Stepper --- */
+    .stepper {
+      display: flex;
+      align-items: center;
+      margin-bottom: 24px;
+      justify-content: center;
+      position: relative;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 2;
+      background: var(--surface-card);
+      padding: 0 8px;
+    }
+
+    .step-circle {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--surface-ground);
+      border: 2px solid var(--surface-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .step-label {
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .step.active .step-circle {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .step.active .step-label {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .step.completed .step-circle {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+
+    .step-connector {
+      flex: 1;
+      height: 2px;
+      background: var(--surface-border);
+      margin: 0 8px;
+      max-width: 60px;
+    }
+
+    .step-connector.completed {
+      background: var(--success);
+    }
+
+    /* --- Radio Cards Form --- */
+    .radio-card {
+      border: 1px solid var(--surface-border);
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      display: flex;
+      gap: 12px;
+      transition: all 0.2s;
+    }
+
+    .radio-card:hover {
+      border-color: #bbb;
+      background: var(--surface-ground);
+    }
+
+    .radio-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .radio-card.selected-success {
+      border-color: var(--success);
+      background: var(--success-bg);
+    }
+
+    .radio-card.selected-warning {
+      border-color: var(--warning);
+      background: var(--warning-bg);
+    }
+
+    .radio-input {
+      margin-top: 2px;
+    }
+
+    .radio-content {
+      flex: 1;
+    }
+
+    .radio-title {
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+
+    .radio-desc {
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .alert {
+      display: flex;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-top: 16px;
+    }
+
+    .alert-warning {
+      background: var(--warning-bg);
+      border: 1px solid color-mix(in srgb, var(--warning) 30%, transparent);
+      color: #b05000;
+    }
+
+    /* --- States --- */
+    .view-step {
+      display: none;
+    }
+
+    .view-step.active {
+      display: block;
+    }
+
+    /* --- Loading State --- */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      gap: 16px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--surface-ground);
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* --- Results State --- */
+    .result-container {
+      text-align: center;
+    }
+
+    .result-icon {
+      font-size: 48px;
+      color: var(--success);
+      margin-bottom: 16px;
+    }
+
+    .result-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      padding: 12px 16px;
+      border-radius: 6px;
+      min-width: 120px;
+    }
+
+    .stat-card.success-stat {
+      background: var(--success-bg);
+      border: 1px solid color-mix(in srgb, var(--success) 30%, transparent);
+      color: var(--success);
+    }
+
+    .stat-card.neutral-stat {
+      background: var(--surface-ground);
+      border: 1px solid #ccc;
+      color: var(--text-secondary);
+    }
+
+    .stat-card.warning-stat {
+      background: var(--warning-bg);
+      border: 1px solid color-mix(in srgb, var(--warning) 30%, transparent);
+      color: var(--warning);
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      font-family: inherit;
+      /* Inter instead of mono for standalone stats to look modern */
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-label {
+      font-size: 12px;
+    }
+
+    .error-section {
+      text-align: left;
+      margin-top: 24px;
+      border-top: 1px solid var(--surface-border);
+      padding-top: 16px;
+    }
+
+    .error-title {
+      color: var(--error);
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .error-list {
+      list-style: none;
+      font-size: 12px;
+      background: var(--error-bg);
+      border: 1px solid color-mix(in srgb, var(--error) 20%, transparent);
+      border-radius: 6px;
+      padding: 8px 12px;
+    }
+
+    .error-list li {
+      padding: 4px 0;
+      border-bottom: 1px dashed color-mix(in srgb, var(--error) 20%, transparent);
+    }
+
+    .error-list li:last-child {
+      border-bottom: none;
+    }
+
+    .error-more {
+      color: var(--primary);
+      cursor: pointer;
+      margin-top: 4px;
+      display: inline-block;
+    }
+
+    .error-more:hover {
+      text-decoration: underline;
+    }
+
+    /* Fake grid behind dialog */
+    .fake-grid {
+      border: 1px solid var(--surface-border);
+      background: white;
+      border-radius: 4px;
+    }
+
+    .fake-row {
+      display: flex;
+      border-bottom: 1px solid var(--surface-border);
+      height: 32px;
+      align-items: center;
+      padding: 0 12px;
+      font-size: 12px;
+    }
+
+    .fake-header {
+      background: var(--primary);
+      color: white;
+      font-weight: 500;
+    }
+
+    .col-1 {
+      width: 100px;
+    }
+
+    .col-2 {
+      flex: 1;
+    }
+
+    .col-3 {
+      width: 120px;
+    }
+
+    /* Debug tools for Mockup Dev only */
+    .mockup-controls {
+      position: fixed;
+      bottom: 30px;
+      left: 16px;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 8px;
+      border-radius: 4px;
+      z-index: 9999;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      font-size: 11px;
+      display: flex;
+      gap: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="viewport-toggle">
+    <span>Kích thước:</span>
+    <button onclick="document.body.style.width='100%'; alert('Responsive: 1440px/Full')">Desktop (Full)</button>
+    <button onclick="document.body.style.width='1280px'; document.body.style.margin='0 auto'">Desktop (1280px)</button>
+    <button onclick="document.body.style.width='768px'; document.body.style.margin='0 auto'">Tablet (768px)</button>
+  </div>
+
+  <div class="app-shell">
+    <header class="topbar">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <i class="pi pi-box" style="font-size: 20px;"></i>
+        <span style="font-weight: 600; font-size: 16px;">PhanMemKeToan</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 16px; font-size: 13px;">
+        <span>Chi nhánh Hà Nội</span>
+        <i class="pi pi-bell"></i>
+        <div
+          style="width: 28px; height: 28px; border-radius: 50%; background: #ccc; display: flex; align-items:center; justify-content:center; color:#333; font-weight:bold;">
+          A</div>
+      </div>
+    </header>
+
+    <aside class="sidebar">
+      <div class="menu-item"><i class="pi pi-home"></i> Tổng quan</div>
+      <div class="menu-item active"><i class="pi pi-book"></i> Danh mục (DI)</div>
+      <div class="menu-item"><i class="pi pi-briefcase"></i> Tổng hợp (GL)</div>
+      <div class="menu-item"><i class="pi pi-wallet"></i> Tiền mặt (CA)</div>
+    </aside>
+
+    <main class="content-area">
+      <nav class="breadcrumb">
+        Danh mục <i class="pi pi-angle-right" style="font-size: 10px; margin: 0 8px;"></i> Tài khoản <i
+          class="pi pi-angle-right" style="font-size: 10px; margin: 0 8px;"></i> Hệ thống tài khoản
+      </nav>
+      <div class="toolbar">
+        <button class="btn btn-primary"><i class="pi pi-plus"></i> Thêm</button>
+        <button class="btn" onclick="openDialog()"><i class="pi pi-cloud-download"></i> Nhập chuẩn</button>
+        <button class="btn"><i class="pi pi-print"></i> In</button>
+        <span style="flex:1"></span>
+        <input type="text" placeholder="Tìm kiếm (F3)"
+          style="padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px; width: 200px;">
+      </div>
+      <div class="page-content">
+        <!-- Background content -->
+        <div class="fake-grid">
+          <div class="fake-row fake-header">
+            <div class="col-1">Số TK</div>
+            <div class="col-2">Tên tài khoản</div>
+            <div class="col-3">Tính chất</div>
+          </div>
+          <div class="fake-row" style="background: var(--surface-ground)">
+            <div class="col-1 font-bold">111</div>
+            <div class="col-2 font-bold">Tiền mặt</div>
+            <div class="col-3">Dư Nợ</div>
+          </div>
+          <div class="fake-row">
+            <div class="col-1" style="padding-left: 24px">1111</div>
+            <div class="col-2">Tiền Việt Nam</div>
+            <div class="col-3">Dư Nợ</div>
+          </div>
+          <div class="fake-row">
+            <div class="col-1" style="padding-left: 24px">1112</div>
+            <div class="col-2">Ngoại tệ</div>
+            <div class="col-3">Dư Nợ</div>
+          </div>
+        </div>
+      </div>
+      <footer class="statusbar">
+        <span>Tổng số: <span class="monospace">3</span> bản ghi</span>
+        <span>Sẵn sàng.</span>
+      </footer>
+    </main>
+  </div>
+
+  <!-- MOCKUP DIALOG START -->
+  <div class="dialog-overlay" id="importDialog">
+    <div class="dialog">
+      <div class="dialog-header" id="dialogHeader">
+        <div class="dialog-title">Nhập danh mục tài khoản chuẩn</div>
+        <button class="dialog-close" onclick="closeDialog()"><i class="pi pi-times"></i></button>
+      </div>
+
+      <div class="dialog-content">
+        <!-- Stepper -->
+        <div class="stepper" id="stepper">
+          <div class="step active" id="st-1">
+            <div class="step-circle"><i class="pi pi-check" style="display: none;" id="st-1-check"></i><span
+                id="st-1-num">1</span></div>
+            <div class="step-label">Chọn chuẩn</div>
+          </div>
+          <div class="step-connector" id="st-conn"></div>
+          <div class="step" id="st-2">
+            <div class="step-circle">2</div>
+            <div class="step-label">Tùy chọn nhập</div>
+          </div>
+        </div>
+
+        <!-- View: Step 1 -->
+        <div id="view-step-1" class="view-step active">
+          <label class="radio-card selected" onclick="selectStandard('tt200')">
+            <input type="radio" name="standard" class="radio-input" checked>
+            <div class="radio-content">
+              <div class="radio-title">Thông tư 200/2014/TT-BTC</div>
+              <div class="radio-desc">Áp dụng cho doanh nghiệp có quy mô vừa và lớn theo chế độ kế toán đầy đủ. (~250
+                tài khoản)</div>
+            </div>
+          </label>
+          <label class="radio-card" onclick="selectStandard('tt133')">
+            <input type="radio" name="standard" class="radio-input">
+            <div class="radio-content">
+              <div class="radio-title">Thông tư 133/2016/TT-BTC</div>
+              <div class="radio-desc">Áp dụng cho doanh nghiệp nhỏ và vừa theo chế độ kế toán đơn giản. (~60 tài khoản)
+              </div>
+            </div>
+          </label>
+        </div>
+
+        <!-- View: Step 2 -->
+        <div id="view-step-2" class="view-step">
+          <div style="margin-bottom: 12px; color: var(--text-secondary);">Xử lý khi mã tài khoản chuẩn trùng với mã tài
+            khoản đã có trong hệ thống:</div>
+
+          <label class="radio-card selected selected-success" onclick="selectConflict('skip')">
+            <input type="radio" name="conflict" class="radio-input" checked>
+            <div class="radio-content">
+              <div class="radio-title">Bỏ qua (Khuyến nghị)</div>
+              <div class="radio-desc">Giữ nguyên tài khoản hiện có nếu trùng mã. Chỉ thêm những tài khoản mới.</div>
+            </div>
+          </label>
+          <label class="radio-card" onclick="selectConflict('overwrite')">
+            <input type="radio" name="conflict" class="radio-input">
+            <div class="radio-content">
+              <div class="radio-title">Ghi đè</div>
+              <div class="radio-desc">Thay thế tài khoản hiện có bằng dữ liệu chuẩn của Bộ Tài Chính.</div>
+            </div>
+          </label>
+
+          <div class="alert alert-warning" id="overwrite-alert" style="display: none;">
+            <i class="pi pi-exclamation-triangle" style="font-size: 16px;"></i>
+            <div>
+              <strong>Cảnh báo:</strong> Các tài khoản trùng mã sẽ bị ghi đè. Cấu hình đặc thù của bạn trên các tài
+              khoản này có thể bị mất. Hành động này không thể hoàn tác.
+            </div>
+          </div>
+        </div>
+
+        <!-- View: Loading -->
+        <div id="view-loading" class="view-step">
+          <div class="loading-container">
+            <div class="spinner"></div>
+            <div style="font-weight: 500; font-size: 14px;">Đang nhập danh mục tài khoản...</div>
+            <div style="color: var(--text-secondary); font-size: 12px;">Vui lòng không đóng cửa sổ này.</div>
+          </div>
+        </div>
+
+        <!-- View: Success/Result -->
+        <div id="view-result" class="view-step">
+          <div class="result-container">
+            <i class="pi pi-check-circle result-icon" id="res-icon"></i>
+            <div class="result-title" id="res-title">Nhập danh mục hoàn tất</div>
+
+            <div class="stats-row">
+              <div class="stat-card success-stat">
+                <div class="stat-value">150</div>
+                <div class="stat-label">Đã nhập mới</div>
+              </div>
+              <div class="stat-card neutral-stat">
+                <div class="stat-value">5</div>
+                <div class="stat-label">Bỏ qua (Trùng)</div>
+              </div>
+              <div class="stat-card warning-stat" id="stat-overwrite" style="display:none;">
+                <div class="stat-value">2</div>
+                <div class="stat-label">Đã ghi đè</div>
+              </div>
+            </div>
+
+            <!-- Partial Errors Section (Toggled in JS for mockup) -->
+            <div class="error-section" id="error-box" style="display: none;">
+              <div class="error-title"><i class="pi pi-times-circle"></i> Có 3 lỗi phát sinh không thể nhập:</div>
+              <ul class="error-list">
+                <li><strong>TK 111</strong> &mdash; Tên tài khoản vượt quá 255 ký tự.</li>
+                <li><strong>TK 211</strong> &mdash; Mã tài khoản không hợp lệ do chứa ký tự đặc biệt.</li>
+                <li><strong>TK 331</strong> &mdash; Lỗi hệ thống: Timeout.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div> <!-- /dialog-content -->
+
+      <div class="dialog-footer" id="footer-step-1">
+        <button class="btn" onclick="closeDialog()">Hủy</button>
+        <button class="btn btn-primary" onclick="goToStep(2)">Tiếp theo <i class="pi pi-arrow-right"
+            style="font-size: 10px;"></i></button>
+      </div>
+
+      <div class="dialog-footer" id="footer-step-2" style="display: none;">
+        <button class="btn" onclick="goToStep(1)"><i class="pi pi-arrow-left" style="font-size: 10px;"></i> Quay
+          lại</button>
+        <button class="btn btn-primary" onclick="doImport()">Nhập</button>
+      </div>
+
+      <div class="dialog-footer" id="footer-loading" style="display: none;">
+        <button class="btn" disabled>Hủy</button>
+        <button class="btn btn-primary" disabled>Đang xử lý...</button>
+      </div>
+
+      <div class="dialog-footer" id="footer-result" style="display: none;">
+        <button class="btn btn-primary" onclick="closeDialog()">Đóng</button>
+      </div>
+    </div>
+  </div>
+  <!-- /MOCKUP DIALOG END -->
+
+  <!-- MOCKUP CONTROL PANEL -->
+  <div class="mockup-controls">
+    <strong>Mockup Actions:</strong>
+    <button onclick="openDialog(); goToStep(1);">🔄 Mở lại từ đầu</button>
+    <button onclick="toggleErrorSim()">🐞 Bật/Tắt Lỗi (Hiện tại: <span id="err-st">Tắt</span>)</button>
+  </div>
+
+  <script>
+    let isErrorSimulated = false;
+    let isOverwrite = false;
+
+    function openDialog() {
+      document.getElementById('importDialog').style.display = 'flex';
+    }
+    function closeDialog() {
+      document.getElementById('importDialog').style.display = 'none';
+    }
+
+    function goToStep(step) {
+      // Hide all views and footers
+      document.querySelectorAll('.view-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.dialog-footer').forEach(el => el.style.display = 'none');
+
+      document.getElementById('stepper').style.display = 'flex';
+
+      if (step === 1) {
+        document.getElementById('view-step-1').classList.add('active');
+        document.getElementById('footer-step-1').style.display = 'flex';
+
+        // Set Stepper state
+        document.getElementById('st-1').classList.remove('completed');
+        document.getElementById('st-1').classList.add('active');
+        document.getElementById('st-1-check').style.display = 'none';
+        document.getElementById('st-1-num').style.display = 'inline';
+
+        document.getElementById('st-conn').classList.remove('completed');
+        document.getElementById('st-2').classList.remove('active', 'completed');
+      }
+      else if (step === 2) {
+        document.getElementById('view-step-2').classList.add('active');
+        document.getElementById('footer-step-2').style.display = 'flex';
+
+        // Set Stepper state
+        document.getElementById('st-1').classList.remove('active');
+        document.getElementById('st-1').classList.add('completed');
+        document.getElementById('st-1-check').style.display = 'inline';
+        document.getElementById('st-1-num').style.display = 'none';
+
+        document.getElementById('st-conn').classList.add('completed');
+        document.getElementById('st-2').classList.add('active');
+      }
+    }
+
+    function selectStandard(std) {
+      let cards = document.querySelectorAll('#view-step-1 .radio-card');
+      cards.forEach(c => c.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      event.currentTarget.querySelector('input').checked = true;
+    }
+
+    function selectConflict(mode) {
+      isOverwrite = (mode === 'overwrite');
+      let cards = document.querySelectorAll('#view-step-2 .radio-card');
+      cards.forEach(c => c.classList.remove('selected', 'selected-success', 'selected-warning'));
+
+      let target = event.currentTarget;
+      target.classList.add('selected');
+      if (isOverwrite) {
+        target.classList.add('selected-warning');
+        document.getElementById('overwrite-alert').style.display = 'flex';
+      } else {
+        target.classList.add('selected-success');
+        document.getElementById('overwrite-alert').style.display = 'none';
+      }
+      target.querySelector('input').checked = true;
+    }
+
+    function doImport() {
+      // Show loading
+      document.querySelectorAll('.view-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.dialog-footer').forEach(el => el.style.display = 'none');
+      document.getElementById('stepper').style.display = 'none';
+
+      document.getElementById('view-loading').classList.add('active');
+      document.getElementById('footer-loading').style.display = 'flex';
+
+      // Simulate API call
+      setTimeout(() => { showResult(); }, 1500);
+    }
+
+    function showResult() {
+      document.querySelectorAll('.view-step').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.dialog-footer').forEach(el => el.style.display = 'none');
+
+      document.getElementById('view-result').classList.add('active');
+      document.getElementById('footer-result').style.display = 'flex';
+
+      // Show overwrite stat if selected
+      document.getElementById('stat-overwrite').style.display = isOverwrite ? 'block' : 'none';
+
+      // Handle Error Simulation
+      if (isErrorSimulated) {
+        document.getElementById('res-icon').className = 'pi pi-exclamation-circle result-icon';
+        document.getElementById('res-icon').style.color = 'var(--warning)';
+        document.getElementById('res-title').innerText = 'Nhập hoàn tất, có lỗi phát sinh';
+        document.getElementById('error-box').style.display = 'block';
+      } else {
+        document.getElementById('res-icon').className = 'pi pi-check-circle result-icon';
+        document.getElementById('res-icon').style.color = 'var(--success)';
+        document.getElementById('res-title').innerText = 'Nhập danh mục hoàn tất';
+        document.getElementById('error-box').style.display = 'none';
+      }
+    }
+
+    function toggleErrorSim() {
+      isErrorSimulated = !isErrorSimulated;
+      document.getElementById('err-st').innerText = isErrorSimulated ? 'Bật' : 'Tắt';
+      if (document.getElementById('view-result').classList.contains('active')) {
+        showResult(); // refresh current view if already on result
+      }
+    }
+  </script>
+</body>
+
+</html>

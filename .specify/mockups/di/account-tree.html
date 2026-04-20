@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DI - Hệ thống tài khoản | PhanMemKeToan Mockup</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/primeicons@7.0.0/primeicons.css" rel="stylesheet">
+  <style>
+    :root {
+      /* Primary */
+      --primary: #1B5E9E;
+      --primary-dark: #0D3F6E;
+      --primary-light: #E8F0FE;
+
+      /* Accounting Semantic */
+      --debit: #1565C0;
+      --credit: #C62828;
+      --positive: #2E7D32;
+      --negative: #C62828;
+
+      /* Status */
+      --posted: #2E7D32;
+      --unposted: #F57C00;
+      --draft: #757575;
+
+      /* Alerts */
+      --success: #2E7D32;
+      --warning: #ED6C02;
+      --error: #D32F2F;
+      --info: #0288D1;
+
+      /* Surface */
+      --surface-ground: #F5F5F5;
+      --surface-card: #FFFFFF;
+      --surface-border: #E0E0E0;
+
+      /* Text */
+      --text-primary: #212121;
+      --text-secondary: #616161;
+      --text-disabled: #9E9E9E;
+
+      /* Background tints */
+      --debit-bg: color-mix(in srgb, var(--debit) 8%, transparent);
+      --credit-bg: color-mix(in srgb, var(--credit) 8%, transparent);
+      --success-bg: color-mix(in srgb, var(--success) 12%, transparent);
+      --info-bg: color-mix(in srgb, var(--info) 8%, transparent);
+      --warning-bg: color-mix(in srgb, var(--warning) 8%, transparent);
+      --error-bg: color-mix(in srgb, var(--error) 8%, transparent);
+
+      /* Spacing */
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', 'Roboto', 'Segoe UI', -apple-system, sans-serif;
+      font-size: 13px;
+      color: var(--text-primary);
+      background: var(--surface-ground);
+      overflow: hidden;
+    }
+
+    .amount,
+    .quantity,
+    .unit-price,
+    .account-no {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .account-no {
+      font-weight: 500;
+    }
+
+    /* Viewport toggler */
+    .viewport-toggle {
+      background: #333;
+      color: white;
+      padding: var(--spacing-sm);
+      display: flex;
+      justify-content: center;
+      gap: var(--spacing-md);
+      z-index: 1000;
+      position: relative;
+    }
+
+    .viewport-toggle button {
+      background: transparent;
+      border: 1px solid #555;
+      color: white;
+      padding: 4px 12px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .viewport-toggle button.active {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    /* Container for the app to allow manual resizing based on viewport toggle */
+    #app-container {
+      width: 100%;
+      height: calc(100vh - 35px);
+      /* Minus viewport toggle */
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      background: var(--surface-card);
+      overflow: hidden;
+      transition: width 0.3s;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    /* App Shell */
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    /* Topbar */
+    .topbar {
+      height: 48px;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 0 var(--spacing-md);
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .topbar-left,
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .logo {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tenant-name {
+      font-size: 13px;
+      opacity: 0.9;
+      border-left: 1px solid rgba(255, 255, 255, 0.3);
+      padding-left: var(--spacing-md);
+    }
+
+    /* Main Body */
+    .app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: var(--surface-card);
+      border-right: 1px solid var(--surface-border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .nav-item {
+      padding: 10px var(--spacing-md);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      color: var(--text-secondary);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .nav-item:hover {
+      background: var(--surface-ground);
+    }
+
+    .nav-item.active {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-weight: 600;
+      border-right: 3px solid var(--primary);
+    }
+
+    /* Content Area */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--surface-ground);
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      padding: 0 var(--spacing-md);
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+
+    .breadcrumb a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .breadcrumb span {
+      margin: 0 4px;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      height: 48px;
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      align-items: center;
+      padding: 0 var(--spacing-md);
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .toolbar-left,
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+
+    /* Inputs & Buttons */
+    input,
+    select,
+    button {
+      font-family: inherit;
+      font-size: 13px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 8px;
+      color: var(--text-secondary);
+    }
+
+    .input-search {
+      padding: 6px 8px 6px 28px;
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      width: 300px;
+      outline: none;
+    }
+
+    .input-search:focus {
+      border-color: var(--primary);
+    }
+
+    .select-input {
+      padding: 6px 8px;
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      outline: none;
+      background: white;
+    }
+
+    .btn {
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 500;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border-color: var(--surface-border);
+      color: var(--text-primary);
+    }
+
+    .btn-outline:hover {
+      background: var(--surface-ground);
+    }
+
+    .btn-icon {
+      padding: 4px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+
+    .btn-icon:hover {
+      color: var(--primary);
+    }
+
+    /* Toggle Switch */
+    .toggle-group {
+      display: flex;
+      background: var(--surface-ground);
+      border-radius: 4px;
+      padding: 2px;
+      border: 1px solid var(--surface-border);
+    }
+
+    .toggle-btn {
+      padding: 4px 12px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 2px;
+      color: var(--text-secondary);
+    }
+
+    .toggle-btn.active {
+      background: white;
+      color: var(--primary);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      font-weight: 500;
+    }
+
+    /* Page Content Splitter */
+    .page-content {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      padding: var(--spacing-md);
+      gap: var(--spacing-md);
+    }
+
+    /* Tree Table Area */
+    .table-container {
+      flex: 1;
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Table Styles */
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 1000px;
+    }
+
+    th,
+    td {
+      padding: 0 8px;
+      height: 32px;
+      border-bottom: 1px solid var(--surface-border);
+      text-align: left;
+      white-space: nowrap;
+      font-size: 12px;
+    }
+
+    th {
+      background: var(--primary);
+      color: white;
+      font-weight: 500;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    /* Frozen Column */
+    th:first-child,
+    td:first-child {
+      position: sticky;
+      left: 0;
+      background: inherit;
+      z-index: 5;
+    }
+
+    th:first-child {
+      z-index: 15;
+      background: var(--primary);
+    }
+
+    tr {
+      background: var(--surface-card);
+      cursor: pointer;
+    }
+
+    tr.alt-row {
+      background: var(--surface-ground);
+    }
+
+    tr:hover td {
+      background: var(--primary-light);
+    }
+
+    tr.selected td {
+      background: var(--primary-light);
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    /* Account Tree Indentation */
+    .tree-node {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .level-1 {
+      padding-left: 0px;
+      font-weight: 600;
+    }
+
+    .level-2 {
+      padding-left: 20px;
+      font-weight: 600;
+    }
+
+    .level-3 {
+      padding-left: 40px;
+    }
+
+    .level-4 {
+      padding-left: 60px;
+    }
+
+    .expander {
+      width: 16px;
+      height: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 6px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1;
+    }
+
+    .badge-debit {
+      background: var(--debit-bg);
+      color: var(--debit);
+    }
+
+    .badge-credit {
+      background: var(--credit-bg);
+      color: var(--credit);
+    }
+
+    .badge-neutral {
+      background: var(--surface-ground);
+      color: var(--text-secondary);
+      border: 1px solid var(--surface-border);
+    }
+
+    .badge-active {
+      background: var(--success-bg);
+      color: var(--success);
+    }
+
+    .badge-inactive {
+      background: var(--surface-ground);
+      color: var(--text-disabled);
+      border: 1px solid var(--surface-border);
+    }
+
+    /* Detail Panel */
+    .detail-panel {
+      width: 320px;
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transform: translateX(0);
+      transition: transform 0.3s;
+    }
+
+    .detail-panel.hidden {
+      display: none;
+    }
+
+    .detail-header {
+      padding: var(--spacing-md);
+      border-bottom: 1px solid var(--surface-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .detail-title {
+      font-size: 16px;
+      font-weight: 600;
+      font-family: var(--font-family-mono);
+    }
+
+    .detail-subtitle {
+      color: var(--text-secondary);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .detail-body {
+      padding: var(--spacing-md);
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .prop-row {
+      margin-bottom: 12px;
+    }
+
+    .prop-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .prop-val {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .detail-actions {
+      padding: var(--spacing-md);
+      border-top: 1px solid var(--surface-border);
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+
+    .checkbox-icon {
+      color: var(--primary);
+      font-size: 14px;
+    }
+
+    .checkbox-icon.disabled {
+      color: var(--surface-border);
+    }
+
+    /* Status Bar */
+    .statusbar {
+      height: 24px;
+      background: var(--surface-ground);
+      border-top: 1px solid var(--surface-border);
+      display: flex;
+      align-items: center;
+      padding: 0 var(--spacing-md);
+      font-size: 11px;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .statusbar span {
+      margin-right: 16px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Viewport Toggle -->
+  <div class="viewport-toggle">
+    <span>Mockup Preview:</span>
+    <button class="active" onclick="setViewport('100%')">Desktop Full</button>
+    <button onclick="setViewport('1280px')">Desktop (1280px)</button>
+    <button onclick="setViewport('1024px')">Laptop (1024px)</button>
+  </div>
+
+  <div id="app-container">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="logo">
+          <i class="pi pi-box"></i> PhanMemKeToan
+        </div>
+        <div class="tenant-name">Công ty Cổ phần ABC</div>
+      </div>
+      <div class="topbar-right">
+        <i class="pi pi-bell" style="cursor: pointer"></i>
+        <div style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <i class="pi pi-user" style="background: rgba(255,255,255,0.2); padding: 6px; border-radius: 50%;"></i>
+          <span>Nguyễn Văn A</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="app-body">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <a href="#" class="nav-item active"><i class="pi pi-sitemap"></i> Danh mục (DI)</a>
+        <a href="#" class="nav-item"><i class="pi pi-book"></i> Tổng hợp (GL)</a>
+        <a href="#" class="nav-item"><i class="pi pi-wallet"></i> Tiền mặt (CA)</a>
+        <a href="#" class="nav-item"><i class="pi pi-building"></i> Tiền gửi (BA)</a>
+        <a href="#" class="nav-item"><i class="pi pi-shopping-cart"></i> Mua hàng (PU)</a>
+        <a href="#" class="nav-item"><i class="pi pi-tags"></i> Bán hàng (SA)</a>
+        <a href="#" class="nav-item"><i class="pi pi-box"></i> Kho (IN)</a>
+        <a href="#" class="nav-item"><i class="pi pi-car"></i> TSCĐ (FA)</a>
+        <a href="#" class="nav-item"><i class="pi pi-cog"></i> Hệ thống (SYS)</a>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Breadcrumb -->
+        <nav class="breadcrumb">
+          <a href="#">Danh mục</a> <span>/</span>
+          <span>Tài khoản</span> <span>/</span>
+          <span style="color: var(--text-primary); font-weight: 500;">Hệ thống tài khoản kế toán</span>
+        </nav>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div class="input-wrapper">
+              <i class="pi pi-search"></i>
+              <input type="text" class="input-search" placeholder="Tìm kiếm theo số tài khoản, tên tài khoản...">
+            </div>
+            <select class="select-input">
+              <option>Trạng thái: Tất cả</option>
+              <option>Đang dùng</option>
+              <option>Ngừng dùng</option>
+            </select>
+            <div class="toggle-group">
+              <button class="toggle-btn active">Chế độ TT200</button>
+              <button class="toggle-btn">Chế độ TT133</button>
+            </div>
+          </div>
+          <div class="toolbar-right">
+            <button class="btn btn-outline"><i class="pi pi-file-excel"></i> Nhập từ Excel</button>
+            <button class="btn btn-outline"><i class="pi pi-download"></i> Xuất Excel</button>
+            <button class="btn btn-primary"><i class="pi pi-plus"></i> Thêm tài khoản</button>
+          </div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="page-content">
+          <!-- Tree Table -->
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 250px;">Số TK</th>
+                  <th>Tên tài khoản</th>
+                  <th style="width: 100px;">Tính chất</th>
+                  <th class="text-center" style="width: 80px;" title="Chi tiết theo Đối tượng">Đối tượng</th>
+                  <th class="text-center" style="width: 80px;" title="Chi tiết theo Công trình">Công trình</th>
+                  <th class="text-center" style="width: 80px;" title="Chi tiết theo Đơn hàng">Đơn hàng</th>
+                  <th class="text-center" style="width: 80px;" title="Có hạch toán Ngoại tệ">Ngoại tệ</th>
+                  <th class="text-center" style="width: 100px;">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Row 1 -->
+                <tr>
+                  <td>
+                    <div class="tree-node level-1">
+                      <i class="pi pi-chevron-down expander"></i>
+                      <span class="account-no">1</span>
+                    </div>
+                  </td>
+                  <td style="font-weight: 600;">TÀI SẢN NGẮN HẠN</td>
+                  <td><span class="badge badge-neutral">Lưỡng tính</span></td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center"><span class="badge badge-active">Đang dùng</span></td>
+                </tr>
+                <!-- Row 11 -->
+                <tr class="alt-row">
+                  <td>
+                    <div class="tree-node level-2">
+                      <i class="pi pi-chevron-down expander"></i>
+                      <span class="account-no">11</span>
+                    </div>
+                  </td>
+                  <td style="font-weight: 600;">Tiền</td>
+                  <td><span class="badge badge-neutral">Lưỡng tính</span></td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center"><span class="badge badge-active">Đang dùng</span></td>
+                </tr>
+                <!-- Row 111 -->
+                <tr>
+                  <td>
+                    <div class="tree-node level-3">
+                      <i class="pi pi-chevron-down expander"></i>
+                      <span class="account-no">111</span>
+                    </div>
+                  </td>
+                  <td style="font-weight: 500;">Tiền mặt</td>
+                  <td><span class="badge badge-debit">Dư Nợ</span></td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center"><span class="badge badge-active">Đang dùng</span></td>
+                </tr>
+                <!-- Row 1111 -->
+                <tr class="alt-row">
+                  <td>
+                    <div class="tree-node level-4">
+                      <i class="pi pi-minus expander" style="opacity: 0.3"></i>
+                      <span class="account-no">1111</span>
+                    </div>
+                  </td>
+                  <td>Tiền Việt Nam</td>
+                  <td><span class="badge badge-debit">Dư Nợ</span></td>
+                  <td class="text-center"><i class="pi pi-minus checkbox-icon disabled"></i></td>
+                  <td class="text-center"><i class="pi pi-minus checkbox-icon disabled"></i></td>
+                  <td class="text-center"><i class="pi pi-minus checkbox-icon disabled"></i></td>
+                  <td class="text-center"><i class="pi pi-minus checkbox-icon disabled"></i></td>
+                  <td class="text-center"><span class="badge badge-active">Đang dùng</span></td>
+                </tr>
+                <!-- Row 1112 selected -->
+                <tr class="selected" onclick="toggleDetailPanel()">
+                  <td>
+                    <div class="tree-node level-4">
+                      <i class="pi pi-minus expander" style="opacity: 0.3"></i>
+                      <span class="account-no">1112</span>
+                    </div>
+                  </td>
+                  <td>Ngoại tệ</td>
+                  <td><span class="badge badge-debit">Dư Nợ</span></td>
+                  <td class="text-center"><i class="pi pi-minus checkbox-icon disabled"></i></td>
+                  <td class="text-center"><i class="pi pi-minus checkbox-icon disabled"></i></td>
+                  <td class="text-center"><i class="pi pi-minus checkbox-icon disabled"></i></td>
+                  <td class="text-center"><i class="pi pi-check checkbox-icon"></i></td>
+                  <td class="text-center"><span class="badge badge-active">Đang dùng</span></td>
+                </tr>
+                <!-- Row 13 -->
+                <tr class="alt-row">
+                  <td>
+                    <div class="tree-node level-2">
+                      <i class="pi pi-chevron-down expander"></i>
+                      <span class="account-no">13</span>
+                    </div>
+                  </td>
+                  <td style="font-weight: 600;">Phải thu</td>
+                  <td><span class="badge badge-neutral">Lưỡng tính</span></td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center"><span class="badge badge-active">Đang dùng</span></td>
+                </tr>
+                <!-- Row 131 -->
+                <tr>
+                  <td>
+                    <div class="tree-node level-3">
+                      <i class="pi pi-minus expander" style="opacity: 0.3"></i>
+                      <span class="account-no">131</span>
+                    </div>
+                  </td>
+                  <td>Phải thu khách hàng</td>
+                  <td><span class="badge badge-neutral">Lưỡng tính</span></td>
+                  <td class="text-center"><i class="pi pi-check checkbox-icon"></i></td>
+                  <td class="text-center"><i class="pi pi-minus checkbox-icon disabled"></i></td>
+                  <td class="text-center"><i class="pi pi-minus checkbox-icon disabled"></i></td>
+                  <td class="text-center"><i class="pi pi-check checkbox-icon"></i></td>
+                  <td class="text-center"><span class="badge badge-active">Đang dùng</span></td>
+                </tr>
+                <!-- Row 3 -->
+                <tr class="alt-row">
+                  <td>
+                    <div class="tree-node level-1">
+                      <i class="pi pi-chevron-right expander"></i>
+                      <span class="account-no">3</span>
+                    </div>
+                  </td>
+                  <td style="font-weight: 600;">NỢ PHẢI TRẢ</td>
+                  <td><span class="badge badge-credit">Dư Có</span></td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center"><span class="badge badge-active">Đang dùng</span></td>
+                </tr>
+                <!-- Row 5 -->
+                <tr>
+                  <td>
+                    <div class="tree-node level-1">
+                      <i class="pi pi-chevron-right expander"></i>
+                      <span class="account-no">5</span>
+                    </div>
+                  </td>
+                  <td style="font-weight: 600;">DOANH THU</td>
+                  <td><span class="badge badge-credit">Dư Có</span></td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center">-</td>
+                  <td class="text-center"><span class="badge badge-active">Đang dùng</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Detail Panel -->
+          <div class="detail-panel" id="detailPanel">
+            <div class="detail-header">
+              <div>
+                <div class="detail-title">1112</div>
+                <div class="detail-subtitle">Ngoại tệ</div>
+              </div>
+              <button class="btn-icon" onclick="toggleDetailPanel()"><i class="pi pi-times"></i></button>
+            </div>
+            <div class="detail-body">
+              <div class="prop-row">
+                <div class="prop-label">Tên tiếng Anh</div>
+                <div class="prop-val">Foreign currency</div>
+              </div>
+              <div class="prop-row">
+                <div class="prop-label">Tài khoản tổng hợp</div>
+                <div class="prop-val">111 - Tiền mặt</div>
+              </div>
+              <div class="prop-row">
+                <div class="prop-label">Tính chất</div>
+                <div class="prop-val"><span class="badge badge-debit">Dư Nợ</span></div>
+              </div>
+              <div class="prop-row">
+                <div class="prop-label">Chi tiết theo</div>
+                <div class="prop-val">
+                  <div style="margin-top: 4px; display: flex; align-items: center; gap: 8px;">
+                    <i class="pi pi-check checkbox-icon"></i> Có hạch toán ngoại tệ
+                  </div>
+                </div>
+              </div>
+              <div class="prop-row">
+                <div class="prop-label">Diễn giải</div>
+                <div class="prop-val" style="color: var(--text-secondary); font-weight: normal;">
+                  Phản ánh tình hình thu, chi, tồn quỹ tiền mặt là ngoại tệ của doanh nghiệp.
+                </div>
+              </div>
+              <div class="prop-row">
+                <div class="prop-label">Trạng thái</div>
+                <div class="prop-val"><span class="badge badge-active">Đang dùng</span></div>
+              </div>
+            </div>
+            <div class="detail-actions">
+              <button class="btn btn-outline" style="flex: 1; justify-content: center;"><i class="pi pi-pencil"></i>
+                Sửa</button>
+              <button class="btn btn-outline" style="color: var(--error); border-color: var(--error);"><i
+                  class="pi pi-trash"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Status Bar -->
+        <footer class="statusbar">
+          <span><i class="pi pi-list" style="margin-right: 4px;"></i> Tổng: 156 tài khoản</span>
+          <span style="color: var(--success);"><i class="pi pi-check-circle" style="margin-right: 4px;"></i> Đang dùng:
+            142</span>
+          <span style="color: var(--text-disabled);"><i class="pi pi-ban" style="margin-right: 4px;"></i> Ngừng dùng:
+            14</span>
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function setViewport(width) {
+      document.getElementById('app-container').style.width = width;
+      const btns = document.querySelectorAll('.viewport-toggle button');
+      btns.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    function toggleDetailPanel() {
+      const panel = document.getElementById('detailPanel');
+      panel.classList.toggle('hidden');
+    }
+  </script>
+</body>
+
+</html>

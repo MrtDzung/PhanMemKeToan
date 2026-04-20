@@ -1,0 +1,22 @@
+<div class="date-range-bar" role="group" aria-label="Khoảng thời gian">
+  <!-- Preset selector -->
+  <p-select [options]="presetGroups" optionGroupLabel="label" optionGroupChildren="items" optionLabel="label"
+    optionValue="value" [ngModel]="selectedPreset()" (ngModelChange)="onPresetChange($event)"
+    placeholder="Chọn khoảng thời gian" styleClass="preset-select" ariaLabel="Chọn khoảng thời gian"></p-select>
+
+  <!-- From date -->
+  <span class="date-label">Từ</span>
+  <p-datepicker [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event); onDateChange()" dateFormat="dd/mm/yy"
+    [showIcon]="true" placeholder="dd/mm/yyyy" styleClass="date-input" ariaLabel="Từ ngày"
+    appendTo="body"></p-datepicker>
+
+  <!-- To date -->
+  <span class="date-label">Đến</span>
+  <p-datepicker [ngModel]="toDate()" (ngModelChange)="toDate.set($event); onDateChange()" dateFormat="dd/mm/yy"
+    [showIcon]="true" placeholder="dd/mm/yyyy" styleClass="date-input" ariaLabel="Đến ngày"
+    appendTo="body"></p-datepicker>
+
+  <!-- Fetch button -->
+  <p-button label="Lấy dữ liệu" icon="pi pi-refresh" styleClass="btn-fetch" ariaLabel="Lấy dữ liệu"
+    (onClick)="onFetch()"></p-button>
+</div>

@@ -1,5 +1,7 @@
 ---
 description: Execute the implementation planning workflow using the plan template to generate design artifacts.
+model: ['Claude Opus 4.6 (copilot)', 'Claude Sonnet 4.6 (copilot)']
+tools: [read, edit, search, execute, web, 'context7/*', todo, vscode/askQuestions, vscode/memory, agent/runSubagent]
 handoffs: 
   - label: Create Tasks
     agent: speckit.tasks
@@ -103,9 +105,9 @@ You **MUST** consider the user input before proceeding (if not empty).
 ### Phase 0: Outline & Research
 
 1. **Extract unknowns from Technical Context** above:
-   - For each NEEDS CLARIFICATION → research task
-   - For each dependency → best practices task
-   - For each integration → patterns task
+   - For each NEEDS CLARIFICATION â†’ research task
+   - For each dependency â†’ best practices task
+   - For each integration â†’ patterns task
 
 2. **Generate and dispatch research agents**:
 
@@ -127,12 +129,12 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 **Prerequisites:** `research.md` complete
 
-1. **Extract entities from feature spec** → `data-model.md`:
+1. **Extract entities from feature spec** â†’ `data-model.md`:
    - Entity name, fields, relationships
    - Validation rules from requirements
    - State transitions if applicable
 
-2. **Define interface contracts** (if project has external interfaces) → `/contracts/`:
+2. **Define interface contracts** (if project has external interfaces) â†’ `/contracts/`:
    - Identify what interfaces the project exposes to users or other systems
    - Document the contract format appropriate for the project type
    - Examples: public APIs for libraries, command schemas for CLI tools, endpoints for web services, grammars for parsers, UI contracts for applications

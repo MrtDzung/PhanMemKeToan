@@ -1,0 +1,315 @@
+{
+  "account": {
+    "title": "Hệ thống Tài khoản Kế toán",
+    "search": {
+      "placeholder": "Tìm kiếm tài khoản... (F3)"
+    },
+    "filter": {
+      "all": "Tất cả",
+      "active": "Đang dùng",
+      "inactive": "Ngừng dùng"
+    },
+    "form": {
+      "account_number": "Mã tài khoản",
+      "account_name": "Tên tài khoản",
+      "account_name_english": "Tên tiếng Anh",
+      "parent": "Tài khoản cha",
+      "category_kind": "Loại tài khoản",
+      "inactive": "Ngừng sử dụng",
+      "foreign_currency": "Theo dõi ngoại tệ",
+      "detail_by": {
+        "title": "Hạch toán chi tiết theo",
+        "account_object": "Đối tượng",
+        "bank_account": "Tài khoản ngân hàng",
+        "job": "Công trình",
+        "project_work": "Công việc",
+        "order": "Đơn hàng",
+        "contract": "Hợp đồng",
+        "expense_item": "Khoản mục chi phí",
+        "department": "Bộ phận",
+        "list_item": "Danh sách",
+        "pu_contract": "Hợp đồng mua"
+      }
+    },
+    "category": {
+      "debit": "Tài khoản Nợ",
+      "credit": "Tài khoản Có"
+    },
+    "object_type": {
+      "none": "Không xác định",
+      "supplier": "Nhà cung cấp",
+      "customer": "Khách hàng",
+      "employee": "Nhân viên"
+    },
+    "action": {
+      "add": "Thêm mới",
+      "edit": "Chỉnh sửa",
+      "delete": "Xóa",
+      "deactivate": "Vô hiệu hóa",
+      "import": "Nhập danh mục",
+      "save": "Lưu",
+      "cancel": "Hủy",
+      "export": "Xuất Excel"
+    },
+    "import": {
+      "title": "Nhập danh mục tài khoản chuẩn",
+      "step_select_standard": "Bước 1: Chọn hệ thống tài khoản",
+      "step_conflict": "Bước 2: Xử lý xung đột",
+      "step_preview": "Bước 3: Xem trước kết quả",
+      "step_confirm": "Bước 4: Xác nhận nhập",
+      "standard": {
+        "tt99": "TT99/2016 — Doanh nghiệp lớn (330+ tài khoản)",
+        "tt133": "TT133/2016 — Doanh nghiệp vừa và nhỏ (200+ tài khoản)"
+      },
+      "conflict": {
+        "skip": "Bỏ qua (Skip) — Giữ nguyên tài khoản hiện tại",
+        "overwrite": "Ghi đè (Overwrite) — Cập nhật theo danh mục chuẩn"
+      },
+      "result": {
+        "imported": "Đã tạo mới",
+        "skipped": "Đã bỏ qua",
+        "overwritten": "Đã ghi đè"
+      }
+    },
+    "error": {
+      "duplicate_code": "Mã tài khoản đã tồn tại",
+      "code_must_start_with_parent": "Mã tài khoản phải bắt đầu bằng mã tài khoản cha",
+      "has_transactions": "Tài khoản đã có phát sinh, không thể xóa",
+      "has_children": "Tài khoản có tài khoản con, không thể xóa",
+      "not_found": "Không tìm thấy tài khoản",
+      "row_version_conflict": "Dữ liệu đã bị thay đổi bởi người dùng khác, vui lòng tải lại",
+      "locked_has_transactions": "Không thể thay đổi mã hoặc tài khoản cha khi đã có phát sinh"
+    },
+    "badge": {
+      "has_transactions": "Có phát sinh",
+      "inactive": "Ngừng dùng",
+      "is_parent": "Tài khoản tổng hợp"
+    }
+  },
+  "lookups": {
+    "currencies": {
+      "title": "Tiền tệ",
+      "code": "Mã TT",
+      "name": "Tên Tiền tệ",
+      "nameEnglish": "Tên Tiếng Anh",
+      "symbol": "Ký hiệu",
+      "exchangeRate": "Tỷ giá mặc định",
+      "isActive": "Đang dùng",
+      "addNew": "Thêm tiền tệ",
+      "saveSuccess": "Đã lưu tiền tệ thành công",
+      "deleteSuccess": "Đã xóa tiền tệ",
+      "deleteConfirm": "Bạn có chắc muốn xóa tiền tệ này?",
+      "deleteBlocked": "Không thể xóa: tiền tệ đang được sử dụng"
+    },
+    "units": {
+      "title": "Đơn vị tính",
+      "code": "Mã ĐVT",
+      "name": "Tên Đơn vị tính",
+      "isActive": "Đang dùng",
+      "addNew": "Thêm đơn vị",
+      "saveSuccess": "Đã lưu đơn vị tính thành công",
+      "deleteSuccess": "Đã xóa đơn vị tính",
+      "deleteConfirm": "Bạn có chắc muốn xóa đơn vị tính này?",
+      "deleteBlocked": "Không thể xóa: đơn vị đang được sử dụng"
+    },
+    "warehouses": {
+      "title": "Kho hàng",
+      "code": "Mã Kho",
+      "name": "Tên Kho",
+      "address": "Địa chỉ",
+      "warehouseKeeper": "Thủ kho",
+      "isActive": "Đang dùng",
+      "addNew": "Thêm kho",
+      "saveSuccess": "Đã lưu kho hàng thành công",
+      "deleteSuccess": "Đã xóa kho hàng",
+      "deleteConfirm": "Bạn có chắc muốn xóa kho hàng này?",
+      "deleteBlocked": "Không thể xóa: kho đang được sử dụng"
+    },
+    "departments": {
+      "title": "Phòng ban",
+      "name": "Tên phòng ban",
+      "code": "Mã phòng",
+      "parent": "Trực thuộc",
+      "isActive": "Hoạt động",
+      "addRoot": "Thêm phòng ban gốc",
+      "addChild": "Thêm phòng con",
+      "saveAll": "Lưu tất cả thay đổi",
+      "saveSuccess": "Đã lưu phòng ban thành công",
+      "deleteSuccess": "Đã xóa phòng ban",
+      "deleteConfirm": "Bạn có chắc muốn xóa phòng ban này?",
+      "deleteBlocked": "Không thể xóa: phòng ban còn phòng con hoặc đang được sử dụng",
+      "maxLevelReached": "Đã đạt tối đa 5 cấp phòng ban"
+    },
+    "expenseItems": {
+      "title": "Khoản mục chi phí",
+      "code": "Mã Khoản mục",
+      "name": "Tên Khoản mục CP",
+      "isActive": "Đang dùng",
+      "addNew": "Thêm khoản mục",
+      "saveSuccess": "Đã lưu khoản mục chi phí thành công",
+      "deleteSuccess": "Đã xóa khoản mục chi phí",
+      "deleteConfirm": "Bạn có chắc muốn xóa khoản mục này?"
+    }
+  },
+  "account-objects": {
+    "title": "Đối tượng kế toán",
+    "new": "Thêm đối tượng",
+    "edit": "Sửa đối tượng",
+    "delete-confirm": "Bạn có chắc muốn xóa đối tượng này?",
+    "delete-success": "Đã xóa đối tượng thành công",
+    "save-success": "Đã lưu đối tượng thành công",
+    "code": "Mã đối tượng",
+    "name": "Tên đối tượng",
+    "name-english": "Tên tiếng Anh",
+    "type": "Loại đối tượng",
+    "type-customer": "Khách hàng",
+    "type-vendor": "Nhà cung cấp",
+    "type-employee": "Nhân viên",
+    "type-all": "Tất cả loại",
+    "group": "Nhóm đối tượng",
+    "tax-code": "Mã số thuế",
+    "address": "Địa chỉ",
+    "phone": "Điện thoại",
+    "fax": "Fax",
+    "email": "Email",
+    "website": "Website",
+    "contact-person": "Người liên hệ",
+    "contact-phone": "ĐT liên hệ",
+    "description": "Mô tả",
+    "credit-limit": "Hạn mức nợ",
+    "payment-term-days": "Số ngày được nợ",
+    "is-active": "Đang sử dụng",
+    "status": "Trạng thái",
+    "status-active": "Hoạt động",
+    "status-inactive": "Ngừng HĐ",
+    "status-all": "Tất cả",
+    "tab-general": "Thông tin chung",
+    "tab-bank": "Tài khoản ngân hàng",
+    "tab-employee": "TT Nhân viên",
+    "tab-balance": "Số dư đầu kỳ",
+    "bank-account-number": "Số tài khoản",
+    "bank-name": "Tên ngân hàng",
+    "bank-branch": "Chi nhánh",
+    "bank-swift-code": "Swift Code",
+    "bank-add-row": "Thêm tài khoản",
+    "balance-currency": "Tiền tệ",
+    "balance-debit-oc": "Dư Nợ (NT)",
+    "balance-credit-oc": "Dư Có (NT)",
+    "balance-exchange-rate": "Tỷ giá",
+    "balance-add-row": "Thêm số dư",
+    "emp-citizen-id": "CMND/CCCD",
+    "emp-dob": "Ngày sinh",
+    "emp-gender": "Giới tính",
+    "emp-gender-male": "Nam",
+    "emp-gender-female": "Nữ",
+    "emp-gender-other": "Khác",
+    "emp-bhxh": "Số BHXH",
+    "emp-hire-date": "Ngày vào làm",
+    "emp-department": "Phòng ban",
+    "emp-dependent-count": "Số NPT",
+    "validation-code-required": "Mã đối tượng là bắt buộc",
+    "validation-code-max": "Mã tối đa 25 ký tự",
+    "validation-name-required": "Tên đối tượng là bắt buộc",
+    "validation-type-required": "Phải chọn ít nhất 1 loại đối tượng",
+    "search-placeholder": "Nhập từ khóa tìm kiếm...",
+    "feature-developing": "Chức năng đang phát triển"
+  },
+  "inventory-items": {
+    "title": "Hàng tồn kho",
+    "new": "Thêm mới hàng tồn kho",
+    "edit": "Chỉnh sửa hàng tồn kho",
+    "tabs": {
+      "general": "Thông tin chung",
+      "unitConverts": "Đơn vị tính phụ",
+      "barcodes": "Mã vạch",
+      "attributes": "Thuộc tính",
+      "warehouseSettings": "Cài đặt kho",
+      "openingBalances": "Số dư tồn kho",
+      "bom": "Định mức NVL"
+    },
+    "fields": {
+      "itemCode": "Mã hàng",
+      "itemName": "Tên hàng",
+      "itemNameEnglish": "Tên tiếng Anh",
+      "category": "Nhóm hàng",
+      "unit": "Đơn vị tính",
+      "itemType": "Loại hàng",
+      "costingMethod": "Phương pháp tính giá",
+      "defaultTaxRate": "Thuế suất mặc định (%)",
+      "unitPrice": "Giá mua",
+      "salePrice1": "Giá bán 1",
+      "salePrice2": "Giá bán 2",
+      "salePrice3": "Giá bán 3",
+      "description": "Mô tả",
+      "isActive": "Đang sử dụng",
+      "convertRate": "Tỷ lệ quy đổi",
+      "barcodeValue": "Giá trị mã vạch",
+      "barcodeType": "Loại mã vạch",
+      "isPrimary": "Mã vạch chính",
+      "attributeValue": "Giá trị",
+      "minStockLevel": "Tồn kho tối thiểu",
+      "maxStockLevel": "Tồn kho tối đa",
+      "leadTimeDays": "Số ngày đặt hàng",
+      "isFollowSerial": "Theo dõi theo Serial",
+      "isFollowLot": "Theo dõi theo Lot",
+      "isFollowExpiry": "Theo dõi hạn sử dụng",
+      "isPanelItem": "Sản phẩm combo",
+      "panelUnit": "ĐVT combo",
+      "warehouse": "Kho",
+      "quantity": "Số lượng",
+      "unitCost": "Giá trị",
+      "amount": "Thành tiền",
+      "currency": "Ngoại tệ",
+      "foreignAmount": "Tiền ngoại tệ",
+      "exchangeRate": "Tỷ giá"
+    },
+    "itemType": {
+      "goods": "Hàng hóa",
+      "rawMaterial": "Nguyên vật liệu",
+      "finishedProduct": "Thành phẩm",
+      "service": "Dịch vụ"
+    },
+    "costingMethod": {
+      "fifo": "Nhập trước xuất trước (FIFO)",
+      "lifo": "Nhập sau xuất trước (LIFO)",
+      "weightedAverage": "Bình quân gia quyền",
+      "specificIdentification": "Đích danh"
+    },
+    "barcodeType": {
+      "code128": "Code 128",
+      "ean13": "EAN-13",
+      "qrcode": "QR Code"
+    },
+    "columns": {
+      "itemCode": "Mã hàng",
+      "itemName": "Tên hàng",
+      "itemType": "Loại",
+      "unit": "ĐVT",
+      "category": "Nhóm hàng",
+      "unitPrice": "Giá mua",
+      "isActive": "Trạng thái"
+    },
+    "messages": {
+      "saveSuccess": "Đã lưu hàng tồn kho",
+      "deleteSuccess": "Đã xóa hàng tồn kho",
+      "deleteConfirm": "Bạn có chắc muốn xóa hàng này?",
+      "serviceNoBalance": "Dịch vụ không có tồn kho đầu kỳ"
+    },
+    "validation": {
+      "itemCodeRequired": "Mã hàng là bắt buộc",
+      "itemNameRequired": "Tên hàng là bắt buộc",
+      "unitRequired": "Đơn vị tính là bắt buộc",
+      "convertRatePositive": "Tỷ lệ quy đổi phải lớn hơn 0",
+      "itemCodeMaxLength": "Mã hàng không quá 25 ký tự",
+      "itemNameMaxLength": "Tên hàng không quá 255 ký tự"
+    },
+    "categories": {
+      "title": "Nhóm hàng",
+      "allItems": "Tất cả hàng hóa"
+    },
+    "actions": {
+      "addRow": "Thêm dòng",
+      "saveAndNew": "Lưu và thêm mới"
+    }
+  }
+}

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <title>DI Master Data Mockups</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #1B5E9E;
+      --surface-ground: #F5F5F5;
+      --surface-card: #FFFFFF;
+      --surface-border: #E0E0E0;
+      --text-primary: #212121;
+      --text-secondary: #616161;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--surface-ground);
+      color: var(--text-primary);
+      margin: 0;
+      padding: 32px;
+    }
+
+    h1 {
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--surface-card);
+      border: 1px solid var(--surface-border);
+      border-radius: 8px;
+      padding: 24px;
+      text-decoration: none;
+      color: inherit;
+      transition: box-shadow 0.2s;
+    }
+
+    .card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-color: var(--primary);
+    }
+
+    .card h2 {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+      color: var(--primary);
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>DI Module — Master Data</h1>
+  <div class="grid">
+    <a href="lookup-screens.html" class="card">
+      <h2>1. Danh mục dùng chung (Lookup screens)</h2>
+      <p>5 tabs: Tiền tệ, Đơn vị tính, Kho hàng, Phòng ban, Khoản mục chi phí.</p>
+    </a>
+    <a href="account-objects-list.html" class="card">
+      <h2>2. Danh sách đối tượng (Account Objects List)</h2>
+      <p>DS Khách hàng, Nhà cung cấp, Nhân viên.</p>
+    </a>
+    <a href="account-object-form.html" class="card">
+      <h2>3. Form đối tượng (Account Object Form)</h2>
+      <p>Khai báo đối tượng 4 tab.</p>
+    </a>
+    <a href="inventory-items-list.html" class="card">
+      <h2>4. DS vật tư hàng hóa (Inventory Items List)</h2>
+      <p>Danh sách HH/VTHH Split view.</p>
+    </a>
+    <a href="inventory-item-form.html" class="card">
+      <h2>5. Form vật tư hàng hóa (Inventory Item Form)</h2>
+      <p>Khai báo vật tư hàng hóa 7 tab.</p>
+    </a>
+  </div>
+</body>
+
+</html>

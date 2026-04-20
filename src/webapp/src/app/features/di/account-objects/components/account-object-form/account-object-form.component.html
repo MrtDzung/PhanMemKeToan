@@ -1,0 +1,278 @@
+<p-toast />
+
+<div class="form-container" [class.opacity-50]="loadingDetail()">
+
+  <!-- Toolbar -->
+  <div class="form-toolbar">
+    <p-button label="Lưu" icon="pi pi-save" (onClick)="save()" [loading]="store.saving()" pTooltip="Ctrl+S" />
+    <p-button label="Lưu & Thêm" icon="pi pi-save" severity="secondary" (onClick)="saveAndNew()"
+      pTooltip="Ctrl+Shift+S" />
+    <p-button label="Đóng" icon="pi pi-times" severity="secondary" (onClick)="store.closeForm()" />
+  </div>
+
+  <!-- Tabs -->
+  <p-tabs [(value)]="activeTab">
+
+    <!-- Tab list -->
+    <p-tablist>
+      <p-tab value="0">{{ 'account-objects.tab-general' | translate }}</p-tab>
+      <p-tab value="1">{{ 'account-objects.tab-bank' | translate }}</p-tab>
+      @if (isEmployee()) {
+      <p-tab value="2" id="tab-employee">{{ 'account-objects.tab-employee' | translate }}</p-tab>
+      }
+    </p-tablist>
+
+    <p-tabpanels>
+
+      <!-- Tab 0: Thông tin chung -->
+      <p-tabpanel value="0">
+        <form [formGroup]="form">
+          <div class="form-grid" style="margin-top: 12px;">
+
+            <!-- Left Column -->
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+
+              <!-- Object Type Checkboxes -->
+              <div class="form-field">
+                <label>{{ 'account-objects.type' | translate }} <span class="required-mark">*</span></label>
+                <div class="type-checkboxes">
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <p-checkbox [binary]="true" [ngModel]="isCustomer()" (ngModelChange)="toggleType(1)" />
+                    <span>{{ 'account-objects.type-customer' | translate }}</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <p-checkbox [binary]="true" [ngModel]="isVendor()" (ngModelChange)="toggleType(2)" />
+                    <span>{{ 'account-objects.type-vendor' | translate }}</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <p-checkbox [binary]="true" [ngModel]="isEmployee()" (ngModelChange)="toggleType(4)" />
+                    <span>{{ 'account-objects.type-employee' | translate }}</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Object Code -->
+              <div class="form-field">
+                <label for="objectCode">
+                  {{ 'account-objects.code' | translate }}
+                  <span class="required-mark">*</span>
+                </label>
+                <input id="objectCode" pInputText formControlName="objectCode" [invalid]="isFieldInvalid('objectCode')"
+                  style="font-size: 13px;" />
+                @if (isFieldInvalid('objectCode')) {
+                <small class="field-error">
+                  @if (form.get('objectCode')?.hasError('required')) {
+                  {{ 'account-objects.validation-code-required' | translate }}
+                  } @else if (form.get('objectCode')?.hasError('maxlength')) {
+                  {{ 'account-objects.validation-code-max' | translate }}
+                  }
+                </small>
+                }
+              </div>
+
+              <!-- Object Name -->
+              <div class="form-field">
+                <label for="objectName">
+                  {{ 'account-objects.name' | translate }}
+                  <span class="required-mark">*</span>
+                </label>
+                <input id="objectName" pInputText formControlName="objectName" [invalid]="isFieldInvalid('objectName')"
+                  style="font-size: 13px;" />
+                @if (isFieldInvalid('objectName')) {
+                <small class="field-error">
+                  {{ 'account-objects.validation-name-required' | translate }}
+                </small>
+                }
+              </div>
+
+              <!-- Object Name English -->
+              <div class="form-field">
+                <label for="objectNameEnglish">{{ 'account-objects.name-english' | translate }}</label>
+                <input id="objectNameEnglish" pInputText formControlName="objectNameEnglish" style="font-size: 13px;" />
+              </div>
+
+            </div>
+
+            <!-- Right Column -->
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+
+              <!-- Tax Code -->
+              <div class="form-field">
+                <label for="taxCode">{{ 'account-objects.tax-code' | translate }}</label>
+                <input id="taxCode" pInputText formControlName="taxCode" style="font-size: 13px;" />
+              </div>
+
+              <!-- Address -->
+              <div class="form-field">
+                <label for="address">{{ 'account-objects.address' | translate }}</label>
+                <input id="address" pInputText formControlName="address" style="font-size: 13px;" />
+              </div>
+
+              <!-- Phone -->
+              <div class="form-field">
+                <label for="phone">{{ 'account-objects.phone' | translate }}</label>
+                <input id="phone" pInputText formControlName="phone" style="font-size: 13px;" />
+              </div>
+
+              <!-- Fax -->
+              <div class="form-field">
+                <label for="fax">{{ 'account-objects.fax' | translate }}</label>
+                <input id="fax" pInputText formControlName="fax" style="font-size: 13px;" />
+              </div>
+
+              <!-- Email -->
+              <div class="form-field">
+                <label for="email">{{ 'account-objects.email' | translate }}</label>
+                <input id="email" pInputText formControlName="email" style="font-size: 13px;" />
+              </div>
+
+              <!-- Website -->
+              <div class="form-field">
+                <label for="website">{{ 'account-objects.website' | translate }}</label>
+                <input id="website" pInputText formControlName="website" style="font-size: 13px;" />
+              </div>
+
+              <!-- Contact Person -->
+              <div class="form-field">
+                <label for="contactPerson">{{ 'account-objects.contact-person' | translate }}</label>
+                <input id="contactPerson" pInputText formControlName="contactPerson" style="font-size: 13px;" />
+              </div>
+
+              <!-- Contact Phone -->
+              <div class="form-field">
+                <label for="contactPhone">{{ 'account-objects.contact-phone' | translate }}</label>
+                <input id="contactPhone" pInputText formControlName="contactPhone" style="font-size: 13px;" />
+              </div>
+
+              <!-- Credit Limit -->
+              <div class="form-field">
+                <label for="creditLimit">{{ 'account-objects.credit-limit' | translate }}</label>
+                <p-inputnumber id="creditLimit" formControlName="creditLimit" [min]="0" [useGrouping]="true"
+                  style="font-size: 13px;" />
+              </div>
+
+              <!-- Payment Term Days -->
+              <div class="form-field">
+                <label for="paymentTermDays">{{ 'account-objects.payment-term-days' | translate }}</label>
+                <p-inputnumber id="paymentTermDays" formControlName="paymentTermDays" [min]="0"
+                  style="font-size: 13px;" />
+              </div>
+
+              <!-- Is Active -->
+              <div class="form-field" style="flex-direction: row; align-items: center; gap: 8px;">
+                <p-toggleswitch formControlName="isActive" />
+                <label>{{ 'account-objects.is-active' | translate }}</label>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="form-field" style="margin-top: 12px;">
+            <label for="description">{{ 'account-objects.description' | translate }}</label>
+            <textarea id="description" pTextarea formControlName="description" rows="3"
+              style="font-size: 13px; width: 100%; resize: vertical;"></textarea>
+          </div>
+
+        </form>
+      </p-tabpanel>
+
+      <!-- Tab 1: Bank Accounts -->
+      <p-tabpanel value="1">
+        <div style="padding-top: 12px;">
+          <div style="margin-bottom: 8px;">
+            <p-button label="{{ 'account-objects.bank-add-row' | translate }}" icon="pi pi-plus" severity="secondary"
+              size="small" (onClick)="addBankAccount()" />
+          </div>
+
+          <p-table [value]="bankAccountsArray.controls" size="small" styleClass="p-datatable-sm p-datatable-gridlines">
+            <ng-template pTemplate="header">
+              <tr>
+                <th style="min-width: 160px;">{{ 'account-objects.bank-account-number' | translate }} *</th>
+                <th style="min-width: 200px;">{{ 'account-objects.bank-name' | translate }} *</th>
+                <th style="min-width: 180px;">{{ 'account-objects.bank-branch' | translate }}</th>
+                <th style="min-width: 130px;">{{ 'account-objects.bank-swift-code' | translate }}</th>
+                <th style="width: 60px;"></th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-ctrl let-i="rowIndex">
+              <tr [formGroup]="ctrl">
+                <td>
+                  <input pInputText formControlName="accountNumber" style="font-size: 12px; width: 100%;"
+                    [class.ng-invalid]="ctrl.get('accountNumber')?.invalid && ctrl.get('accountNumber')?.touched" />
+                </td>
+                <td>
+                  <input pInputText formControlName="bankName" style="font-size: 12px; width: 100%;"
+                    [class.ng-invalid]="ctrl.get('bankName')?.invalid && ctrl.get('bankName')?.touched" />
+                </td>
+                <td>
+                  <input pInputText formControlName="bankBranch" style="font-size: 12px; width: 100%;" />
+                </td>
+                <td>
+                  <input pInputText formControlName="swiftCode" style="font-size: 12px; width: 100%;" />
+                </td>
+                <td>
+                  <p-button icon="pi pi-trash" [text]="true" severity="danger" size="small"
+                    (onClick)="removeBankAccount(i)" />
+                </td>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="5" class="text-center" style="padding: 16px;">Chưa có tài khoản ngân hàng</td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </p-tabpanel>
+
+      <!-- Tab 2: Employee (shown only if Employee bit set) -->
+      @if (isEmployee()) {
+      <p-tabpanel value="2">
+        <form [formGroup]="form" style="padding-top: 12px;">
+          <div formGroupName="employeeProfile">
+            <div class="form-grid">
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div class="form-field">
+                  <label>{{ 'account-objects.emp-citizen-id' | translate }}</label>
+                  <input pInputText formControlName="citizenId" style="font-size: 13px;" />
+                </div>
+                <div class="form-field">
+                  <label>{{ 'account-objects.emp-dob' | translate }}</label>
+                  <p-datepicker formControlName="dateOfBirth" [showIcon]="true" dateFormat="dd/mm/yy" />
+                </div>
+                <div class="form-field">
+                  <label>{{ 'account-objects.emp-gender' | translate }}</label>
+                  <p-select formControlName="gender" [options]="genderOptions" optionLabel="label" optionValue="value"
+                    placeholder="Chọn giới tính" />
+                </div>
+                <div class="form-field">
+                  <label>{{ 'account-objects.emp-bhxh' | translate }}</label>
+                  <input pInputText formControlName="socialInsuranceNumber" style="font-size: 13px;" />
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div class="form-field">
+                  <label>{{ 'account-objects.emp-hire-date' | translate }}</label>
+                  <p-datepicker formControlName="hireDate" [showIcon]="true" dateFormat="dd/mm/yy" />
+                </div>
+                <div class="form-field">
+                  <label>{{ 'account-objects.emp-department' | translate }}</label>
+                  <p-select formControlName="departmentId" [options]="departments()" optionLabel="departmentName"
+                    optionValue="id" placeholder="Chọn phòng ban" [filter]="true" />
+                </div>
+                <div class="form-field">
+                  <label>{{ 'account-objects.emp-dependent-count' | translate }}</label>
+                  <p-inputnumber formControlName="dependentCount" [min]="0" style="font-size: 13px;" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </p-tabpanel>
+      }
+
+    </p-tabpanels>
+  </p-tabs>
+
+</div>

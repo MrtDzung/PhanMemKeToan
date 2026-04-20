@@ -1,0 +1,3 @@
+[     103ms] [LOG] Angular is running in development mode. @ http://localhost:64428/@fs/F:/DuAn/PhanMemKeToan/src/webapp/.angular/cache/20.3.23/webapp/vite/deps/chunk-4XTOXYJZ.js?v=e57661e9:14751
+[   22295ms] [ERROR] Access to fetch at 'http://localhost:5086/api/auth/login' from origin 'http://localhost:64428' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*' when the request's credentials mode is 'include'. @ http://localhost:64428/login:0
+[   22295ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:5086/api/auth/login:0
