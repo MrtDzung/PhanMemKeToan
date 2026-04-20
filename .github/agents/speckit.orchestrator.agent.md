@@ -1,7 +1,7 @@
 ---
 name: Orchestrator
 description: Phase-based orchestrator that coordinates SpecKit agents through Design â†’ Prepare â†’ Build pipeline with review gates between each phase.
-model: ['Claude Sonnet 4.6 (copilot)', 'Gemini 3.1 Pro (Preview) (copilot)']
+model: ['Claude Sonnet 4.6 (copilot)', 'GPT-5.4 (copilot)']
 tools: [vscode, execute, read, agent, edit, search, web, todo]
 agents: ['*']
 ---
@@ -90,32 +90,36 @@ Wait for user response:
 
 > This phase is REQUIRED for features with frontend UI. Skip for backend-only features.
 
-6.5. **Mockup** â€” Call `speckit.mockup` with the feature description and spec reference
-   - Agent generates standalone HTML/CSS mockup files in `.specify/mockups/<module>/`
-   - Each screen = 1 `.html` file that can be opened directly in browser
+6.5. **Mockup** — Call `speckit.mockup` with the feature description and spec reference
+   - Agent generates Angular standalone components with PrimeNG + mock data in `src/webapp/src/app/mockups/<module>/`
+   - Each screen = Angular component + mock-data.ts, registered under `/mockup/<module>/<screen>` route
+   - Runs `npx ng build` to verify compilation
 
-**â–¶ GATE 2.5** â€” Present mockup files and STOP:
+**▶ GATE 2.5** — Present mockup routes and STOP:
 
 ```
-ðŸ“ PHASE 2.5 COMPLETE â€” UI Mockup
+📐 PHASE 2.5 COMPLETE — Angular Mockup
 
-Files created:
-  âœ… .specify/mockups/<module>/<screen>.html â€” [description]
-  âœ… .specify/mockups/<module>/_index.html â€” Index page
+Components created:
+  ✅ src/webapp/src/app/mockups/<module>/<screen>/ — [description]
+  ✅ Route: /mockup/<module>/<screen>
 
-ðŸ‘‰ Open in browser to preview:
-   file:///<absolute-path>/_index.html
+Build: ✅ ng build passed
 
-Review the UI design. Options:
-  A) Approve â†’ Continue to Phase 3 (Build)
-  B) Revise â†’ Describe changes needed â†’ Re-generate mockup
-  C) Skip â†’ Proceed without mockup approval
+👉 Preview in running app:
+   http://localhost:4200/mockup/<module>/<screen>
+
+Review the UI. Options:
+  A) Approve → Continue to Phase 3 (Build)
+     → Mockup components will be copied to features/<module>/ and wired to real APIs
+  B) Revise → Describe changes needed → Re-generate mockup
+  C) Skip → Proceed without mockup approval
 ```
 
 Wait for user response:
-- **"Approve" / "A"** â†’ Proceed to Phase 3
-- **Revision feedback** â†’ Re-run `speckit.mockup` with feedback (max 3 rounds)
-- **"Skip" / "C"** â†’ Proceed to Phase 3 without mockup approval
+- **"Approve" / "A"** → Proceed to Phase 3
+- **Revision feedback** → Re-run `speckit.mockup` with feedback (max 3 rounds)
+- **"Skip" / "C"** → Proceed to Phase 3 without mockup approval
 
 ### Phase 3: BUILD
 

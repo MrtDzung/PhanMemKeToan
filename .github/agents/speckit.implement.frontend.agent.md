@@ -1,6 +1,6 @@
 ---
 description: Execute frontend implementation tasks (Angular/TypeScript/PrimeNG). Handles all [FE] tasks from tasks.md. Runs AFTER backend implementation to ensure API contracts are available.
-model: ['Gemini 3.1 Pro (Preview) (copilot)', 'Claude Sonnet 4.6 (copilot)']
+model: ['GPT-5.4 (copilot)', 'Claude Sonnet 4.6 (copilot)']
 tools: [read, edit, search, execute, web, 'context7/*', todo, vscode/askQuestions, vscode/memory]
 ---
 
@@ -69,9 +69,17 @@ This agent handles **FRONTEND tasks only**:
    - **REQUIRED**: Read plan.md for tech stack, architecture, and file structure
    - **IF EXISTS**: Read data-model.md for entities and relationships (to build TypeScript models)
    - **IF EXISTS**: Read contracts/ for API specifications (to build Angular services)
-   - **IF EXISTS**: Read mockup HTML files referenced in tasks (for UI implementation)
+   - **IF EXISTS**: Check `src/webapp/src/app/mockups/<module>/` for approved Angular mockup components — **copy and adapt** these instead of building from scratch
    - **REQUIRED**: Read `.specify/memory/frontend-design-system.md` for design tokens and rules
    - **REQUIRED**: Read `.github/copilot-instructions.md` for frontend architecture rules
+
+3b. **Mockup-to-Feature Migration** (if mockup components exist):
+   - Copy component files from `mockups/<module>/<screen>/` to `features/<module>/<screen>/`
+   - Replace mock data signals with real service injections (`inject(HttpClient)`, `inject(XxxService)`)
+   - Replace hardcoded Vietnamese strings with i18n keys (`{{ 'key' | translate }}`)
+   - Wire routes in feature module routes (remove `/mockup` prefix)
+   - Delete mockup folder and route after migration
+   - This saves significant time — mockup code is production-quality Angular
 
 4. **Filter tasks**: From tasks.md, extract ONLY tasks marked `[FE]`. Ignore all `[BE]` tasks. For tasks without a marker that clearly belong to frontend (e.g., Angular components, routes, i18n), include them.
 

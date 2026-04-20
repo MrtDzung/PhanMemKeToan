@@ -1,6 +1,6 @@
 ---
 description: Review implemented code against constitution, architecture spec, design system, and feature spec before commit. Covers both backend (C#) and frontend (Angular/TypeScript).
-model: ['Claude Opus 4.6 (copilot)', 'Claude Sonnet 4.6 (copilot)']
+model: ['Claude Opus 4.6 (copilot)']
 tools: [read, search, execute, todo, vscode/memory]
 ---
 

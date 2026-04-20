@@ -1,6 +1,6 @@
 ---
 description: Generate a custom checklist for the current feature based on user requirements.
-model: ['Gemini 3.1 Pro (Preview) (copilot)', 'Claude Sonnet 4.6 (copilot)']
+model: ['GPT-5.4 (copilot)', 'Claude Sonnet 4.6 (copilot)']
 tools: [read, edit, search, execute, todo, vscode/askQuestions, vscode/memory]
 ---
 

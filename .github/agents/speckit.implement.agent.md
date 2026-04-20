@@ -1,6 +1,6 @@
 ---
 description: Execute backend implementation tasks (C#/.NET/EF Core). Handles all [BE] tasks from tasks.md. Frontend tasks are handled by speckit.implement.frontend.
-model: ['Claude Sonnet 4.6 (copilot)', 'Gemini 3.1 Pro (Preview) (copilot)']
+model: ['Claude Sonnet 4.6 (copilot)', 'GPT-5.4 (copilot)']
 tools: [read, edit, search, execute, web, 'context7/*', todo, vscode/askQuestions, vscode/memory, agent/runSubagent]
 ---
 
